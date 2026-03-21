@@ -2,6 +2,10 @@
 
 Instructions for AI coding assistants working on this project. Read `PROJECT_PLAN.md` for full project context.
 
+## Git Commits
+
+**NEVER** make a git commit without prompting the user first.
+
 ## Development Workflow
 
 Follow test-driven development:
