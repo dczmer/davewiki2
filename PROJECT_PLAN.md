@@ -260,20 +260,9 @@ wiki_root/               (configurable, e.g., ~/.davewiki)
 - **Lua files:** Module and file-level docstrings, function docstrings with type annotations
 - **Nix files:** File-level descriptions and inline comments
 - **Tests:** Clear description of intent - what is being tested, why, and why this approach
-- **Consistency:** Keep README.md, PROJECT_PLAN.md, and AGENTS.md consistent with project state
 
 **Code Review Practices:**
-1. **Self-review before commit:** Spawn AI subagent to review code for:
-   - Correctness
-   - Consistency
-   - Best practices
-   - Test coverage
-   - Security concerns
-   - Duplication and reusability
-   - Tests using real `test_root` instead of mocked file system
-   - Shell command injection vulnerabilities
-
-2. **Peer review:** Pull request review by other developers
+- Peer review via pull requests
 
 **Antipatterns to Avoid:**
 1. **Over-mocking in unit tests** - Can produce passing tests for incorrect code. Use real `test_root/` files instead.
