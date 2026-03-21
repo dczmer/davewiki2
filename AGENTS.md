@@ -75,7 +75,7 @@ Before committing, spawn a subagent to run a code review. The review should chec
 
 ## Documentation Consistency
 
-Keep `README.md`, `PROJECT_PLAN.md`, and `AGENTS.md` consistent with each other and with the actual state of the project. When making changes that affect project structure, conventions, or features, update all three documents.
+Use the `documentation-consistency` skill to check that README.md, PROJECT_PLAN.md, and AGENTS.md are consistent with each other and with the actual project state. Run this skill when making changes that affect project structure, conventions, or features.
 
 ## Commit Conventions
 
