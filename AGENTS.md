@@ -47,9 +47,9 @@ nix run .#nvim-test -- -u scripts/minimal-init.lua --headless -c 'PlenaryBustedF
 
 ### Current Test Suite
 
-- `tests/lua/davewiki/core_spec.lua` - Core module tests (wiki_root resolution, tag management)
+- `tests/lua/davewiki/core_spec.lua` - Core module tests (wiki_root resolution, tag management, markdown hyperlink support)
 - `tests/lua/davewiki/init_spec.lua` - Init module tests (public API)
-- Total: ~46 tests covering all implemented features
+- Total: ~65 tests covering all implemented features
 
 ### Testing Rules
 

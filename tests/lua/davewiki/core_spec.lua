@@ -424,3 +424,370 @@ describe("davewiki.core tag file management", function()
 		end)
 	end)
 end)
+
+describe("davewiki.core markdown hyperlink support", function()
+	describe("constants", function()
+		it("should have LINK_PATTERN defined", function()
+			assert.is_not_nil(lua_core.LINK_PATTERN)
+		end)
+	end)
+
+	describe("is_path_within_wiki_root", function()
+		before_each(function()
+			lua_core.wiki_root = test_root
+		end)
+
+		after_each(function()
+			lua_core.wiki_root = nil
+		end)
+
+		it("should return true for path within wiki_root", function()
+			assert.is_true(lua_core.is_path_within_wiki_root(test_root .. "/notes/file.md"))
+		end)
+
+		it("should return true for wiki_root itself", function()
+			assert.is_true(lua_core.is_path_within_wiki_root(test_root))
+		end)
+
+		it("should return false for path outside wiki_root", function()
+			assert.is_false(lua_core.is_path_within_wiki_root("/etc/passwd"))
+		end)
+
+		it("should return false for path traversal attempt", function()
+			local escaped_path = vim.fn.resolve(test_root .. "/../../../etc/passwd")
+			assert.is_false(lua_core.is_path_within_wiki_root(escaped_path))
+		end)
+
+		it("should return false when wiki_root is nil", function()
+			lua_core.wiki_root = nil
+			assert.is_false(lua_core.is_path_within_wiki_root("/any/path"))
+		end)
+	end)
+
+	describe("get_link_under_cursor", function()
+		it("should extract valid link under cursor", function()
+			local buf = vim.api.nvim_create_buf(false, true)
+			vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "This is a [link](./file.md) in text" })
+			vim.api.nvim_set_current_buf(buf)
+			vim.api.nvim_win_set_cursor(0, { 1, 12 }) -- Position cursor on [link]
+
+			local link = lua_core.get_link_under_cursor()
+			assert.is_not_nil(link)
+			assert.are.equal("./file.md", link.path)
+
+			vim.api.nvim_buf_delete(buf, { force = true })
+		end)
+
+		it("should return nil when cursor is not on a link", function()
+			local buf = vim.api.nvim_create_buf(false, true)
+			vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "This is just regular text" })
+			vim.api.nvim_set_current_buf(buf)
+			vim.api.nvim_win_set_cursor(0, { 1, 5 })
+
+			local link = lua_core.get_link_under_cursor()
+			assert.is_nil(link)
+
+			vim.api.nvim_buf_delete(buf, { force = true })
+		end)
+
+		it("should handle links at start of line", function()
+			local buf = vim.api.nvim_create_buf(false, true)
+			vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "[link](./file.md) at start" })
+			vim.api.nvim_set_current_buf(buf)
+			vim.api.nvim_win_set_cursor(0, { 1, 0 }) -- Cursor on [
+
+			local link = lua_core.get_link_under_cursor()
+			assert.is_not_nil(link)
+			assert.are.equal("./file.md", link.path)
+
+			vim.api.nvim_buf_delete(buf, { force = true })
+		end)
+
+		it("should handle multiple links on same line", function()
+			local buf = vim.api.nvim_create_buf(false, true)
+			vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "Text [first](a.md) and [second](b.md) here" })
+			vim.api.nvim_set_current_buf(buf)
+
+			-- Cursor on first link
+			vim.api.nvim_win_set_cursor(0, { 1, 8 })
+			local link = lua_core.get_link_under_cursor()
+			assert.is_not_nil(link)
+			assert.are.equal("a.md", link.path)
+
+			-- Cursor on second link
+			vim.api.nvim_win_set_cursor(0, { 1, 25 })
+			link = lua_core.get_link_under_cursor()
+			assert.is_not_nil(link)
+			assert.are.equal("b.md", link.path)
+
+			vim.api.nvim_buf_delete(buf, { force = true })
+		end)
+
+		it("should detect external URLs", function()
+			local buf = vim.api.nvim_create_buf(false, true)
+			vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "See [website](https://example.com)" })
+			vim.api.nvim_set_current_buf(buf)
+			vim.api.nvim_win_set_cursor(0, { 1, 8 })
+
+			local link = lua_core.get_link_under_cursor()
+			assert.is_not_nil(link)
+			assert.are.equal("https://example.com", link.path)
+			assert.is_true(link.is_url)
+
+			vim.api.nvim_buf_delete(buf, { force = true })
+		end)
+
+		it("should return link text in result", function()
+			local buf = vim.api.nvim_create_buf(false, true)
+			vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "Click [My Link](./file.md)" })
+			vim.api.nvim_set_current_buf(buf)
+			vim.api.nvim_win_set_cursor(0, { 1, 10 })
+
+			local link = lua_core.get_link_under_cursor()
+			assert.is_not_nil(link)
+			assert.are.equal("./file.md", link.path)
+			assert.are.equal("My Link", link.text)
+
+			vim.api.nvim_buf_delete(buf, { force = true })
+		end)
+
+		it("should handle cursor on URL part of link", function()
+			local buf = vim.api.nvim_create_buf(false, true)
+			vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "See [link](./file.md)" })
+			vim.api.nvim_set_current_buf(buf)
+			-- The path starts at column 11 (0-indexed): "See [link]("./file.md")"
+			-- Position cursor on the path
+			vim.api.nvim_win_set_cursor(0, { 1, 14 })
+
+			local link = lua_core.get_link_under_cursor()
+			assert.is_not_nil(link)
+
+			vim.api.nvim_buf_delete(buf, { force = true })
+		end)
+
+		it("should handle absolute paths within wiki_root", function()
+			local buf = vim.api.nvim_create_buf(false, true)
+			vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "See [notes](/sources/note.md)" })
+			vim.api.nvim_set_current_buf(buf)
+			vim.api.nvim_win_set_cursor(0, { 1, 8 })
+
+			local link = lua_core.get_link_under_cursor()
+			assert.is_not_nil(link)
+			assert.are.equal("/sources/note.md", link.path)
+
+			vim.api.nvim_buf_delete(buf, { force = true })
+		end)
+	end)
+
+	describe("jump_to_link", function()
+		local original_wiki_root
+
+		before_each(function()
+			original_wiki_root = lua_core.wiki_root
+			lua_core.wiki_root = test_root
+		end)
+
+		after_each(function()
+			lua_core.wiki_root = original_wiki_root
+		end)
+
+		it("should open relative file link that exists", function()
+			-- Create a test file in test_root
+			local test_file = test_root .. "/test-link-target.md"
+			vim.fn.writefile({ "# Test Target", "" }, test_file)
+
+			local buf = vim.api.nvim_create_buf(false, true)
+			vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "See [target](test-link-target.md)" })
+			vim.api.nvim_buf_set_name(buf, test_root .. "/test-link-source.md")
+			vim.api.nvim_set_current_buf(buf)
+			vim.api.nvim_win_set_cursor(0, { 1, 8 })
+
+			local result = lua_core.jump_to_link()
+			assert.is_true(result)
+
+			-- Verify we jumped to the target file
+			local current_file = vim.api.nvim_buf_get_name(0)
+			assert.is_true(current_file:match("test%-link%-target%.md$") ~= nil)
+
+			vim.api.nvim_buf_delete(buf, { force = true })
+			vim.fn.delete(test_file)
+		end)
+
+		it("should open relative link from subdirectory without ./ prefix", function()
+			-- Test case: [Grilled Fish](grilled-fish.md) from notes/raw fish.md
+			-- This is a relative link without ./ prefix
+			local notes_dir = test_root .. "/notes"
+			local source_file = notes_dir .. "/raw-fish.md"
+			local target_file = notes_dir .. "/grilled-fish.md"
+
+			-- Ensure notes directory exists
+			if vim.fn.isdirectory(notes_dir) ~= 1 then
+				vim.fn.mkdir(notes_dir, "p")
+			end
+
+			-- Create target file
+			vim.fn.writefile({ "# Grilled Fish", "" }, target_file)
+
+			-- Create source buffer
+			local buf = vim.api.nvim_create_buf(false, true)
+			vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "See [Grilled Fish](grilled-fish.md)" })
+			vim.api.nvim_buf_set_name(buf, source_file)
+			vim.api.nvim_set_current_buf(buf)
+			vim.api.nvim_win_set_cursor(0, { 1, 8 })
+
+			local result = lua_core.jump_to_link()
+			assert.is_true(result)
+
+			-- Verify we jumped to the target file in the same directory
+			local current_file = vim.api.nvim_buf_get_name(0)
+			assert.is_true(current_file:match("notes/grilled%-fish%.md$") ~= nil)
+
+			vim.api.nvim_buf_delete(buf, { force = true })
+			vim.fn.delete(target_file)
+		end)
+
+		it("should open relative link from file with spaces in name", function()
+			-- Test case: file with spaces in name, like "raw fish.md"
+			local notes_dir = test_root .. "/notes"
+			local source_file = notes_dir .. "/raw test fish.md" -- spaces in name
+			local target_file = notes_dir .. "/grilled-fish.md"
+
+			-- Ensure notes directory exists
+			if vim.fn.isdirectory(notes_dir) ~= 1 then
+				vim.fn.mkdir(notes_dir, "p")
+			end
+
+			-- Create target file
+			vim.fn.writefile({ "# Grilled Fish", "" }, target_file)
+
+			-- Create source buffer
+			local buf = vim.api.nvim_create_buf(false, true)
+			vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "See [Grilled Fish](grilled-fish.md)" })
+			vim.api.nvim_buf_set_name(buf, source_file)
+			vim.api.nvim_set_current_buf(buf)
+			vim.api.nvim_win_set_cursor(0, { 1, 8 })
+
+			local result = lua_core.jump_to_link()
+			assert.is_true(result)
+
+			-- Verify we jumped to the target file in the same directory
+			local current_file = vim.api.nvim_buf_get_name(0)
+			assert.is_true(current_file:match("notes/grilled%-fish%.md$") ~= nil)
+
+			vim.api.nvim_buf_delete(buf, { force = true })
+			vim.fn.delete(target_file)
+		end)
+
+		it("should open absolute file link within wiki_root", function()
+			-- Create a test file in sources/
+			local test_file = test_root .. "/sources/bengal.md"
+			-- File already exists from test data
+
+			local buf = vim.api.nvim_create_buf(false, true)
+			vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "See [bengal](/sources/bengal.md)" })
+			vim.api.nvim_buf_set_name(buf, test_root .. "/some-file.md")
+			vim.api.nvim_set_current_buf(buf)
+			vim.api.nvim_win_set_cursor(0, { 1, 8 })
+
+			local result = lua_core.jump_to_link()
+			assert.is_true(result)
+
+			-- Verify we jumped to the target file
+			local current_file = vim.api.nvim_buf_get_name(0)
+			assert.is_true(current_file:match("bengal%.md$") ~= nil)
+
+			vim.api.nvim_buf_delete(buf, { force = true })
+		end)
+
+		it("should return false for non-existent file", function()
+			local buf = vim.api.nvim_create_buf(false, true)
+			vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "See [missing](./nonexistent.md)" })
+			vim.api.nvim_buf_set_name(buf, test_root .. "/test-file.md")
+			vim.api.nvim_set_current_buf(buf)
+			vim.api.nvim_win_set_cursor(0, { 1, 8 })
+
+			local result = lua_core.jump_to_link()
+			assert.is_false(result)
+
+			vim.api.nvim_buf_delete(buf, { force = true })
+		end)
+
+		it("should block path traversal attempts", function()
+			local buf = vim.api.nvim_create_buf(false, true)
+			vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "See [escape](../../../etc/passwd)" })
+			vim.api.nvim_buf_set_name(buf, test_root .. "/test-file.md")
+			vim.api.nvim_set_current_buf(buf)
+			vim.api.nvim_win_set_cursor(0, { 1, 8 })
+
+			local result = lua_core.jump_to_link()
+			assert.is_false(result)
+
+			vim.api.nvim_buf_delete(buf, { force = true })
+		end)
+
+		it("should return false when not on a link", function()
+			local buf = vim.api.nvim_create_buf(false, true)
+			vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "Just regular text" })
+			vim.api.nvim_set_current_buf(buf)
+			vim.api.nvim_win_set_cursor(0, { 1, 5 })
+
+			local result = lua_core.jump_to_link()
+			assert.is_false(result)
+
+			vim.api.nvim_buf_delete(buf, { force = true })
+		end)
+
+		it("should return false when wiki_root is nil", function()
+			lua_core.wiki_root = nil
+
+			local buf = vim.api.nvim_create_buf(false, true)
+			vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "See [link](./file.md)" })
+			vim.api.nvim_set_current_buf(buf)
+			vim.api.nvim_win_set_cursor(0, { 1, 8 })
+
+			local result = lua_core.jump_to_link()
+			assert.is_false(result)
+
+			vim.api.nvim_buf_delete(buf, { force = true })
+		end)
+
+		it("should return true for external URLs", function()
+			local buf = vim.api.nvim_create_buf(false, true)
+			vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "See [website](https://example.com)" })
+			vim.api.nvim_set_current_buf(buf)
+			vim.api.nvim_win_set_cursor(0, { 1, 8 })
+
+			-- Mock vim.ui.open to verify it's called with the correct URL
+			local original_ui_open = vim.ui.open
+			local opened_url = nil
+			vim.ui.open = function(url)
+				opened_url = url
+			end
+
+			local result = lua_core.jump_to_link()
+
+			-- Restore original vim.ui.open
+			vim.ui.open = original_ui_open
+
+			assert.is_true(result)
+			assert.are.equal("https://example.com", opened_url)
+
+			vim.api.nvim_buf_delete(buf, { force = true })
+		end)
+
+		it("should return false for non-.md file extensions", function()
+			local buf = vim.api.nvim_create_buf(false, true)
+			vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "See [image](./image.png)" })
+			vim.api.nvim_buf_set_name(buf, test_root .. "/test-file.md")
+			vim.api.nvim_set_current_buf(buf)
+			vim.api.nvim_win_set_cursor(0, { 1, 8 })
+
+			local result = lua_core.jump_to_link()
+			-- Non-.md files should still work if we're opening in browser
+			-- But for this implementation, we only support .md files
+			assert.is_false(result)
+
+			vim.api.nvim_buf_delete(buf, { force = true })
+		end)
+	end)
+end)

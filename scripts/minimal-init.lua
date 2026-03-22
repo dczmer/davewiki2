@@ -31,6 +31,12 @@ local davewiki = require("davewiki").setup({
 vim.api.nvim_create_autocmd("FileType", {
     pattern = "markdown",
     callback = function()
-        vim.keymap.set("n", "<CR>", davewiki.jump_to_tag, { buffer = true, desc = "Jump to tag file under cursor" })
+        vim.keymap.set("n", "<CR>", function()
+            local davewiki = require("davewiki")
+            -- Try tag first, then link
+            if not davewiki.jump_to_tag() then
+                davewiki.jump_to_link()
+            end
+        end, { buffer = true, desc = "Jump to tag or link under cursor" })
     end,
 })

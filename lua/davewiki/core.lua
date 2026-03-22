@@ -329,4 +329,166 @@ M.jump_to_tag_file = function(tag_name)
 	return true
 end
 
+-- ============================================================================
+-- MARKDOWN HYPERLINK SUPPORT
+-- ============================================================================
+
+--- Pattern for matching markdown links [text](path)
+--- @type string
+M.LINK_PATTERN = "%[([^%]]*)%]%(([^)]+)%)"
+
+--- @class LinkInfo
+--- @field text string The link text (display text)
+--- @field path string The link target (URL or file path)
+--- @field is_url boolean Whether the link is an external URL
+--- @field start_col integer The starting column of the link (0-indexed)
+--- @field end_col integer The ending column of the link (0-indexed, exclusive)
+
+--- Gets the markdown link under the current cursor position
+--- @return LinkInfo|nil Link info if cursor is on a valid markdown link, nil otherwise
+M.get_link_under_cursor = function()
+	local cursor_pos = vim.api.nvim_win_get_cursor(0)
+	local col_num = cursor_pos[2]
+
+	local line = vim.api.nvim_get_current_line()
+
+	-- Find all links in the line
+	local start_pos = 1
+	while true do
+		local match_start, match_end, link_text, link_path = line:find(M.LINK_PATTERN, start_pos)
+		if not match_start then
+			break
+		end
+
+		-- Check if cursor is within the entire link (from '[' to ')')
+		-- Convert to 0-indexed for cursor comparison
+		local link_start_0indexed = match_start - 1
+		local link_end_0indexed = match_end
+
+		-- Cursor is within the link if col_num >= link_start_0indexed and col_num < link_end_0indexed
+		if col_num >= link_start_0indexed and col_num < link_end_0indexed then
+			-- Determine if this is a URL
+			local is_url = link_path:match("^https?://") ~= nil
+
+			return {
+				text = link_text,
+				path = link_path,
+				is_url = is_url,
+				start_col = link_start_0indexed,
+				end_col = link_end_0indexed,
+			}
+		end
+
+		start_pos = match_end + 1
+	end
+
+	return nil
+end
+
+--- Checks if a resolved path is within wiki_root (security validation)
+--- @param path string The absolute path to validate
+--- @return boolean True if path is within wiki_root, false otherwise
+M.is_path_within_wiki_root = function(path)
+	if not M.wiki_root then
+		return false
+	end
+
+	local real_wiki_root = vim.fn.resolve(M.wiki_root)
+	local real_path = vim.fn.resolve(path)
+
+	return real_path:sub(1, #real_wiki_root) == real_wiki_root
+end
+
+--- Resolves a link path relative to the current file or wiki_root
+--- @param path string The link path (relative or absolute within wiki_root)
+--- @param current_file string? The current buffer's file path
+--- @return string|nil resolved_path The resolved absolute path, or nil if invalid
+--- @return string|nil error Error message if resolution failed
+M.resolve_link_path = function(path, current_file)
+	if not M.wiki_root then
+		return nil, "wiki_root not configured"
+	end
+
+	-- Check if it's an absolute path within wiki_root
+	if path:sub(1, 1) == "/" then
+		local absolute_path = M.wiki_root .. path
+
+		-- Security: validate path is within wiki_root
+		if not M.is_path_within_wiki_root(absolute_path) then
+			return nil, "path escapes wiki_root"
+		end
+
+		return absolute_path, nil
+	end
+
+	-- Relative path: resolve from current file's directory
+	if current_file then
+		local current_dir = vim.fn.fnamemodify(current_file, ":h")
+		local resolved = vim.fn.resolve(current_dir .. "/" .. path)
+
+		-- Security: validate path is within wiki_root
+		if not M.is_path_within_wiki_root(resolved) then
+			return nil, "path escapes wiki_root"
+		end
+
+		return resolved, nil
+	end
+
+	-- No current file, resolve relative to wiki_root
+	local resolved = M.wiki_root .. "/" .. path
+	return vim.fn.resolve(resolved), nil
+end
+
+--- Jumps to the linked file or opens URL in browser
+--- @return boolean Success
+M.jump_to_link = function()
+	if not M.wiki_root then
+		return false
+	end
+
+	local link = M.get_link_under_cursor()
+	if not link then
+		return false
+	end
+
+	-- Handle external URLs
+	if link.is_url then
+		vim.ui.open(link.path)
+		return true
+	end
+
+	-- Only support .md files for internal links
+	if not link.path:match("%.md$") then
+		vim.notify("davewiki: Only .md files are supported for internal links", vim.log.levels.WARN)
+		return false
+	end
+
+	-- Get current buffer's file path for relative path resolution
+	local current_file = vim.api.nvim_buf_get_name(0)
+
+	-- Resolve the path
+	local target_path, err = M.resolve_link_path(link.path, current_file)
+
+	if err then
+		vim.notify("davewiki: " .. err, vim.log.levels.ERROR)
+		return false
+	end
+
+	-- Security check: path must be within wiki_root
+	if not M.is_path_within_wiki_root(target_path) then
+		vim.notify("davewiki: path escapes wiki_root", vim.log.levels.ERROR)
+		return false
+	end
+
+	-- Check if file exists
+	if vim.fn.filereadable(target_path) ~= 1 then
+		vim.notify("davewiki: file not found: " .. target_path, vim.log.levels.WARN)
+		return false
+	end
+
+	-- Open the file
+	vim.cmd("edit " .. vim.fn.fnameescape(target_path))
+	return true
+end
+
 return M

@@ -74,6 +74,17 @@ function M.jump_to_tag()
 	return false
 end
 
+--- Jump to the hyperlink under the cursor
+--- Opens the linked file or URL. For internal links, resolves relative to
+--- the current file or wiki_root (for absolute paths). For external URLs,
+--- opens in the system default browser.
+---
+--- @return boolean True if jump was successful, false otherwise
+function M.jump_to_link()
+	local core = require("davewiki.core")
+	return core.jump_to_link()
+end
+
 --- Get the current configuration
 ---@return DavewikiConfig
 function M.get_config()

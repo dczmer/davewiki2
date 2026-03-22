@@ -35,6 +35,16 @@ Tags (`#tag-name`) create connections between notes. When you add a tag to a blo
 - Tag files live under `sources/` as anchor files
 - Jump to any tag file to see all back-references
 
+### Markdown Links
+
+Markdown links (`[text](path)`) provide navigation between notes and external resources.
+
+- **Internal links**: Jump to other `.md` files within your wiki
+  - Relative paths: `[notes](./notes.md)` or `[notes](notes.md)`
+  - Absolute paths within wiki: `[sources](/sources/bengal.md)`- **External URLs**: Open in your system's default browser
+  - `[website](https://example.com)`
+- **Security**: All paths are validated to stay within `wiki_root`- Press `<CR>` on any link to navigate
+
 ### Blocks
 
 Journals are organized into blocks separated by `---`. Each block can contain multiple tags. When you search for a tag, you find all blocks mentioning it.
@@ -165,6 +175,8 @@ This opens neovim with the `scripts/minimal-init.lua` configuration, which:
 - Provides a minimal environment for testing features interactively
 
 You can test the tag navigation by opening any markdown file in `test_root/` and pressing `<CR>` on a tag (e.g., `#bengal`).
+
+You can test hyperlink navigation by pressing `<CR>` on a markdown link like `[notes](./notes.md)`or `[website](https://example.com)`.
 
 ### Running Tests
 
