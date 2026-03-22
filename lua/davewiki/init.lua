@@ -50,6 +50,30 @@ function M.setup(user_config)
 	return M
 end
 
+--- Jump to the tag file under the cursor
+--- Creates the tag file if it doesn't exist
+---
+--- Usage example:
+---   vim.api.nvim_create_autocmd('FileType', {
+---     pattern = 'markdown',
+---     callback = function()
+---       vim.keymap.set('n', '<CR>', require('davewiki').jump_to_tag, {
+---         buffer = true,
+---         desc = 'Jump to tag file under cursor'
+---       })
+---     end
+---   })
+---
+--- @return boolean True if jump was successful, false otherwise
+function M.jump_to_tag()
+	local core = require("davewiki.core")
+	local tag = core.get_tag_under_cursor()
+	if tag then
+		return core.jump_to_tag_file(tag)
+	end
+	return false
+end
+
 --- Get the current configuration
 ---@return DavewikiConfig
 function M.get_config()
