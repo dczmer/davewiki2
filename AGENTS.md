@@ -19,16 +19,37 @@ Follow test-driven development:
 
 ## Testing
 
-Run tests with:
+### Running All Tests
+
+To run the complete test suite:
 
 ```sh
-nix run .#nvim-test -- -u scripts/minimal-init.lua --headless -c 'PlenaryBustedFile tests/file_spec.lua' -c 'qa!'
+nix run .#nvim-test -- -u scripts/minimal-init.lua --headless -c 'PlenaryBustedDirectory tests' -c 'qa!'
 ```
 
-- Always use the minimal init: `-u scripts/minimal-init.lua`
-- Use `PlenaryBustedFile` to run a specific test file
-- Use `PlenaryBustedDirectory` to run all tests in a directory
-- Always end with `-c 'qa!'` to exit after tests complete
+Or run individual test files:
+
+```sh
+# Run core module tests
+nix run .#nvim-test -- -u scripts/minimal-init.lua --headless -c 'PlenaryBustedFile tests/lua/davewiki/core_spec.lua' -c 'qa!'
+
+# Run init module tests
+nix run .#nvim-test -- -u scripts/minimal-init.lua --headless -c 'PlenaryBustedFile tests/lua/davewiki/init_spec.lua' -c 'qa!'
+```
+
+### Test Commands Reference
+
+- **Always use the minimal init:** `-u scripts/minimal-init.lua`
+- **Run all tests:** `PlenaryBustedDirectory tests`
+- **Run specific file:** `PlenaryBustedFile tests/lua/davewiki/core_spec.lua`
+- **Run directory:** `PlenaryBustedDirectory tests/lua/davewiki`
+- **Always end with:** `-c 'qa!'` to exit after tests complete
+
+### Current Test Suite
+
+- `tests/lua/davewiki/core_spec.lua` - Core module tests (wiki_root resolution, tag management)
+- `tests/lua/davewiki/init_spec.lua` - Init module tests (public API)
+- Total: ~46 tests covering all implemented features
 
 ### Testing Rules
 
