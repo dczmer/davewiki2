@@ -148,3 +148,26 @@ let g:davewiki_wiki_root = '~/my-wiki'
 ```
 
 The priority for wiki_root is: setup option > `g:davewiki_wiki_root` > default `~/davewiki`
+
+## Development
+
+### Manual Testing
+
+For manual acceptance testing, you can run an interactive neovim instance pre-configured with davewiki:
+
+```sh
+nix run .#nvim-test
+```
+
+This opens neovim with the `scripts/minimal-init.lua` configuration, which:
+- Sets up davewiki with `./test_root` as the wiki root
+- Includes example keybindings for jump-to-tag functionality
+- Provides a minimal environment for testing features interactively
+
+You can test the tag navigation by opening any markdown file in `test_root/` and pressing `<CR>` on a tag (e.g., `#bengal`).
+
+### Running Tests
+
+```sh
+nix run .#nvim-test -- -u scripts/minimal-init.lua --headless -c 'PlenaryBustedDirectory tests' -c 'qa!'
+```

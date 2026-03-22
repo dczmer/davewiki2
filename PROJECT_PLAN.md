@@ -193,7 +193,7 @@ wiki_root/               (configurable, e.g., ~/.davewiki)
 **Testing:**
 - **Unit tests:** `nix run .#nvim-test -- -u scripts/minimal-init.lua --headless -c ...`
 - **Integration tests:** Combined module/functionality testing
-- **Manual testing:** `nix run` for interactive verification
+- **Manual testing:** `nix run .#nvim-test` to open an interactive neovim instance with davewiki pre-configured using `scripts/minimal-init.lua`. The minimal init includes a working example of jump-to-tag functionality bound to `<CR>` in markdown files.
 
 **Testing Commands:**
 - Always use minimal init: `-u scripts/minimal-init.lua`
@@ -209,7 +209,7 @@ wiki_root/               (configurable, e.g., ~/.davewiki)
 
 **Project Scripts Directory:**
 - `scripts/` - Testing and development scripts
-- `scripts/minimal-init.lua` - Minimal neovim config for testing
+- `scripts/minimal-init.lua` - Minimal neovim config for testing and manual acceptance testing. Pre-configures davewiki with `test_root/` as wiki_root and includes a working example of `<CR>` keybinding for jump-to-tag functionality in markdown files.
 
 **Debugging:**
 1. Run linters and type checker
