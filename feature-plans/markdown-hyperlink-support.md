@@ -1,6 +1,6 @@
 ---
 name: "markdown-hyperlink-support"
-status: "open"
+status: "done"
 ---
 
 # Markdown Hyperlink Support

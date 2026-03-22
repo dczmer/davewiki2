@@ -23,6 +23,10 @@ M.setup = function(opts)
 	end
 
 	M.wiki_root = vim.fn.expand(M.wiki_root)
+	M.wiki_root = vim.fn.fnamemodify(M.wiki_root, ":p")
+	M.wiki_root = vim.fn.resolve(M.wiki_root)
+	-- Strip trailing slash for consistent path comparisons
+	M.wiki_root = M.wiki_root:gsub("/+$", "")
 
 	if not vim.fn.isdirectory(M.wiki_root) then
 		if not opts.wiki_root and not vim.g.davewiki_wiki_root then
@@ -385,8 +389,8 @@ M.get_link_under_cursor = function()
 	return nil
 end
 
---- Checks if a resolved path is within wiki_root (security validation)
---- @param path string The absolute path to validate
+--- Checks if a resolved path is within wiki_root (security validation).
+--- @param path string The absolute path to validate (callers must resolve relative paths first)
 --- @return boolean True if path is within wiki_root, false otherwise
 M.is_path_within_wiki_root = function(path)
 	if not M.wiki_root then
@@ -399,7 +403,13 @@ M.is_path_within_wiki_root = function(path)
 	return real_path:sub(1, #real_wiki_root) == real_wiki_root
 end
 
---- Resolves a link path relative to the current file or wiki_root
+--- Resolves a link path relative to the directory containing the current file or wiki_root.
+---
+--- Path resolution:
+--- - Absolute paths (starting with `/`) are resolved relative to wiki_root
+--- - Relative paths are resolved relative to the directory containing current_file
+--- - If no current_file, relative paths resolve against wiki_root
+---
 --- @param path string The link path (relative or absolute within wiki_root)
 --- @param current_file string? The current buffer's file path
 --- @return string|nil resolved_path The resolved absolute path, or nil if invalid

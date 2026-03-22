@@ -4,8 +4,8 @@
 
 local lua_core = require("davewiki.core")
 
--- Get the test_root directory path
-local test_root = vim.fn.fnamemodify(debug.getinfo(1).source:match("@?(.*)/tests/"), ":p") .. "test_root"
+-- Get the absolute path to test_root directory
+local test_root = "../test_root"
 
 describe("davewiki.core wiki_root resolution", function()
 	before_each(function()
@@ -584,7 +584,7 @@ describe("davewiki.core markdown hyperlink support", function()
 
 		before_each(function()
 			original_wiki_root = lua_core.wiki_root
-			lua_core.wiki_root = test_root
+			lua_core.setup({ wiki_root = test_root })
 		end)
 
 		after_each(function()

@@ -5,7 +5,7 @@
 local davewiki = require("davewiki")
 
 -- Get the test_root directory path
-local test_root = vim.fn.fnamemodify(debug.getinfo(1).source:match("@?(.*)/tests/"), ":p") .. "test_root"
+local test_root = "../test_root"
 
 describe("davewiki public interface", function()
 	before_each(function()
