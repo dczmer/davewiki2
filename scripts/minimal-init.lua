@@ -1,18 +1,36 @@
--- Minimal neovim configuration for testing davewiki plugin
+vim.opt.runtimepath:append(".")
 
--- Set runtimepath to include plugin and dependencies
-vim.opt.runtimepath:append(vim.fn.fnamemodify(debug.getinfo(1).source:match("@(.*/)"), ":p") .. "..")
-vim.opt.runtimepath:append(vim.fn.fnamemodify(debug.getinfo(1).source:match("@(.*/)"), ":p") .. "../../lua")
+-- some minimal config
+vim.g.mapleader = ","
+vim.g.maplocalleader = "\\"
+vim.cmd([[
+    filetype on
+    filetype indent on
+    filetype plugin on
+    syntax on
+]])
+vim.cmd.colorscheme("elflord")
 
--- Set wiki_root to test_root for tests
-vim.g.davewiki_test_root = vim.fn.fnamemodify(debug.getinfo(1).source:match("@(.*/)"), ":p") .. "../test_root"
+-- import davewiki with all modules disabled initially to keep tests simple.
+-- when you need to test a sub-system, initialize it by calling it's `setup()` directly.
+-- we use ./test_root as the location for our notes and the tests are allowed to modify this folder.
+local davewiki = require("davewiki").setup({
+    wiki_root = "./test_root",
+    telescope = {
+        enabled = false,
+    },
+    cmp = {
+        enabled = false,
+    },
+    journal = {
+        enabled = false,
+    },
+})
 
--- Minimal plugin setup for testing
-vim.opt.runtimepath:append(vim.g.davewiki_test_root)
-
--- Suppress startup messages
-vim.opt.shortmess:append("I")
-
--- Minimal UI
-vim.opt.number = false
-vim.opt.relativenumber = false
+-- example of how to bind `jump_to_tag` to `<CR>` for navigation
+vim.api.nvim_create_autocmd("FileType", {
+    pattern = "markdown",
+    callback = function()
+        vim.keymap.set("n", "<CR>", davewiki.jump_to_tag, { buffer = true, desc = "Jump to tag file under cursor" })
+    end,
+})
