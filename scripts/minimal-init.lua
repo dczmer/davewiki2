@@ -32,7 +32,6 @@ vim.api.nvim_create_autocmd("FileType", {
     pattern = "markdown",
     callback = function()
         vim.keymap.set("n", "<CR>", function()
-            local davewiki = require("davewiki")
             -- Try tag first, then link
             if not davewiki.jump_to_tag() then
                 davewiki.jump_to_link()
@@ -40,3 +39,9 @@ vim.api.nvim_create_autocmd("FileType", {
         end, { buffer = true, desc = "Jump to tag or link under cursor" })
     end,
 })
+
+-- setup whichkey
+require("which-key").setup({})
+vim.keymap.set("n", "<leader>?", function()
+    require("which-key").show()
+end, { desc = "Show which-key" })

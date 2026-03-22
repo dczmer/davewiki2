@@ -47,6 +47,12 @@ function M.setup(user_config)
 	M.core.setup({ wiki_root = config.wiki_root })
 	config.wiki_root = M.core.wiki_root
 
+	if config.cmp.enabled then
+		M.cmp = require("davewiki.cmp")
+		M.cmp.setup({ enabled = true })
+		M.cmp.register_tag_names()
+	end
+
 	return M
 end
 
