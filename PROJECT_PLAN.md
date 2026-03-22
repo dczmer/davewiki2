@@ -83,6 +83,9 @@ Command-line neovim users who want a simple journal-based note-taking system.
 - luacheck - linting
 - stylua - Lua formatter
 - lua-language-server - type checking
+- git - version control
+- ripgrep - search utility
+- fd - file finder
 - lz.n - lazy loading support (optional for users)
 - plenary.nvim tests - testing framework
 
@@ -118,22 +121,21 @@ Command-line neovim users who want a simple journal-based note-taking system.
 
 **Project Directory Structure:**
 ```
-davewiki/
-├── lua/                 (lua modules)
-│   └── davewiki/
-│       ├── init.lua     (public interface - davewiki.lua)
-│       ├── core.lua
-│       ├── cmp.lua
-│       ├── telescope.lua
-│       └── calendar.lua
-├── ftplugin/            (filetype plugins)
-├── tests/               (plenary tests)
-├── test_root/           (example/test wiki)
-├── scripts/             (testing and dev scripts)
-├── README.md
-├── PROJECT_PLAN.md
-├── AGENTS.md
-└── flake.nix            (nix build configuration)
+lua/                     (lua modules)
+└── davewiki/
+    ├── init.lua         (public interface - davewiki.lua)
+    ├── core.lua
+    ├── cmp.lua
+    ├── telescope.lua
+    └── calendar.lua
+ftplugin/                (filetype plugins)
+tests/                   (plenary tests)
+test_root/               (example/test wiki)
+scripts/                 (testing and dev scripts)
+README.md
+PROJECT_PLAN.md
+AGENTS.md
+flake.nix                (nix build configuration)
 ```
 
 **Wiki Directory Structure (managed by plugin for users):**
