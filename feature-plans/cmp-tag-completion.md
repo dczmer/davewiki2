@@ -1,6 +1,6 @@
 ---
 name: "cmp-tag-completion"
-status: "open"
+status: "done"
 ---
 
 # CMP Tag Completion
