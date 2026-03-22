@@ -34,6 +34,7 @@
           lua54Packages.luacheck
           lua-language-server
           stylua
+          gh
         ];
         neovimWrapped = pkgs.wrapNeovim pkgs.neovim-unwrapped {
           configure = {
@@ -77,6 +78,7 @@
           stylua = pkgs.stylua;
           lua-language-server = pkgs.lua-language-server;
           lua = pkgs.lua54Packages.lua;
+          gh = pkgs.gh;
         };
         apps = rec {
           default = davewiki;
