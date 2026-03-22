@@ -1,6 +1,6 @@
 ---
 name: "basic-tag-file-management"
-status: "open"
+status: "done"
 ---
 
 # Basic Tag File Management
