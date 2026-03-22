@@ -76,6 +76,7 @@
           luacheck = pkgs.lua54Packages.luacheck;
           stylua = pkgs.stylua;
           lua-language-server = pkgs.lua-language-server;
+          lua = pkgs.lua54Packages.lua;
         };
         apps = rec {
           default = davewiki;
