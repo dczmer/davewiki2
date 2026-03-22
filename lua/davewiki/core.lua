@@ -1,38 +1,60 @@
----
--- @module davewiki.core
--- @brief General utilities library for davewiki
--- @version 1.0
+local M = {}
 
-local core = {}
+---@type string|nil
+M.wiki_root = nil
 
 ---@class DavewikiCoreConfig
-local default_config = {
-	wiki_root = "",
-}
+---@field wiki_root string|nil Root directory for wiki
 
-core.config = default_config
+--- Setup davewiki.core with configuration options
+---@param opts DavewikiCoreConfig?
+---@return DavewikiCoreConfig
+M.setup = function(opts)
+	opts = opts or {}
 
---- Validate that wiki_root is set and exists
----@return boolean
-function core.validate_wiki_root()
-	local wiki_root = core.config.wiki_root
-	if not wiki_root or wiki_root == "" then
-		return false
+	local default_wiki_root = "~/davewiki"
+
+	if opts.wiki_root then
+		M.wiki_root = opts.wiki_root
+	elseif vim.g.davewiki_wiki_root then
+		M.wiki_root = vim.g.davewiki_wiki_root
+	else
+		M.wiki_root = default_wiki_root
 	end
-	return true
+
+	M.wiki_root = vim.fn.expand(M.wiki_root)
+
+	if not vim.fn.isdirectory(M.wiki_root) then
+		if not opts.wiki_root and not vim.g.davewiki_wiki_root then
+			vim.schedule(function()
+				vim.api.nvim_echo({
+					{ "davewiki: wiki_root directory does not exist: " .. M.wiki_root, "WarningMsg" },
+					{ "\n" },
+					{ "Using default path. Set g:davewiki_wiki_root or pass wiki_root to setup().", "Normal" },
+				}, false, {})
+			end)
+		end
+	end
+
+	return M
 end
 
---- Get the wiki root directory path
----@return string
-function core.get_wiki_root()
-	return core.config.wiki_root
+--- Executes a ripgrep command and returns the matching lines.
+--- Uses vim.system() to avoid shell injection vulnerabilities.
+--- @param args table Array of string arguments to pass to ripgrep
+--- @return table Array of matching lines from ripgrep output, or empty table on failure
+M.ripgrep = function(args)
+	local result = vim.system({ "rg", unpack(args) }, { text = true }):wait()
+
+	if result.code ~= 0 then
+		return {}
+	end
+
+	local lines = {}
+	for line in result.stdout:gmatch("[^\n]+") do
+		table.insert(lines, line)
+	end
+	return lines
 end
 
---- Path join utility
----@param ... string Path components to join
----@return string
-function core.path_join(...)
-	return table.concat({ ... }, "/")
-end
-
-return core
+return M

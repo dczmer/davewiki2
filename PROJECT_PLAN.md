@@ -102,16 +102,13 @@ Command-line neovim users who want a simple journal-based note-taking system.
 **System Components:**
 
 1. **Lua Modules (in `lua/` directory):**
-   - `davewiki.lua` - Public interface, provides `setup()` function
-   - `davewiki/core.lua` - General utilities library
+   - `davewiki/init.lua` - Public interface, provides `setup()` function
+   - `davewiki/core.lua` - Core utilities including wiki_root resolution
    - `davewiki/cmp.lua` - nvim-cmp integration
    - `davewiki/telescope.lua` - Telescope integration
    - `davewiki/calendar.lua` - Daily calendar system implementation
 
-2. **Vim Filetype Plugin:**
-   - `ftplugin/` - Markdown filetype plugin with autocommands and global settings
-
-3. **Tests:**
+2. **Tests:**
    - `tests/` - plenary.nvim test suite
    - `test_root/` directory - sample notes and tags for testing
 
@@ -123,13 +120,13 @@ Command-line neovim users who want a simple journal-based note-taking system.
 ```
 lua/                     (lua modules)
 └── davewiki/
-    ├── init.lua         (public interface - davewiki.lua)
+    ├── init.lua         (public interface)
     ├── core.lua
     ├── cmp.lua
     ├── telescope.lua
     └── calendar.lua
-ftplugin/                (filetype plugins)
 tests/                   (plenary tests)
+tests/lua/davewiki/      (test files mirroring lua/ structure)
 test_root/               (example/test wiki)
 scripts/                 (testing and dev scripts)
 README.md
@@ -200,7 +197,10 @@ wiki_root/               (configurable, e.g., ~/.davewiki)
 
 **Testing Commands:**
 - Always use minimal init: `-u scripts/minimal-init.lua`
-- Use `-c` flag to pass commands: `lua` for lua statements, `luafile` to source lua files
+- Use `PlenaryBustedFile` to run a specific test file
+- Use `PlenaryBustedDirectory` to run all tests in a directory
+- Always end with `-c 'qa!'` to exit after tests complete
+- Example: `nix run .#nvim-test -- -u scripts/minimal-init.lua --headless -c 'PlenaryBustedFile tests/file_spec.lua' -c 'qa!'`
 
 **Test Environment:**
 - Tests run against **real files** in `test_root/` directory - no mocking
@@ -274,8 +274,7 @@ wiki_root/               (configurable, e.g., ~/.davewiki)
 ```
 davewiki/
 ├── lua/davewiki/        (lua modules)
-├── ftplugin/            (filetype plugins)
-├── tests/               (plenary tests)
+├── tests/lua/davewiki/  (test files, mirroring lua/ structure)
 ├── test_root/           (example/test wiki)
 ├── scripts/             (testing and dev scripts)
 ├── README.md

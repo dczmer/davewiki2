@@ -3,7 +3,7 @@
 -- @brief Public interface for davewiki plugin
 -- @version 1.0
 
-local davewiki = {}
+local M = {}
 
 ---@class DavewikiConfig
 ---@field wiki_root string Root directory for all notes (required)
@@ -21,7 +21,6 @@ local davewiki = {}
 ---@field enabled boolean Enable journal module (default: true)
 
 local default_config = {
-	wiki_root = "",
 	telescope = {
 		enabled = true,
 	},
@@ -38,18 +37,23 @@ local config = vim.deepcopy(default_config)
 
 --- Setup the davewiki plugin with the given configuration
 ---@param user_config DavewikiConfig?
----@return DavewikiConfig
-function davewiki.setup(user_config)
+---@return table
+function M.setup(user_config)
 	if user_config then
 		config = vim.tbl_deep_extend("force", config, user_config)
 	end
-	return config
+
+	M.core = require("davewiki.core")
+	M.core.setup({ wiki_root = config.wiki_root })
+	config.wiki_root = M.core.wiki_root
+
+	return M
 end
 
 --- Get the current configuration
 ---@return DavewikiConfig
-function davewiki.get_config()
+function M.get_config()
 	return config
 end
 
-return davewiki
+return M

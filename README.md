@@ -54,6 +54,10 @@ Another block with #vim tips.
 
 Non-journal notes go in `notes/` and can mention tags, but aren't automatically indexed by the tagging system.
 
+### Attachments
+
+Optional attachments (images, files) can be stored in `attachments/` within your wiki root.
+
 ## Installation
 
 ### With Nix (recommended)
@@ -130,7 +134,17 @@ require('davewiki').setup({
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| `wiki_root` | string | **Required** | Root directory for all notes |
+| `wiki_root` | string | `~/davewiki` | Root directory for all notes (can also set `g:davewiki_wiki_root`) |
 | `telescope.enabled` | boolean | `true` | Enable telescope integration |
 | `cmp.enabled` | boolean | `true` | Enable nvim-cmp integration |
 | `journal.enabled` | boolean | `true` | Enable journal module |
+
+### Alternative Configuration
+
+You can also set `wiki_root` via a vim global variable:
+
+```vim
+let g:davewiki_wiki_root = '~/my-wiki'
+```
+
+The priority for wiki_root is: setup option > `g:davewiki_wiki_root` > default `~/davewiki`

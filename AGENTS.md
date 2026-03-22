@@ -22,17 +22,27 @@ Follow test-driven development:
 Run tests with:
 
 ```sh
-nix run .#nvim-test -- -u scripts/minimal-init.lua --headless -c ...
+nix run .#nvim-test -- -u scripts/minimal-init.lua --headless -c 'PlenaryBustedFile tests/file_spec.lua' -c 'qa!'
 ```
 
 - Always use the minimal init: `-u scripts/minimal-init.lua`
-- Use `-c` to pass commands: `lua` for statements, `luafile` to source files
+- Use `PlenaryBustedFile` to run a specific test file
+- Use `PlenaryBustedDirectory` to run all tests in a directory
+- Always end with `-c 'qa!'` to exit after tests complete
 
 ### Testing Rules
 
 - **Never mock** vim internal functions or filesystem operations unless there is no alternative.
 - Tests run against **real files** in `test_root/` — no mocking the filesystem.
 - Tests must use `test_root` as the `wiki_root` and **never access files outside it**.
+
+### Test File Structure
+
+- **Directory layout:** Tests mirror the `lua/` folder structure under `tests/lua/`
+- **File naming:** Append `_spec.lua` to the corresponding module name
+- **Examples:**
+  - `lua/davewiki/init.lua` → `tests/lua/davewiki/init_spec.lua`
+  - `lua/davewiki/core.lua` → `tests/lua/davewiki/core_spec.lua`
 
 ## Code Quality
 
