@@ -1,3 +1,7 @@
+---
+name: wiki-root-configuration
+status: done
+---
 # wiki-root-configuration
 
 ## Metadata
