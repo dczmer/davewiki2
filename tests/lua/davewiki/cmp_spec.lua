@@ -137,113 +137,89 @@ describe("davewiki.cmp wiki_tags source", function()
 				instance = source.new()
 			end)
 
-			it("should return empty results when context has no # prefix", function()
-				local context = {
-					col = 1,
-					cursor = { 1, 0 },
-					line = "just text",
+			it("should call callback with all tags", function()
+				local buf = vim.api.nvim_create_buf(false, true)
+				vim.api.nvim_set_current_buf(buf)
+				vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "#bengal" })
+				vim.bo[buf].filetype = "markdown"
+
+				local params = {
+					context = {
+						cursor_before_line = "#bengal",
+					},
+					offset = 1,
 				}
 
-				local items = instance:complete(context)
+				local result = nil
+				local callback = function(response)
+					result = response
+				end
 
-				assert.is_table(items)
-				assert.are.equal(0, #items)
+				instance:complete(params, callback)
+
+				vim.api.nvim_buf_delete(buf, { force = true })
+
+				assert.is_table(result)
+				assert.is_table(result.items)
+				assert.is_true(#result.items > 0)
 			end)
 
-			it("should return all tags for bare # character", function()
-				local context = {
-					col = 2,
-					cursor = { 1, 1 },
-					line = "#",
+			it("should include tag with documentation showing usage count", function()
+				local buf = vim.api.nvim_create_buf(false, true)
+				vim.api.nvim_set_current_buf(buf)
+				vim.bo[buf].filetype = "markdown"
+
+				local params = {
+					context = {
+						cursor_before_line = "#ben",
+					},
+					offset = 1,
 				}
 
-				local items = instance:complete(context)
+				local result = nil
+				local callback = function(response)
+					result = response
+				end
 
-				-- Bare # should return all tags (standard autocomplete behavior)
-				assert.is_true(#items > 0)
-			end)
+				instance:complete(params, callback)
 
-			it("should return matching tags for valid prefix", function()
-				local context = {
-					col = 5,
-					cursor = { 1, 4 },
-					line = "#ben",
-				}
+				vim.api.nvim_buf_delete(buf, { force = true })
 
-				local items = instance:complete(context)
-
-				-- Should find #bengal
-				assert.is_true(#items > 0)
+				-- Should have items with documentation
 				local found = false
-				for _, item in ipairs(items) do
-					if item.label == "#bengal" then
+				for _, item in ipairs(result.items) do
+					if item.documentation then
 						found = true
+						assert.is_not_nil(item.documentation:match("Used .* times"))
 						break
 					end
 				end
 				assert.is_true(found)
 			end)
 
-			it("should do case-insensitive matching", function()
-				local context = {
-					col = 5,
-					cursor = { 1, 4 },
-					line = "#BEN",
+			it("should return all tags regardless of prefix", function()
+				local buf = vim.api.nvim_create_buf(false, true)
+				vim.api.nvim_set_current_buf(buf)
+				vim.bo[buf].filetype = "markdown"
+
+				local params = {
+					context = {
+						cursor_before_line = "#xyz",
+					},
+					offset = 1,
 				}
 
-				local items = instance:complete(context)
-
-				-- Should find #bengal (case insensitive)
-				assert.is_true(#items > 0)
-			end)
-
-			it("should return all tags when prefix matches nothing specific", function()
-				local context = {
-					col = 2,
-					cursor = { 1, 1 },
-					line = "#",
-				}
-
-				local items = instance:complete(context)
-
-				-- Should return all available tags from test_root
-				-- (at least bengal, mackerel should exist)
-				assert.is_true(#items > 0)
-			end)
-
-			it("should return completion items with label containing # prefix", function()
-				local context = {
-					col = 5,
-					cursor = { 1, 4 },
-					line = "#ben",
-				}
-
-				local items = instance:complete(context)
-
-				for _, item in ipairs(items) do
-					assert.is_string(item.label)
-					assert.is_true(item.label:sub(1, 1) == "#")
+				local result = nil
+				local callback = function(response)
+					result = response
 				end
-			end)
 
-			it("should handle partial matches at end of line", function()
-				local context = {
-					col = 10,
-					cursor = { 1, 9 },
-					line = "tag is #mac",
-				}
+				instance:complete(params, callback)
 
-				local items = instance:complete(context)
+				vim.api.nvim_buf_delete(buf, { force = true })
 
-				-- Should find #mackerel
-				local found = false
-				for _, item in ipairs(items) do
-					if item.label == "#mackerel" then
-						found = true
-						break
-					end
-				end
-				assert.is_true(found)
+				-- Should still return all tags (filtering happens via trigger char)
+				assert.is_true(#result.items > 0)
 			end)
 		end)
 	end)
