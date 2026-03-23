@@ -7,7 +7,7 @@ A personal knowledge base system for neovim with journal-based note-taking, insp
 - Manages a directory of markdown notes and daily journals
 - Organizes notes using flat tags (`#tag-name`) with back-reference tracking
 - Provides quick search and navigation between tags, notes, and journals
-- Integrates with telescope.nvim and nvim-cmp for completion
+- Integrates with telescope.nvim (planned) and nvim-cmp for completion
 
 ## Key features
 
@@ -20,7 +20,7 @@ A personal knowledge base system for neovim with journal-based note-taking, insp
 
 ### Wiki Root
 
-All your notes are stored in a configurable `wiki_root` directory (e.g., `~/.davewiki`). All paths mentioned below are relative to this root directory.
+All your notes are stored in a configurable `wiki_root` directory (e.g., `~/davewiki`). All paths mentioned below are relative to this root directory.
 
 ### Journals
 
@@ -247,6 +247,8 @@ require('davewiki').setup({
 | `cmp.enabled` | boolean | `true` | Enable nvim-cmp integration |
 | `journal.enabled` | boolean | `true` | Enable journal module |
 | `show_tag_backlinks` | boolean | `true` | Enable automatic backlink display when opening tag files |
+
+**Note:** The `telescope` and `journal` configuration options are placeholders for future features and are not yet functional.
 
 ### nvim-cmp Configuration
 
