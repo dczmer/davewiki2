@@ -184,7 +184,8 @@ M.find_tag_files = function()
     return M.ripgrep(args)
 end
 
---- Creates a tag file with proper YAML frontmatter
+--- Creates and opens a tag file buffer with YAML frontmatter
+--- The buffer is opened but not saved - user can save or quit to cancel.
 --- @param tag_name string The tag name (with # prefix)
 --- @return boolean Success
 M.create_tag_file = function(tag_name)
@@ -207,9 +208,10 @@ M.create_tag_file = function(tag_name)
         vim.fn.mkdir(sources_dir, "p")
     end
 
-    -- Check if file already exists
+    -- Check if file already exists - if so, just open it
     if vim.fn.filereadable(tag_file_path) == 1 then
-        return true -- File already exists, consider it success
+        vim.cmd("edit " .. vim.fn.fnameescape(tag_file_path))
+        return true
     end
 
     -- Create frontmatter
@@ -227,9 +229,11 @@ M.create_tag_file = function(tag_name)
         "Tag file for " .. tag_name .. " related notes.",
     }
 
-    -- Write file
-    local success = vim.fn.writefile(content, tag_file_path)
-    return success == 0
+    -- Open a new buffer with the content (don't save automatically)
+    vim.cmd("edit " .. vim.fn.fnameescape(tag_file_path))
+    vim.api.nvim_buf_set_lines(0, 0, -1, false, content)
+
+    return true
 end
 
 --- Validates frontmatter in all tag files
@@ -318,6 +322,7 @@ M.get_tag_under_cursor = function()
 end
 
 --- Jumps to a tag file, creating it if necessary
+--- Opens a buffer with the file content so user can save or discard.
 --- @param tag_name string The tag name (with # prefix)
 --- @return boolean Success
 M.jump_to_tag_file = function(tag_name)
@@ -325,18 +330,8 @@ M.jump_to_tag_file = function(tag_name)
         return false
     end
 
-    -- Create the tag file if it doesn't exist
-    if not M.create_tag_file(tag_name) then
-        return false
-    end
-
-    local name = tag_name:gsub("^#", "")
-    local tag_file_path = M.wiki_root .. "/sources/" .. name .. ".md"
-
-    -- Open the file
-    vim.cmd("edit " .. vim.fn.fnameescape(tag_file_path))
-
-    return true
+    -- create_tag_file opens the buffer (existing file or new unsaved buffer)
+    return M.create_tag_file(tag_name)
 end
 
 -- ============================================================================

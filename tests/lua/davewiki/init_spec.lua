@@ -76,7 +76,7 @@ describe("davewiki.jump_to_tag", function()
         vim.api.nvim_buf_delete(buf, { force = true })
     end)
 
-    it("should create and jump to non-existing tag", function()
+    it("should open buffer for non-existing tag", function()
         local buf = vim.api.nvim_create_buf(false, true)
         vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "Text #jump-to-tag-test here" })
         vim.api.nvim_set_current_buf(buf)
@@ -91,12 +91,14 @@ describe("davewiki.jump_to_tag", function()
         local success = davewiki.jump_to_tag()
         assert.is_true(success)
 
-        -- Verify file was created
-        assert.are.equal(1, vim.fn.filereadable(test_file))
-
-        -- Verify we jumped to it
+        -- Verify buffer was opened with correct path
         local current_file = vim.api.nvim_buf_get_name(0)
         assert.is_true(current_file:match("jump%-to%-tag%-test%.md$") ~= nil)
+
+        -- Verify buffer has frontmatter content
+        local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+        local content_str = table.concat(lines, "\n")
+        assert.is_true(content_str:match("name: jump%-to%-tag%-test") ~= nil)
 
         vim.api.nvim_buf_delete(buf, { force = true })
     end)

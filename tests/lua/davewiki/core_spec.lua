@@ -207,29 +207,47 @@ describe("davewiki.core tag file management", function()
     end)
 
     describe("create_tag_file", function()
-        it("should create tag file with proper frontmatter", function()
+        it("should open buffer with proper frontmatter content", function()
             local tag_name = "#test-tag-cleanup"
             local success = lua_core.create_tag_file(tag_name)
             assert.is_true(success)
 
-            local tag_file_path = test_root .. "/sources/test-tag-cleanup.md"
-            assert.are.equal(1, vim.fn.filereadable(tag_file_path))
+            -- Verify buffer was opened with the correct content
+            local buf = vim.api.nvim_get_current_buf()
+            local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
+            local content_str = table.concat(lines, "\n")
 
-            local content = vim.fn.readfile(tag_file_path)
-            local content_str = table.concat(content, "\n")
             -- Check frontmatter exists
             assert.is_true(content_str:match("^---") ~= nil)
             assert.is_true(content_str:match("name: test%-tag%-cleanup") ~= nil)
             assert.is_true(content_str:match("created: %d%d%d%d%-%d%d%-%d%d") ~= nil)
+
+            -- Clean up: close the buffer without saving
+            vim.api.nvim_buf_delete(buf, { force = true })
         end)
 
-        it("should return true for existing files", function()
+        it("should open existing file", function()
             local tag_name = "#test-tag-cleanup"
-            -- Create file first
-            lua_core.create_tag_file(tag_name)
-            -- Second call should return true (idempotent)
+            local tag_file_path = test_root .. "/sources/test-tag-cleanup.md"
+
+            -- Create the file manually first
+            vim.fn.writefile(
+                { "---", "name: test-tag-cleanup", "created: 2024-01-01", "---", "", "# Test" },
+                tag_file_path
+            )
+
+            -- create_tag_file should open the existing file
             local success = lua_core.create_tag_file(tag_name)
             assert.is_true(success)
+
+            -- Verify the buffer contains the existing file content
+            local buf = vim.api.nvim_get_current_buf()
+            local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
+            local content_str = table.concat(lines, "\n")
+            assert.is_true(content_str:match("name: test%-tag%-cleanup") ~= nil)
+
+            -- Clean up
+            vim.api.nvim_buf_delete(buf, { force = true })
         end)
 
         it("should not create tag file outside wiki_root", function()
@@ -297,12 +315,20 @@ describe("davewiki.core tag file management", function()
         end)
 
         it("should not report violations for valid frontmatter", function()
-            -- Files created by create_tag_file should have valid frontmatter
-            lua_core.create_tag_file("#valid-test-cleanup")
+            -- Create a file with valid frontmatter manually
+            local test_file = test_root .. "/sources/valid-test-cleanup.md"
+            vim.fn.writefile({
+                "---",
+                "name: valid-test-cleanup",
+                "created: 2024-01-01",
+                "---",
+                "",
+                "# Valid Test",
+            }, test_file)
+
             local violations = lua_core.validate_frontmatter()
 
-            -- Check that our newly created file is NOT in violations
-            local test_file = test_root .. "/sources/valid-test-cleanup.md"
+            -- Check that our valid file is NOT in violations
             for _, v in ipairs(violations) do
                 assert.is_false(v.file == test_file)
             end
@@ -398,7 +424,7 @@ describe("davewiki.core tag file management", function()
             assert.is_true(current_file:match("bengal%.md$") ~= nil)
         end)
 
-        it("should create and jump to non-existing tag file", function()
+        it("should open buffer for non-existing tag file", function()
             local tag_name = "#test-tag-cleanup"
 
             -- Ensure tag file doesn't exist
@@ -410,12 +436,14 @@ describe("davewiki.core tag file management", function()
             local success = lua_core.jump_to_tag_file(tag_name)
             assert.is_true(success)
 
-            -- Verify file was created
-            assert.are.equal(1, vim.fn.filereadable(tag_file_path))
-
-            -- Verify we jumped to it
+            -- Verify buffer was opened with the correct path
             local current_file = vim.api.nvim_buf_get_name(0)
             assert.is_true(current_file:match("test%-tag%-cleanup%.md$") ~= nil)
+
+            -- Verify buffer has frontmatter content
+            local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
+            local content_str = table.concat(lines, "\n")
+            assert.is_true(content_str:match("name: test%-tag%-cleanup") ~= nil)
         end)
 
         it("should return false for invalid tags", function()
