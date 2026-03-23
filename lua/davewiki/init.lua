@@ -35,6 +35,8 @@ local default_config = {
 ---@type DavewikiConfig
 local config = vim.deepcopy(default_config)
 
+local core = require("davewiki.core")
+
 --- Setup the davewiki plugin with the given configuration
 ---@param user_config DavewikiConfig?
 ---@return table
@@ -43,9 +45,8 @@ function M.setup(user_config)
         config = vim.tbl_deep_extend("force", config, user_config)
     end
 
-    M.core = require("davewiki.core")
-    M.core.setup({ wiki_root = config.wiki_root })
-    config.wiki_root = M.core.wiki_root
+    core.setup({ wiki_root = config.wiki_root })
+    config.wiki_root = core.wiki_root
 
     if config.cmp.enabled then
         M.cmp = require("davewiki.cmp")
@@ -61,7 +62,6 @@ end
 ---
 --- @return boolean True if jump was successful, false otherwise
 function M.jump_to_tag()
-    local core = require("davewiki.core")
     local tag = core.get_tag_under_cursor()
     if tag then
         return core.jump_to_tag_file(tag)
@@ -76,7 +76,6 @@ end
 ---
 --- @return boolean True if jump was successful, false otherwise
 function M.jump_to_link()
-    local core = require("davewiki.core")
     return core.jump_to_link()
 end
 
