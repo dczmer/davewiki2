@@ -116,3 +116,15 @@ Use the `documentation-consistency` skill to check that README.md, PROJECT_PLAN.
 
 - Use **Conventional Commits** format.
 - Use **feature branches** merged to main.
+
+## GitHub Operations
+
+Use `nix run .#gh` for all GitHub CLI operations (issues, PRs, releases):
+
+```sh
+nix run .#gh pr create --title "feat: add new feature" --body "$(cat <<'EOF'
+## Summary
+- New feature description
+EOF
+)"
+```
