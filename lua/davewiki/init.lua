@@ -85,4 +85,74 @@ function M.get_config()
     return config
 end
 
+--- Sets up autocommands for tag file backlink display
+--- When a tag file is opened, automatically searches for backlinks and
+--- populates the quickfix list. Quickfix closes when leaving the tag file.
+function M.setup_backlinks_autocmd()
+    local augroup = vim.api.nvim_create_augroup("DaveWikiBacklinks", { clear = true })
+
+    -- Autocommand for when entering a tag file buffer
+    vim.api.nvim_create_autocmd("BufReadPost", {
+        group = augroup,
+        pattern = config.wiki_root .. "/sources/*.md",
+        desc = "Show backlinks when entering a tag file",
+        callback = function(args)
+            print(args)
+            local file_path = vim.api.nvim_buf_get_name(args.buf)
+
+            -- Check if this is a tag file
+            if not core.is_tag_file(file_path) then
+                return
+            end
+
+            -- Extract tag name from filename
+            local tag_name = core.extract_tag_from_filename(file_path)
+            if not tag_name then
+                return
+            end
+
+            -- Find all backlinks
+            local backlinks = core.find_backlinks("#" .. tag_name)
+
+            -- If no backlinks found, do nothing (silent behavior)
+            if #backlinks == 0 then
+                return
+            end
+
+            -- Format backlinks for quickfix
+            local qf_list = {}
+            for _, backlink in ipairs(backlinks) do
+                table.insert(qf_list, {
+                    filename = backlink.file,
+                    lnum = backlink.lnum,
+                    col = backlink.col,
+                    text = backlink.line,
+                })
+            end
+
+            -- Set quickfix list and open it
+            vim.fn.setqflist(qf_list, "r")
+            vim.cmd("copen")
+        end,
+    })
+
+    -- Autocommand for when leaving a tag file buffer
+    vim.api.nvim_create_autocmd("BufLeave", {
+        group = augroup,
+        pattern = config.wiki_root .. "/sources/*.md",
+        desc = "Close quickfix when leaving a tag file",
+        callback = function(args)
+            local file_path = vim.api.nvim_buf_get_name(args.buf)
+
+            -- Check if this is a tag file
+            if not core.is_tag_file(file_path) then
+                return
+            end
+
+            -- Close quickfix window
+            vim.cmd("cclose")
+        end,
+    })
+end
+
 return M

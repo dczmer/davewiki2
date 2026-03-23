@@ -792,3 +792,229 @@ describe("davewiki.core markdown hyperlink support", function()
         end)
     end)
 end)
+
+describe("davewiki.core tag file backlinks", function()
+    before_each(function()
+        lua_core.wiki_root = test_root
+    end)
+
+    after_each(function()
+        -- Clean up any test files
+        local test_patterns = {
+            test_root .. "/notes/backlink-test-*.md",
+        }
+        for _, pattern in ipairs(test_patterns) do
+            local files = vim.fn.glob(pattern, false, true)
+            for _, file in ipairs(files) do
+                vim.fn.delete(file)
+            end
+        end
+    end)
+
+    describe("is_tag_file", function()
+        it("should return true for files in sources/ directory", function()
+            assert.is_true(lua_core.is_tag_file(test_root .. "/sources/bengal.md"))
+            assert.is_true(lua_core.is_tag_file(test_root .. "/sources/mackerel.md"))
+        end)
+
+        it("should return false for files outside sources/", function()
+            assert.is_false(lua_core.is_tag_file(test_root .. "/notes/fish-types.md"))
+            assert.is_false(lua_core.is_tag_file(test_root .. "/bengal.md"))
+        end)
+
+        it("should return false for non-markdown files", function()
+            assert.is_false(lua_core.is_tag_file(test_root .. "/sources/bengal.txt"))
+            assert.is_false(lua_core.is_tag_file(test_root .. "/sources/bengal"))
+        end)
+
+        it("should return false when wiki_root is nil", function()
+            lua_core.wiki_root = nil
+            assert.is_false(lua_core.is_tag_file(test_root .. "/sources/bengal.md"))
+        end)
+
+        it("should return false for nil path", function()
+            assert.is_false(lua_core.is_tag_file(nil))
+        end)
+    end)
+
+    describe("extract_tag_from_filename", function()
+        it("should extract tag name from tag file path", function()
+            local tag = lua_core.extract_tag_from_filename(test_root .. "/sources/bengal.md")
+            assert.are.equal("bengal", tag)
+        end)
+
+        it("should handle hyphenated tag names", function()
+            local tag = lua_core.extract_tag_from_filename(test_root .. "/sources/test-tag-name.md")
+            assert.are.equal("test-tag-name", tag)
+        end)
+
+        it("should handle underscore tag names", function()
+            local tag = lua_core.extract_tag_from_filename(test_root .. "/sources/test_tag_name.md")
+            assert.are.equal("test_tag_name", tag)
+        end)
+
+        it("should return nil for files outside sources/", function()
+            local tag = lua_core.extract_tag_from_filename(test_root .. "/notes/fish-types.md")
+            assert.is_nil(tag)
+        end)
+
+        it("should return nil for non-markdown files", function()
+            local tag = lua_core.extract_tag_from_filename(test_root .. "/sources/bengal.txt")
+            assert.is_nil(tag)
+        end)
+
+        it("should return nil for nil path", function()
+            local tag = lua_core.extract_tag_from_filename(nil)
+            assert.is_nil(tag)
+        end)
+    end)
+
+    describe("extract_summary", function()
+        it("should return full line if under 80 characters", function()
+            local line = "Short line with #tag"
+            local summary = lua_core.extract_summary(line, 17, 80)
+            assert.are.equal(line, summary)
+        end)
+
+        it("should truncate to 80 characters", function()
+            local line = string.rep("a", 100) .. " #tag " .. string.rep("b", 100)
+            local summary = lua_core.extract_summary(line, 101, 80)
+            assert.are.equal(80, #summary)
+        end)
+
+        it("should ensure tag is visible in summary", function()
+            local line = string.rep("a", 100) .. " #important-tag " .. string.rep("b", 100)
+            local tag_col = 101 -- Position of # in the line (0-indexed)
+            local summary = lua_core.extract_summary(line, tag_col, 80)
+            assert.is_true(summary:match("#important%-tag") ~= nil)
+        end)
+
+        it("should handle tag at start of line", function()
+            local line = "#tag is at the start of this very long line " .. string.rep("x", 100)
+            local summary = lua_core.extract_summary(line, 0, 80)
+            assert.is_true(summary:match("^#tag") ~= nil)
+            assert.are.equal(80, #summary)
+        end)
+
+        it("should handle tag at end of line", function()
+            local line = string.rep("x", 100) .. " this has #tag"
+            local summary = lua_core.extract_summary(line, 106, 80)
+            assert.is_true(summary:match("#tag$") ~= nil)
+            assert.are.equal(80, #summary)
+        end)
+
+        it("should use default max_length of 80", function()
+            local line = string.rep("x", 200)
+            local summary = lua_core.extract_summary(line, 100)
+            assert.are.equal(80, #summary)
+        end)
+    end)
+
+    describe("format_quickfix_entry", function()
+        it("should format entry with all fields", function()
+            local entry = lua_core.format_quickfix_entry(
+                "/path/to/file.md",
+                42,
+                10,
+                "This line has #bengal in it",
+                "#bengal"
+            )
+            assert.are.equal("/path/to/file.md", entry.filename)
+            assert.are.equal(42, entry.lnum)
+            assert.are.equal(10, entry.col)
+            assert.are.equal("This line has #bengal in it", entry.text)
+        end)
+
+        it("should truncate text to 80 chars", function()
+            local long_line = string.rep("x", 100) .. " #tag " .. string.rep("y", 100)
+            local entry = lua_core.format_quickfix_entry(
+                "/path/file.md",
+                1,
+                101,
+                long_line,
+                "#tag"
+            )
+            assert.are.equal(80, #entry.text)
+            assert.is_true(entry.text:match("#tag") ~= nil)
+        end)
+    end)
+
+    describe("find_backlinks", function()
+        it("should find references to tag in other files", function()
+            -- Create a test file with a tag reference
+            local notes_dir = test_root .. "/notes"
+            if vim.fn.isdirectory(notes_dir) ~= 1 then
+                vim.fn.mkdir(notes_dir, "p")
+            end
+            local test_file = notes_dir .. "/backlink-test-ref.md"
+            vim.fn.writefile({
+                "# Test Note",
+                "",
+                "This mentions #bengal in the content.",
+            }, test_file)
+
+            local backlinks = lua_core.find_backlinks("#bengal")
+
+            -- Clean up
+            vim.fn.delete(test_file)
+
+            assert.is_table(backlinks)
+            assert.is_true(#backlinks >= 1)
+
+            -- Find our test file in results
+            local found = false
+            for _, backlink in ipairs(backlinks) do
+                if backlink.file:match("backlink%-test%-ref%.md$") then
+                    found = true
+                    assert.are.equal(3, backlink.lnum)
+                    assert.is_true(backlink.col > 0)
+                    assert.is_string(backlink.line)
+                    break
+                end
+            end
+            assert.is_true(found)
+        end)
+
+        it("should return empty table when no references found", function()
+            local backlinks = lua_core.find_backlinks("#nonexistent-tag-xyz123")
+            assert.is_table(backlinks)
+            assert.are.equal(0, #backlinks)
+        end)
+
+        it("should return empty table when wiki_root is nil", function()
+            lua_core.wiki_root = nil
+            local backlinks = lua_core.find_backlinks("#bengal")
+            assert.is_table(backlinks)
+            assert.are.equal(0, #backlinks)
+        end)
+
+        it("should find multiple references in same file", function()
+            local notes_dir = test_root .. "/notes"
+            if vim.fn.isdirectory(notes_dir) ~= 1 then
+                vim.fn.mkdir(notes_dir, "p")
+            end
+            local test_file = notes_dir .. "/backlink-test-multi.md"
+            vim.fn.writefile({
+                "# Multi Reference Test",
+                "",
+                "First #bengal here.",
+                "Second #bengal there.",
+                "Third #bengal everywhere!",
+            }, test_file)
+
+            local backlinks = lua_core.find_backlinks("#bengal")
+
+            -- Clean up
+            vim.fn.delete(test_file)
+
+            -- Count how many references we found in our test file
+            local count = 0
+            for _, backlink in ipairs(backlinks) do
+                if backlink.file:match("backlink%-test%-multi%.md$") then
+                    count = count + 1
+                end
+            end
+            assert.are.equal(3, count)
+        end)
+    end)
+end)

@@ -502,4 +502,167 @@ M.jump_to_link = function()
     return true
 end
 
+-- ============================================================================
+-- TAG FILE BACKLINKS
+-- ============================================================================
+
+--- Checks if a file path is a tag file in the sources/ directory
+--- @param file_path string The file path to check
+--- @return boolean True if the file is a tag file
+M.is_tag_file = function(file_path)
+    if not file_path or not M.wiki_root then
+        return false
+    end
+
+    -- Check if it's a .md file
+    if not file_path:match("%.md$") then
+        return false
+    end
+
+    -- Check if it's in the sources/ directory
+    local sources_dir = M.wiki_root .. "/sources/"
+    local resolved_path = vim.fn.resolve(file_path)
+    local resolved_sources = vim.fn.resolve(sources_dir)
+
+    return resolved_path:sub(1, #resolved_sources) == resolved_sources
+end
+
+--- Extracts the tag name from a tag file path
+--- Returns the tag name (without # prefix) if path is a valid tag file, nil otherwise
+--- @param file_path string The file path
+--- @return string|nil The tag name or nil
+M.extract_tag_from_filename = function(file_path)
+    if not file_path then
+        return nil
+    end
+
+    -- Check if it's a valid tag file
+    if not M.is_tag_file(file_path) then
+        return nil
+    end
+
+    -- Extract the filename without extension
+    local filename = vim.fn.fnamemodify(file_path, ":t:r")
+    return filename
+end
+
+--- Extracts a summary of a line, centered around the tag position
+--- Truncates to max_length while ensuring the tag is visible
+--- @param line_content string The full line content
+--- @param tag_start_col integer The column position (0-indexed) where the tag starts
+--- @param max_length integer|nil Maximum length of summary (default: 80)
+--- @return string The extracted summary
+M.extract_summary = function(line_content, tag_start_col, max_length)
+    max_length = max_length or 80
+
+    if not line_content or #line_content <= max_length then
+        return line_content or ""
+    end
+
+    -- Calculate the center point of our summary window
+    -- We want the tag to be visible, so center around tag_start_col
+    local half_window = math.floor(max_length / 2)
+
+    -- Calculate start and end positions
+    local start_pos = tag_start_col - half_window
+    local end_pos = tag_start_col + half_window
+
+    -- Adjust if start is before beginning of string
+    if start_pos < 0 then
+        end_pos = end_pos - start_pos
+        start_pos = 0
+    end
+
+    -- Adjust if end is beyond string length
+    if end_pos > #line_content then
+        start_pos = start_pos - (end_pos - #line_content)
+        end_pos = #line_content
+        -- Ensure start doesn't go negative
+        if start_pos < 0 then
+            start_pos = 0
+        end
+    end
+
+    -- Extract the substring (Lua uses 1-based indexing for string.sub)
+    local summary = line_content:sub(start_pos + 1, end_pos)
+
+    return summary
+end
+
+--- Formats a backlink match into a quickfix-compatible entry
+--- @param file_path string The file path
+--- @param line_num integer The line number (1-indexed)
+--- @param col_num integer The column number (1-indexed)
+--- @param line_content string The full line content
+--- @param tag_name string The tag name being searched for
+--- @return table Quickfix entry with filename, lnum, col, and text fields
+M.format_quickfix_entry = function(file_path, line_num, col_num, line_content, tag_name)
+    -- Extract summary ensuring tag is visible
+    -- Convert col_num to 0-indexed for extract_summary
+    local summary = M.extract_summary(line_content, col_num - 1, 80)
+
+    return {
+        filename = file_path,
+        lnum = line_num,
+        col = col_num,
+        text = summary,
+    }
+end
+
+--- @class BacklinkMatch
+--- @field file string The file path containing the reference
+--- @field lnum integer The line number (1-indexed)
+--- @field col integer The column number (1-indexed)
+--- @field line string The line content (truncated to 80 chars)
+
+--- Finds all backlinks (references) to a tag across wiki_root
+--- Uses ripgrep to search for exact tag matches
+--- @param tag_name string The tag name to search for (with # prefix)
+--- @return table Array of BacklinkMatch objects
+M.find_backlinks = function(tag_name)
+    if not M.wiki_root or not tag_name then
+        return {}
+    end
+
+    -- Validate tag name
+    if not M.is_valid_tag(tag_name) then
+        return {}
+    end
+
+    -- Use ripgrep to find all occurrences
+    -- Format: file:line:column:content
+    local args = {
+        "--line-number",
+        "--column",
+        "--fixed-strings",
+        tag_name,
+        M.wiki_root,
+    }
+
+    local lines = M.ripgrep(args)
+    local backlinks = {}
+
+    for _, line in ipairs(lines) do
+        -- Parse ripgrep output: file:line:column:content
+        local file_path, line_num, col_num, content = line:match("^(.-):(%d+):(%d+):(.*)$")
+
+        if file_path and line_num and col_num then
+            line_num = tonumber(line_num)
+            col_num = tonumber(col_num)
+
+            -- Skip tag files (files in sources/ directory)
+            if not M.is_tag_file(file_path) then
+                table.insert(backlinks, {
+                    file = file_path,
+                    lnum = line_num,
+                    col = col_num,
+                    line = content,
+                })
+            end
+        end
+    end
+
+    return backlinks
+end
+
 return M

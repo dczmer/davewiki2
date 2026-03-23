@@ -64,6 +64,98 @@ Another block with #vim tips.
 
 Non-journal notes go in `notes/` and can mention tags, but aren't automatically indexed by the tagging system.
 
+### Tag File Backlinks
+
+When you open a tag file (a markdown file in `sources/`), davewiki can search your entire wiki for references to that tag and display them in the quickfix window.
+
+**Features:**
+- **Automatic display**: Quickfix window opens automatically when you enter a tag file
+- **Navigation**: Press `<CR>` on any entry to jump to that reference
+- **Smart summary**: Each entry shows an 80-character preview with the tag visible
+- **Auto-close**: Quickfix closes automatically when you leave the tag file
+- **Silent operation**: If no backlinks are found, nothing happens (no noise)
+- **Refresh**: Use `:e` to reload the tag file and refresh the backlink list
+
+**Configuration:**
+To enable automatic backlink display, add the following to your configuration after calling `setup()`:
+
+```lua
+require('davewiki').setup({
+  -- your other config options
+})
+
+-- Enable automatic backlink display for tag files
+require('davewiki').setup_backlinks_autocmd()
+```
+
+Alternatively, you can set up the autocommands manually for more control:
+
+```lua
+local davewiki = require('davewiki')
+davewiki.setup({
+  -- your config
+})
+
+-- Create an autocommand group
+local augroup = vim.api.nvim_create_augroup("DaveWikiBacklinks", { clear = true })
+
+-- Show backlinks when entering a tag file
+vim.api.nvim_create_autocmd("BufReadPost", {
+  group = augroup,
+  pattern = "*.md",
+  desc = "Show backlinks when entering a tag file",
+  callback = function(args)
+    local file_path = vim.api.nvim_buf_get_name(args.buf)
+    local core = require('davewiki.core')
+    
+    -- Check if this is a tag file
+    if not core.is_tag_file(file_path) then
+      return
+    end
+    
+    -- Extract tag name and find backlinks
+    local tag_name = core.extract_tag_from_filename(file_path)
+    if not tag_name then
+      return
+    end
+    
+    local backlinks = core.find_backlinks("#" .. tag_name)
+    if #backlinks == 0 then
+      return
+    end
+    
+    -- Populate quickfix list
+    local qf_list = {}
+    for _, backlink in ipairs(backlinks) do
+      table.insert(qf_list, {
+        filename = backlink.file,
+        lnum = backlink.lnum,
+        col = backlink.col,
+        text = backlink.line,
+      })
+    end
+    
+    vim.fn.setqflist(qf_list, "r")
+    vim.cmd("copen")
+  end,
+})
+
+-- Close quickfix when leaving a tag file
+vim.api.nvim_create_autocmd("BufLeave", {
+  group = augroup,
+  pattern = "*.md",
+  desc = "Close quickfix when leaving a tag file",
+  callback = function(args)
+    local file_path = vim.api.nvim_buf_get_name(args.buf)
+    local core = require('davewiki.core')
+    
+    if core.is_tag_file(file_path) then
+      vim.cmd("cclose")
+    end
+  end,
+})
+```
+
 ### Attachments
 
 Optional attachments (images, files) can be stored in `attachments/` within your wiki root.
