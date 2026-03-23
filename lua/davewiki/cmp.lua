@@ -27,49 +27,6 @@ function cmp.is_enabled()
     return cmp.config.enabled
 end
 
---- Extracts the tag prefix from the current line
----@param line string The current line content
----@param col number The cursor column (0-indexed)
----@return string|nil The tag prefix (without #) or nil if not a valid tag position
-function cmp.get_tag_prefix(line, col)
-    for i = col, 0, -1 do
-        local char = line:sub(i + 1, i + 1)
-        if char == "#" then
-            if i == 0 then
-                local prefix = line:sub(i + 2)
-                if prefix and prefix:match("^[A-Za-z0-9]") then
-                    return prefix
-                end
-                return nil
-            end
-            local prev_char = line:sub(i, i)
-            if prev_char:match("%s") or prev_char:match("%p") then
-                local prefix = line:sub(i + 2)
-                if prefix and prefix:match("^[A-Za-z0-9]") then
-                    return prefix
-                end
-            end
-        end
-    end
-    return nil
-end
-
---- Gets all tag names from tag files
----@return string[] Array of tag names with # prefix
-function cmp.get_all_tags()
-    local tag_files = core.find_tag_files()
-    local tags = {}
-
-    for _, file_path in ipairs(tag_files) do
-        local tag_name = file_path:match("([^/]+)%.md$")
-        if tag_name then
-            table.insert(tags, "#" .. tag_name)
-        end
-    end
-
-    return tags
-end
-
 --- Wiki tags cmp source definition
 local wiki_tags_source = {}
 
