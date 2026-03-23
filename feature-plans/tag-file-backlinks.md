@@ -131,7 +131,10 @@ Feature passes manual acceptance testing and code review. All unit tests, type c
 
 **Public Functions/APIs:**
 - `core.find_backlinks(tag_name)` - Find all backlinks to a tag across wiki_root
-- `core.format_quickfix_data(matches)` - Format matches into quickfix-compatible structure
+- `core.format_quickfix_entry(file_path, line_num, col_num, line_content, tag_name)` - Format a single backlink match into quickfix-compatible entry structure
+- `core.is_tag_file(file_path)` - Check if a file path is a tag file in the sources/ directory
+- `core.extract_tag_from_filename(file_path)` - Extract the tag name from a tag file path
+- `core.extract_summary(line_content, tag_start_col, max_length)` - Extract a summary of a line centered around the tag position
 - `init.setup_backlinks_autocmd()` - Set up autocommand for tag file backlink display
 - Configuration option: `show_tag_backlinks` (boolean, default: true)
 
@@ -147,9 +150,10 @@ Feature passes manual acceptance testing and code review. All unit tests, type c
   - Example setup with autocommand
 
 **Configuration/Infrastructure:**
-- Add `show_tag_backlinks` option to setup configuration
-- Autocommand defined in `lua/davewiki/init.lua` (callback function)
-- Add example autocommand configuration to README
+- Add `show_tag_backlinks` option to setup configuration (default: true)
+- `init.setup_backlinks_autocmd()` function sets up autocommands automatically when option is enabled
+- Autocommands use `BufReadPost` and `BufLeave` events with `desc` properties
+- Add example manual autocommand configuration to README for users who want custom behavior
 
 **Deployment Artifacts:**
 - None additional (part of existing plugin)
