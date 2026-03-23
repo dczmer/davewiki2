@@ -32,9 +32,15 @@ M.setup = function(opts)
         if not opts.wiki_root and not vim.g.davewiki_wiki_root then
             vim.schedule(function()
                 vim.api.nvim_echo({
-                    { "davewiki: wiki_root directory does not exist: " .. M.wiki_root, "WarningMsg" },
+                    {
+                        "davewiki: wiki_root directory does not exist: " .. M.wiki_root,
+                        "WarningMsg",
+                    },
                     { "\n" },
-                    { "Using default path. Set g:davewiki_wiki_root or pass wiki_root to setup().", "Normal" },
+                    {
+                        "Using default path. Set g:davewiki_wiki_root or pass wiki_root to setup().",
+                        "Normal",
+                    },
                 }, false, {})
             end)
         end
