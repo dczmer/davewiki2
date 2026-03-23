@@ -20,7 +20,7 @@ local davewiki = require("davewiki").setup({
         enabled = false,
     },
     cmp = {
-        enabled = false,
+        enabled = true,
     },
     journal = {
         enabled = false,
@@ -38,6 +38,46 @@ vim.api.nvim_create_autocmd("FileType", {
             end
         end, { buffer = true, desc = "Jump to tag or link under cursor" })
     end,
+})
+
+-- setup cmp to test tag/link auto-completion
+local cmp = require("cmp")
+cmp.setup({
+    completion = {
+        completeopt = "menu,menuone,preview,noselect",
+    },
+    mappings = cmp.mapping.preset.insert({
+        ["<Up>"] = cmp.mapping.select_prev_item(),
+        ["<Down>"] = cmp.mapping.select_next_item(),
+        ["<C-Space>"] = cmp.mapping.complete(),
+        ["<CR>"] = cmp.mapping({
+            i = function(fallback)
+                if cmp.visible() and cmp.get_active_entry() then
+                    cmp.confirm({ select = true })
+                else
+                    fallback()
+                end
+            end,
+            c = cmp.mapping.confirm({ select = true }),
+        }),
+        ["<Tab>"] = cmp.mapping(function(fallback)
+            if cmp.visible() then
+                cmp.select_next_item()
+            else
+                fallback()
+            end
+        end, { "i" }),
+        ["<S-Tab>"] = cmp.mapping(function(fallback)
+            if cmp.visible() then
+                cmp.select_prev_item()
+            else
+                fallback()
+            end
+        end, { "i" }),
+    }),
+    sources = cmp.config.sources({
+        { name = "wiki_tags", keyword_length = 1, priority = 800 },
+    }),
 })
 
 -- setup whichkey

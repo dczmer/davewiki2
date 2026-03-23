@@ -149,6 +149,22 @@ require('davewiki').setup({
 | `cmp.enabled` | boolean | `true` | Enable nvim-cmp integration |
 | `journal.enabled` | boolean | `true` | Enable journal module |
 
+### nvim-cmp Configuration
+
+To enable tag autocomplete, add the `wiki_tags` source to your cmp setup:
+
+```lua
+-- In your cmp setup
+require('cmp').setup({
+  sources = {
+    { name = 'wiki_tags' },
+    -- other sources...
+  },
+})
+```
+
+When you type `#` followed by tag characters in a markdown file, davewiki will suggest matching tag names from your `sources/` directory.
+
 ### Alternative Configuration
 
 You can also set `wiki_root` via a vim global variable:

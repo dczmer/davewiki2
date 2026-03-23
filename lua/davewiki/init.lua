@@ -21,15 +21,15 @@ local M = {}
 ---@field enabled boolean Enable journal module (default: true)
 
 local default_config = {
-	telescope = {
-		enabled = true,
-	},
-	cmp = {
-		enabled = true,
-	},
-	journal = {
-		enabled = true,
-	},
+    telescope = {
+        enabled = true,
+    },
+    cmp = {
+        enabled = true,
+    },
+    journal = {
+        enabled = true,
+    },
 }
 
 ---@type DavewikiConfig
@@ -39,15 +39,21 @@ local config = vim.deepcopy(default_config)
 ---@param user_config DavewikiConfig?
 ---@return table
 function M.setup(user_config)
-	if user_config then
-		config = vim.tbl_deep_extend("force", config, user_config)
-	end
+    if user_config then
+        config = vim.tbl_deep_extend("force", config, user_config)
+    end
 
-	M.core = require("davewiki.core")
-	M.core.setup({ wiki_root = config.wiki_root })
-	config.wiki_root = M.core.wiki_root
+    M.core = require("davewiki.core")
+    M.core.setup({ wiki_root = config.wiki_root })
+    config.wiki_root = M.core.wiki_root
 
-	return M
+    if config.cmp.enabled then
+        M.cmp = require("davewiki.cmp")
+        M.cmp.setup({ enabled = true })
+        M.cmp.register_tag_names()
+    end
+
+    return M
 end
 
 --- Jump to the tag file under the cursor
@@ -55,12 +61,12 @@ end
 ---
 --- @return boolean True if jump was successful, false otherwise
 function M.jump_to_tag()
-	local core = require("davewiki.core")
-	local tag = core.get_tag_under_cursor()
-	if tag then
-		return core.jump_to_tag_file(tag)
-	end
-	return false
+    local core = require("davewiki.core")
+    local tag = core.get_tag_under_cursor()
+    if tag then
+        return core.jump_to_tag_file(tag)
+    end
+    return false
 end
 
 --- Jump to the hyperlink under the cursor
@@ -70,14 +76,14 @@ end
 ---
 --- @return boolean True if jump was successful, false otherwise
 function M.jump_to_link()
-	local core = require("davewiki.core")
-	return core.jump_to_link()
+    local core = require("davewiki.core")
+    return core.jump_to_link()
 end
 
 --- Get the current configuration
 ---@return DavewikiConfig
 function M.get_config()
-	return config
+    return config
 end
 
 return M

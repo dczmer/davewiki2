@@ -35,6 +35,9 @@ nix run .#nvim-test -- -u scripts/minimal-init.lua --headless -c 'PlenaryBustedF
 
 # Run init module tests
 nix run .#nvim-test -- -u scripts/minimal-init.lua --headless -c 'PlenaryBustedFile tests/lua/davewiki/init_spec.lua' -c 'qa!'
+
+# Run cmp module tests
+nix run .#nvim-test -- -u scripts/minimal-init.lua --headless -c 'PlenaryBustedFile tests/lua/davewiki/cmp_spec.lua' -c 'qa!'
 ```
 
 ### Test Commands Reference
@@ -49,7 +52,8 @@ nix run .#nvim-test -- -u scripts/minimal-init.lua --headless -c 'PlenaryBustedF
 
 - `tests/lua/davewiki/core_spec.lua` - Core module tests (wiki_root resolution, tag management, markdown hyperlink support)
 - `tests/lua/davewiki/init_spec.lua` - Init module tests (public API)
-- Total: ~65 tests covering all implemented features
+- `tests/lua/davewiki/cmp_spec.lua` - Cmp module tests (nvim-cmp tag completion)
+- Total: ~87 tests covering all implemented features
 
 ### Testing Rules
 
@@ -112,3 +116,15 @@ Use the `documentation-consistency` skill to check that README.md, PROJECT_PLAN.
 
 - Use **Conventional Commits** format.
 - Use **feature branches** merged to main.
+
+## GitHub Operations
+
+Use `nix run .#gh` for all GitHub CLI operations (issues, PRs, releases):
+
+```sh
+nix run .#gh pr create --title "feat: add new feature" --body "$(cat <<'EOF'
+## Summary
+- New feature description
+EOF
+)"
+```

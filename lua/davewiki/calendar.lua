@@ -9,21 +9,21 @@ local calendar = {}
 ---@field enabled boolean Enable calendar module
 
 calendar.config = {
-	enabled = true,
+    enabled = true,
 }
 
 --- Setup calendar module
 ---@param config DavewikiCalendarConfig?
 function calendar.setup(config)
-	if config then
-		calendar.config = vim.tbl_deep_extend("force", calendar.config, config)
-	end
+    if config then
+        calendar.config = vim.tbl_deep_extend("force", calendar.config, config)
+    end
 end
 
 --- Check if calendar module is enabled
 ---@return boolean
 function calendar.is_enabled()
-	return calendar.config.enabled
+    return calendar.config.enabled
 end
 
 return calendar
