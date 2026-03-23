@@ -114,7 +114,8 @@ Command-line neovim users who want a simple journal-based note-taking system.
 
 4. **Scripts:**
    - `scripts/` - Testing and development scripts
-   - `scripts/minimal-init.lua` - Minimal neovim config for testing
+   - `scripts/minimal-init.lua` - Minimal neovim config for testing (telescope and journal enabled)
+   - `scripts/davewiki2-init.lua` - Full neovim config with all plugin features enabled
 
 **Project Directory Structure:**
 ```
