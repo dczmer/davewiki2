@@ -10,6 +10,7 @@ local M = {}
 ---@field telescope DavewikiTelescopeConfig Telescope integration config
 ---@field cmp DavewikiCmpConfig nvim-cmp integration config
 ---@field journal DavewikiJournalConfig Journal module config
+---@field show_tag_backlinks boolean Enable automatic backlink display in quickfix (default: true)
 
 ---@class DavewikiTelescopeConfig
 ---@field enabled boolean Enable telescope integration (default: true)
@@ -30,6 +31,7 @@ local default_config = {
     journal = {
         enabled = true,
     },
+    show_tag_backlinks = true,
 }
 
 ---@type DavewikiConfig
@@ -52,6 +54,10 @@ function M.setup(user_config)
         M.cmp = require("davewiki.cmp")
         M.cmp.setup({ enabled = true })
         M.cmp.register_tag_names()
+    end
+
+    if config.show_tag_backlinks then
+        M.setup_backlinks_autocmd()
     end
 
     return M
@@ -97,7 +103,6 @@ function M.setup_backlinks_autocmd()
         pattern = config.wiki_root .. "/sources/*.md",
         desc = "Show backlinks when entering a tag file",
         callback = function(args)
-            print(args)
             local file_path = vim.api.nvim_buf_get_name(args.buf)
 
             -- Check if this is a tag file

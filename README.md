@@ -66,7 +66,7 @@ Non-journal notes go in `notes/` and can mention tags, but aren't automatically 
 
 ### Tag File Backlinks
 
-When you open a tag file (a markdown file in `sources/`), davewiki can search your entire wiki for references to that tag and display them in the quickfix window.
+When you open a tag file (a markdown file in `sources/`), davewiki automatically searches your entire wiki for references to that tag and displays them in the quickfix window.
 
 **Features:**
 - **Automatic display**: Quickfix window opens automatically when you enter a tag file
@@ -77,15 +77,17 @@ When you open a tag file (a markdown file in `sources/`), davewiki can search yo
 - **Refresh**: Use `:e` to reload the tag file and refresh the backlink list
 
 **Configuration:**
-To enable automatic backlink display, add the following to your configuration after calling `setup()`:
+Enable/disable with the `show_tag_backlinks` option (enabled by default):
 
 ```lua
 require('davewiki').setup({
-  -- your other config options
-})
+  wiki_root = "~/.davewiki",
 
--- Enable automatic backlink display for tag files
-require('davewiki').setup_backlinks_autocmd()
+  -- Enable automatic tag backlink display (default: true)
+  -- When enabled, opening a tag file automatically shows all references
+  -- to that tag in the quickfix window
+  show_tag_backlinks = true,  -- Set to false to disable
+})
 ```
 
 Alternatively, you can set up the autocommands manually for more control:
@@ -93,10 +95,11 @@ Alternatively, you can set up the autocommands manually for more control:
 ```lua
 local davewiki = require('davewiki')
 davewiki.setup({
-  -- your config
+  wiki_root = "~/.davewiki",
+  show_tag_backlinks = false,  -- Disable automatic setup
 })
 
--- Create an autocommand group
+-- Manually configure autocommands
 local augroup = vim.api.nvim_create_augroup("DaveWikiBacklinks", { clear = true })
 
 -- Show backlinks when entering a tag file
@@ -107,23 +110,23 @@ vim.api.nvim_create_autocmd("BufReadPost", {
   callback = function(args)
     local file_path = vim.api.nvim_buf_get_name(args.buf)
     local core = require('davewiki.core')
-    
+
     -- Check if this is a tag file
     if not core.is_tag_file(file_path) then
       return
     end
-    
+
     -- Extract tag name and find backlinks
     local tag_name = core.extract_tag_from_filename(file_path)
     if not tag_name then
       return
     end
-    
+
     local backlinks = core.find_backlinks("#" .. tag_name)
     if #backlinks == 0 then
       return
     end
-    
+
     -- Populate quickfix list
     local qf_list = {}
     for _, backlink in ipairs(backlinks) do
@@ -134,7 +137,7 @@ vim.api.nvim_create_autocmd("BufReadPost", {
         text = backlink.line,
       })
     end
-    
+
     vim.fn.setqflist(qf_list, "r")
     vim.cmd("copen")
   end,
@@ -148,7 +151,7 @@ vim.api.nvim_create_autocmd("BufLeave", {
   callback = function(args)
     local file_path = vim.api.nvim_buf_get_name(args.buf)
     local core = require('davewiki.core')
-    
+
     if core.is_tag_file(file_path) then
       vim.cmd("cclose")
     end
@@ -229,6 +232,9 @@ require('davewiki').setup({
   journal = {
     enabled = true,
   },
+
+  -- Enable automatic tag backlink display (default: true)
+  show_tag_backlinks = true,
 })
 ```
 
@@ -240,6 +246,7 @@ require('davewiki').setup({
 | `telescope.enabled` | boolean | `true` | Enable telescope integration |
 | `cmp.enabled` | boolean | `true` | Enable nvim-cmp integration |
 | `journal.enabled` | boolean | `true` | Enable journal module |
+| `show_tag_backlinks` | boolean | `true` | Enable automatic backlink display when opening tag files |
 
 ### nvim-cmp Configuration
 
