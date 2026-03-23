@@ -76,10 +76,7 @@ cmp.setup({
         end, { "i" }),
     }),
     sources = cmp.config.sources({
-        { name = "nvim_lsp", keyword_length = 1, priority = 1000 },
         { name = "wiki_tags", keyword_length = 1, priority = 800 },
-        { name = "buffer", keyword_length = 3, priority = 500 },
-        { name = "path", priority = 250 },
     }),
 })
 
