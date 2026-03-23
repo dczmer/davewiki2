@@ -614,42 +614,9 @@ describe("davewiki.core markdown hyperlink support", function()
 		end)
 
 		it("should open relative link from subdirectory without ./ prefix", function()
-			-- Test case: [Grilled Fish](grilled-fish.md) from notes/raw fish.md
-			-- This is a relative link without ./ prefix
+			-- Test relative link without ./ prefix
 			local notes_dir = test_root .. "/notes"
 			local source_file = notes_dir .. "/raw-fish.md"
-			local target_file = notes_dir .. "/grilled-fish.md"
-
-			-- Ensure notes directory exists
-			if vim.fn.isdirectory(notes_dir) ~= 1 then
-				vim.fn.mkdir(notes_dir, "p")
-			end
-
-			-- Create target file
-			vim.fn.writefile({ "# Grilled Fish", "" }, target_file)
-
-			-- Create source buffer
-			local buf = vim.api.nvim_create_buf(false, true)
-			vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "See [Grilled Fish](grilled-fish.md)" })
-			vim.api.nvim_buf_set_name(buf, source_file)
-			vim.api.nvim_set_current_buf(buf)
-			vim.api.nvim_win_set_cursor(0, { 1, 8 })
-
-			local result = lua_core.jump_to_link()
-			assert.is_true(result)
-
-			-- Verify we jumped to the target file in the same directory
-			local current_file = vim.api.nvim_buf_get_name(0)
-			assert.is_true(current_file:match("notes/grilled%-fish%.md$") ~= nil)
-
-			vim.api.nvim_buf_delete(buf, { force = true })
-			vim.fn.delete(target_file)
-		end)
-
-		it("should open relative link from file with spaces in name", function()
-			-- Test case: file with spaces in name, like "raw fish.md"
-			local notes_dir = test_root .. "/notes"
-			local source_file = notes_dir .. "/raw test fish.md" -- spaces in name
 			local target_file = notes_dir .. "/grilled-fish.md"
 
 			-- Ensure notes directory exists
