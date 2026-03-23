@@ -1,7 +1,10 @@
 ---
 -- @module davewiki.telescope
--- @brief Telescope integration for search UI
+-- @brief Telescope integration for search UI (placeholder for future implementation)
 -- @version 1.0
+-- @deprecated This module is a placeholder stub. The telescope integration
+-- is not yet implemented. The config options are accepted for forward
+-- compatibility, but no telescope functions are called.
 
 local telescope = {}
 

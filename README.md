@@ -15,7 +15,6 @@ A personal knowledge base system for neovim with journal-based note-taking, insp
 - Tag-based organization with back-references
 - Markdown link navigation
 - Tag autocomplete
-- Full-text search across all notes
 
 ## How it works
 
@@ -43,7 +42,8 @@ Markdown links (`[text](path)`) provide navigation between notes and external re
   - Relative paths: `[notes](./notes.md)` or `[notes](notes.md)`
   - Absolute paths within wiki: `[sources](/sources/bengal.md)`- **External URLs**: Open in your system's default browser
   - `[website](https://example.com)`
-- **Security**: All paths are validated to stay within `wiki_root`- Press `<CR>` on any link to navigate
+- **Security**: All paths are validated to stay within `wiki_root`
+- **Keybinding**: Press `<CR>` on any link to navigate (must be configured in your init.lua)
 
 ### Blocks
 

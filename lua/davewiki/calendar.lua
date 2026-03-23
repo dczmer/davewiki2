@@ -1,7 +1,10 @@
 ---
 -- @module davewiki.calendar
--- @brief Daily calendar system implementation
+-- @brief Daily calendar system implementation (placeholder for future implementation)
 -- @version 1.0
+-- @deprecated This module is a placeholder stub. The calendar integration
+-- is not yet implemented. The config options are accepted for forward
+-- compatibility, but no calendar functions are called.
 
 local calendar = {}
 
