@@ -105,11 +105,6 @@ function M.setup_backlinks_autocmd()
         callback = function(args)
             local file_path = vim.api.nvim_buf_get_name(args.buf)
 
-            -- Check if this is a tag file
-            if not core.is_tag_file(file_path) then
-                return
-            end
-
             -- Extract tag name from filename
             local tag_name = core.extract_tag_from_filename(file_path)
             if not tag_name then
