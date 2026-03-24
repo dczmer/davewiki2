@@ -7,7 +7,7 @@ A personal knowledge base system for neovim with journal-based note-taking, insp
 - Manages a directory of markdown notes and daily journals
 - Organizes notes using flat tags (`#tag-name`) with back-reference tracking
 - Provides quick search and navigation between tags, notes, and journals
-- Integrates with telescope.nvim and nvim-cmp for completion
+- Integrates with telescope.nvim (planned) and nvim-cmp for completion
 
 ## Key features
 
@@ -20,7 +20,7 @@ A personal knowledge base system for neovim with journal-based note-taking, insp
 
 ### Wiki Root
 
-All your notes are stored in a configurable `wiki_root` directory (e.g., `~/.davewiki`). All paths mentioned below are relative to this root directory.
+All your notes are stored in a configurable `wiki_root` directory (e.g., `~/davewiki`). All paths mentioned below are relative to this root directory.
 
 ### Journals
 
@@ -63,6 +63,32 @@ Another block with #vim tips.
 ### Other Notes
 
 Non-journal notes go in `notes/` and can mention tags, but aren't automatically indexed by the tagging system.
+
+### Tag File Backlinks
+
+When you open a tag file (a markdown file in `sources/`), davewiki automatically searches your entire wiki for references to that tag and displays them in the quickfix window.
+
+**Features:**
+- **Automatic display**: Quickfix window opens automatically when you enter a tag file
+- **Navigation**: Press `<CR>` on any entry to jump to that reference
+- **Smart summary**: Each entry shows an 80-character preview with the tag visible
+- **Auto-close**: Quickfix closes automatically when you leave the tag file
+- **Silent operation**: If no backlinks are found, nothing happens (no noise)
+- **Refresh**: Use `:e` to reload the tag file and refresh the backlink list
+
+**Configuration:**
+Enable/disable with the `show_tag_backlinks` option (enabled by default):
+
+```lua
+require('davewiki').setup({
+  wiki_root = "~/.davewiki",
+
+  -- Enable automatic tag backlink display (default: true)
+  -- When enabled, opening a tag file automatically shows all references
+  -- to that tag in the quickfix window
+  show_tag_backlinks = true,  -- Set to false to disable
+})
+```
 
 ### Attachments
 
@@ -137,6 +163,9 @@ require('davewiki').setup({
   journal = {
     enabled = true,
   },
+
+  -- Enable automatic tag backlink display (default: true)
+  show_tag_backlinks = true,
 })
 ```
 
@@ -148,6 +177,9 @@ require('davewiki').setup({
 | `telescope.enabled` | boolean | `true` | Enable telescope integration |
 | `cmp.enabled` | boolean | `true` | Enable nvim-cmp integration |
 | `journal.enabled` | boolean | `true` | Enable journal module |
+| `show_tag_backlinks` | boolean | `true` | Enable automatic backlink display when opening tag files |
+
+**Note:** The `telescope` and `journal` configuration options are placeholders for future features and are not yet functional.
 
 ### nvim-cmp Configuration
 

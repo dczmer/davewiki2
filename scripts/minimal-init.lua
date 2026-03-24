@@ -16,6 +16,7 @@ vim.cmd.colorscheme("elflord")
 -- we use ./test_root as the location for our notes and the tests are allowed to modify this folder.
 local davewiki = require("davewiki").setup({
     wiki_root = "./test_root",
+    show_tag_backlinks = true,
     telescope = {
         enabled = false,
     },

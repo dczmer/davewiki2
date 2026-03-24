@@ -76,6 +76,21 @@ nix run .#nvim-test -- -u scripts/minimal-init.lua --headless -c 'PlenaryBustedF
 - Follow lua-language-server (LuaLS) naming conventions.
 - Run `luacheck` (linter) and `stylua` (formatter) before committing.
 
+### Keymaps and Autocommands
+
+- All keymaps must include a `desc` property describing their function.
+- All autocommands must include a `desc` property describing their function.
+- Example:
+  ```lua
+  vim.keymap.set('n', '<leader>tw', function() require('davewiki').jump_to_tag() end, { desc = 'Jump to tag file under cursor' })
+  vim.api.nvim_create_autocmd("BufEnter", {
+    group = augroup,
+    pattern = "*.md",
+    desc = "Show backlinks when entering a tag file",
+    callback = function() ... end,
+  })
+  ```
+
 ### Documentation
 
 - **Lua files:** Module-level and file-level docstrings. Function docstrings with type annotations.
