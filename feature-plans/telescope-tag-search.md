@@ -1,6 +1,6 @@
 ---
 name: "telescope-tag-search"
-status: "open"
+status: "done"
 ---
 
 # Telescope Tag Search
