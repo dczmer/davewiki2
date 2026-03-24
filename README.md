@@ -7,7 +7,7 @@ A personal knowledge base system for neovim with journal-based note-taking, insp
 - Manages a directory of markdown notes and daily journals
 - Organizes notes using flat tags (`#tag-name`) with back-reference tracking
 - Provides quick search and navigation between tags, notes, and journals
-- Integrates with telescope.nvim (planned) and nvim-cmp for completion
+- Integrates with telescope.nvim for tag search and nvim-cmp for completion
 
 ## Key features
 
@@ -15,6 +15,7 @@ A personal knowledge base system for neovim with journal-based note-taking, insp
 - Tag-based organization with back-references
 - Markdown link navigation
 - Tag autocomplete
+- Telescope integration for tag search and navigation
 
 ## How it works
 
@@ -179,7 +180,42 @@ require('davewiki').setup({
 | `journal.enabled` | boolean | `true` | Enable journal module |
 | `show_tag_backlinks` | boolean | `true` | Enable automatic backlink display when opening tag files |
 
-**Note:** The `telescope` and `journal` configuration options are placeholders for future features and are not yet functional.
+**Note:** The `journal` configuration option is a placeholder for future features and is not yet functional.
+
+### Telescope Commands
+
+When telescope integration is enabled, the following commands are available:
+
+| Command | Description |
+|---------|-------------|
+| `:DavewikiTags` | Open a telescope picker to search and navigate to tag files |
+| `:DavewikiTagReferences [tag_name]` | Search for tag references across the wiki |
+
+**Usage Examples:**
+
+```vim
+" Open tags picker - fuzzy find and jump to tag file
+:DavewikiTags
+
+" Search for all references to #bengal
+:DavewikiTagReferences #bengal
+
+" Show all tag references across the entire wiki
+:DavewikiTagReferences
+```
+
+**Lua API:**
+
+```lua
+-- Open tags picker
+require('davewiki').telescope.tags()
+
+-- Search for references to a specific tag
+require('davewiki').telescope.tag_references("#bengal")
+
+-- Show all tag references
+require('davewiki').telescope.tag_references()
+```
 
 ### nvim-cmp Configuration
 

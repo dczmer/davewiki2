@@ -11,34 +11,28 @@ vim.cmd([[
 ]])
 vim.cmd.colorscheme("elflord")
 
--- import davewiki with all modules disabled initially to keep tests simple.
--- when you need to test a sub-system, initialize it by calling it's `setup()` directly.
--- we use ./test_root as the location for our notes and the tests are allowed to modify this folder.
-local davewiki = require("davewiki").setup({
-    wiki_root = "./test_root",
-    telescope = {
-        enabled = false,
+local telescope = require("telescope")
+telescope.setup({
+    defaults = {
+        file_ignore_patterns = {
+            "^%.git/",
+            "result/",
+            ".direnv/",
+        },
     },
-    cmp = {
-        enabled = true,
-    },
-    journal = {
-        enabled = false,
+    pickers = {
+        find_files = {
+            theme = "dropdown",
+            find_command = { "fd", "--type", "f", "--strip-cwd-prefix" },
+        },
+        live_grep = {
+            additional_args = function()
+                return { "--hidden" }
+            end,
+        },
     },
 })
-
--- example of how to bind `jump_to_tag` to `<CR>` for navigation
-vim.api.nvim_create_autocmd("FileType", {
-    pattern = "markdown",
-    callback = function()
-        vim.keymap.set("n", "<CR>", function()
-            -- Try tag first, then link
-            if not davewiki.jump_to_tag() then
-                davewiki.jump_to_link()
-            end
-        end, { buffer = true, desc = "Jump to tag or link under cursor" })
-    end,
-})
+telescope.load_extension("fzf")
 
 -- setup cmp to test tag/link auto-completion
 local cmp = require("cmp")
@@ -85,3 +79,33 @@ require("which-key").setup({})
 vim.keymap.set("n", "<leader>?", function()
     require("which-key").show()
 end, { desc = "Show which-key" })
+
+-- import davewiki with all modules disabled initially to keep tests simple.
+-- when you need to test a sub-system, initialize it by calling it's `setup()` directly.
+-- we use ./test_root as the location for our notes and the tests are allowed to modify this folder.
+local davewiki = require("davewiki").setup({
+    wiki_root = "./test_root",
+    show_tag_backlinks = true,
+    telescope = {
+        enabled = true,
+    },
+    cmp = {
+        enabled = true,
+    },
+    journal = {
+        enabled = true,
+    },
+})
+
+-- example of how to bind `jump_to_tag` to `<CR>` for navigation
+vim.api.nvim_create_autocmd("FileType", {
+    pattern = "markdown",
+    callback = function()
+        vim.keymap.set("n", "<CR>", function()
+            -- Try tag first, then link
+            if not davewiki.jump_to_tag() then
+                davewiki.jump_to_link()
+            end
+        end, { buffer = true, desc = "Jump to tag or link under cursor" })
+    end,
+})
