@@ -1,6 +1,6 @@
 ---
 name: "telescope-heading-search"
-status: "open"
+status: "done"
 ---
 
 # Telescope Heading Search
