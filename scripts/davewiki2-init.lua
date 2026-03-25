@@ -118,3 +118,7 @@ end, { desc = "Open davewiki tags picker" })
 vim.keymap.set("n", "<leader>wT", function()
     require("davewiki").telescope.tag_references()
 end, { desc = "Search davewiki tag references" })
+
+vim.keymap.set("n", "<leader>wh", function()
+    require("davewiki").telescope.headings()
+end, { desc = "Search davewiki headings" })
