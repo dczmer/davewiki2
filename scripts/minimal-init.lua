@@ -38,6 +38,19 @@ local davewiki = require("davewiki").setup({
     },
 })
 
+-- Telescope keymaps
+vim.keymap.set("n", "<leader>wt", function()
+    davewiki.telescope.tags()
+end, { desc = "Open davewiki tags picker" })
+
+vim.keymap.set("n", "<leader>wT", function()
+    davewiki.telescope.tag_references()
+end, { desc = "Search davewiki tag references" })
+
+vim.keymap.set("n", "<leader>wh", function()
+    davewiki.telescope.headings()
+end, { desc = "Search davewiki headings" })
+
 -- example of how to bind `jump_to_tag` to `<CR>` for navigation
 vim.api.nvim_create_autocmd("FileType", {
     pattern = "markdown",

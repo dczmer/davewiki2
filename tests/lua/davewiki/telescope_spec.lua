@@ -141,3 +141,88 @@ describe("davewiki.telescope helper functions", function()
     end)
 
 end)
+
+describe("davewiki.telescope headings function", function()
+    before_each(function()
+        core.setup({ wiki_root = test_root })
+        telescope.config.enabled = true
+    end)
+
+    describe("headings", function()
+        it("should return false when telescope is not installed", function()
+            -- Mock telescope module as not installed
+            local original_require = _G.require
+            _G.require = function(mod)
+                if mod == "telescope" then
+                    error("module 'telescope' not found")
+                end
+                return original_require(mod)
+            end
+
+            local result = telescope.headings()
+
+            _G.require = original_require
+
+            assert.is_false(result)
+        end)
+
+        it("should return false when wiki_root is not set", function()
+            core.wiki_root = nil
+            local result = telescope.headings()
+            assert.is_false(result)
+        end)
+    end)
+
+    describe("get_headings_list", function()
+        it("should return list of all level-1 headings from wiki", function()
+            local headings = telescope.get_headings_list()
+
+            assert.is_table(headings)
+            assert.is_true(#headings > 0)
+
+            -- Each heading should be a table with required fields
+            for _, heading in ipairs(headings) do
+                assert.is_table(heading)
+                assert.is_string(heading.text)
+                assert.is_string(heading.file)
+                assert.is_number(heading.lnum)
+                -- Level-1 headings start with "# " and have content
+                assert.is_true(heading.text:match("^# .+") ~= nil)
+            end
+
+            -- Headings should be alphabetically sorted by text
+            for i = 2, #headings do
+                assert.is_true(headings[i - 1].text <= headings[i].text)
+            end
+        end)
+
+        it("should return empty table when wiki_root is nil", function()
+            core.wiki_root = nil
+            local headings = telescope.get_headings_list()
+            assert.is_table(headings)
+            assert.are.equal(0, #headings)
+        end)
+
+        it("should only include level-1 headings", function()
+            local headings = telescope.get_headings_list()
+
+            for _, heading in ipairs(headings) do
+                -- Should not start with "##" (level-2+) or "#" followed by another #
+                local heading_content = heading.text:sub(3) -- Remove "# "
+                assert.is_false(heading_content:match("^#") ~= nil,
+                    "Heading '" .. heading.text .. "' appears to be level-2 or higher")
+            end
+        end)
+
+        it("should include filename in each heading entry", function()
+            local headings = telescope.get_headings_list()
+            assert.is_true(#headings > 0)
+
+            for _, heading in ipairs(headings) do
+                assert.is_string(heading.file)
+                -- File should contain the wiki_root path
+                assert.is_true(heading.file:match(test_root) ~= nil)
+            end
+        end)
+    end)
+end)

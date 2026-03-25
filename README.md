@@ -15,7 +15,7 @@ A personal knowledge base system for neovim with journal-based note-taking, insp
 - Tag-based organization with back-references
 - Markdown link navigation
 - Tag autocomplete
-- Telescope integration for tag search and navigation
+- Telescope integration for tag search, heading search, and navigation
 
 ## How it works
 
@@ -190,6 +190,7 @@ When telescope integration is enabled, the following commands are available:
 |---------|-------------|
 | `:DavewikiTags` | Open a telescope picker to search and navigate to tag files |
 | `:DavewikiTagReferences [tag_name]` | Search for tag references across the wiki |
+| `:DavewikiHeadings` | Search for level-1 headings across all markdown files |
 
 **Usage Examples:**
 
@@ -202,6 +203,9 @@ When telescope integration is enabled, the following commands are available:
 
 " Show all tag references across the entire wiki
 :DavewikiTagReferences
+
+" Search for headings across all markdown files
+:DavewikiHeadings
 ```
 
 **Keymap Examples:**
@@ -216,6 +220,11 @@ end, { desc = 'Open davewiki tags picker' })
 vim.keymap.set('n', '<leader>wT', function()
     require('davewiki').telescope.tag_references()
 end, { desc = 'Search davewiki tag references' })
+
+-- Search for headings with <leader>wh
+vim.keymap.set('n', '<leader>wh', function()
+    require('davewiki').telescope.headings()
+end, { desc = 'Search davewiki headings' })
 ```
 
 ### nvim-cmp Configuration

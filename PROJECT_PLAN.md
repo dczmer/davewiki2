@@ -105,7 +105,7 @@ Command-line neovim users who want a simple journal-based note-taking system.
    - `davewiki/init.lua` - Public interface, provides `setup()` function
    - `davewiki/core.lua` - Core utilities including wiki_root resolution
    - `davewiki/cmp.lua` - nvim-cmp integration
-   - `davewiki/telescope.lua` - Telescope integration (placeholder - future implementation)
+   - `davewiki/telescope.lua` - Telescope integration for tag and heading search
    - `davewiki/calendar.lua` - Daily calendar system implementation (placeholder - future implementation)
 
 2. **Tests:**
@@ -134,6 +134,7 @@ README.md
 PROJECT_PLAN.md
 AGENTS.md
 flake.nix                (nix build configuration)
+feature-plans/           (feature specification documents)
 ```
 
 **Wiki Directory Structure (managed by plugin for users):**
