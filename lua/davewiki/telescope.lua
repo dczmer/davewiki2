@@ -20,6 +20,9 @@ function telescope.setup(config)
     if config then
         telescope.config = vim.tbl_deep_extend("force", telescope.config, config)
     end
+
+    -- Register user commands
+    telescope.setup_commands()
 end
 
 --- Check if telescope integration is enabled
@@ -54,96 +57,6 @@ function telescope.get_tags_list()
     table.sort(tags)
 
     return tags
-end
-
---- Get a sorted list of tag file paths
---- Uses core.find_tag_files() to find all tag files in sources/
----@return table Array of tag file paths, sorted alphabetically
-function telescope.get_tag_sources()
-    if not core.wiki_root then
-        return {}
-    end
-
-    local tag_files = core.find_tag_files()
-
-    -- Sort alphabetically
-    table.sort(tag_files)
-
-    return tag_files
-end
-
---- Get references to a tag across the wiki
---- Uses core.find_backlinks() to find all references, filtering out tag files
----@param tag_name string The tag name to search for (with # prefix)
----@return table Array of reference objects with file, lnum, col, line fields
-function telescope.get_references(tag_name)
-    if not core.wiki_root then
-        return {}
-    end
-
-    if not core.is_valid_tag(tag_name) then
-        return {}
-    end
-
-    return core.find_backlinks(tag_name)
-end
-
---- Open telescope picker to list all tags
---- Allows fuzzy filtering and navigation to tag files
----@return boolean True if picker opened successfully, false otherwise
-function telescope.tags()
-    if not is_telescope_installed() then
-        vim.notify("davewiki: telescope.nvim not installed", vim.log.levels.WARN)
-        return false
-    end
-
-    if not core.wiki_root then
-        vim.notify("davewiki: wiki_root is not configured", vim.log.levels.ERROR)
-        return false
-    end
-
-    local tag_files = telescope.get_tag_sources()
-
-    if #tag_files == 0 then
-        vim.notify("davewiki: No tags found in wiki_root", vim.log.levels.INFO)
-        return false
-    end
-
-    local pickers = require("telescope.pickers")
-    local finders = require("telescope.finders")
-    local conf = require("telescope.config").values
-
-    pickers
-        .new({}, {
-            prompt_title = "Tags",
-            finder = finders.new_table({
-                results = tag_files,
-                entry_maker = function(entry)
-                    local tag_name = core.extract_tag_from_filename(entry)
-                    return {
-                        value = entry,
-                        display = tag_name or entry,
-                        ordinal = tag_name or entry,
-                        filename = entry,
-                    }
-                end,
-            }),
-            sorter = conf.file_sorter({}),
-            previewer = conf.grep_previewer({}),
-            attach_mappings = function(_, map)
-                map("i", "<CR>", function(bufnr)
-                    local selection = require("telescope.actions.state").get_selected_entry()
-                    require("telescope.actions").close(bufnr)
-                    if selection then
-                        vim.cmd("edit " .. vim.fn.fnameescape(selection.filename))
-                    end
-                end)
-                return true
-            end,
-        })
-        :find()
-
-    return true
 end
 
 --- Get all references for a tag or all tag references in the wiki
@@ -199,6 +112,64 @@ function telescope.get_all_references(tag_name)
     end
 
     return references
+end
+
+--- Open telescope picker to list all tags
+--- Allows fuzzy filtering and navigation to tag files
+---@return boolean True if picker opened successfully, false otherwise
+function telescope.tags()
+    if not is_telescope_installed() then
+        vim.notify("davewiki: telescope.nvim not installed", vim.log.levels.WARN)
+        return false
+    end
+
+    if not core.wiki_root then
+        vim.notify("davewiki: wiki_root is not configured", vim.log.levels.ERROR)
+        return false
+    end
+
+    local tag_files = core.find_tag_files()
+
+    if #tag_files == 0 then
+        vim.notify("davewiki: No tags found in wiki_root", vim.log.levels.INFO)
+        return false
+    end
+
+    local pickers = require("telescope.pickers")
+    local finders = require("telescope.finders")
+    local conf = require("telescope.config").values
+
+    pickers
+        .new({}, {
+            prompt_title = "Tags",
+            finder = finders.new_table({
+                results = tag_files,
+                entry_maker = function(entry)
+                    local tag_name = core.extract_tag_from_filename(entry)
+                    return {
+                        value = entry,
+                        display = tag_name or entry,
+                        ordinal = tag_name or entry,
+                        filename = entry,
+                    }
+                end,
+            }),
+            sorter = conf.file_sorter({}),
+            previewer = conf.grep_previewer({}),
+            attach_mappings = function(_, map)
+                map("i", "<CR>", function(bufnr)
+                    local selection = require("telescope.actions.state").get_selected_entry()
+                    require("telescope.actions").close(bufnr)
+                    if selection then
+                        vim.cmd("edit " .. vim.fn.fnameescape(selection.filename))
+                    end
+                end)
+                return true
+            end,
+        })
+        :find()
+
+    return true
 end
 
 --- Open telescope picker to search for tag references
@@ -275,6 +246,37 @@ function telescope.tag_references(tag_name)
         :find()
 
     return true
+end
+
+--- Set up user commands for telescope integration
+function telescope.setup_commands()
+    -- Command to open tags picker
+    vim.api.nvim_create_user_command("DavewikiTags", function()
+        telescope.tags()
+    end, {
+        desc = "Open davewiki tags picker",
+    })
+
+    -- Command to open tag references picker
+    vim.api.nvim_create_user_command("DavewikiTagReferences", function(opts)
+        local tag_name = opts.args
+        if tag_name == "" then
+            tag_name = nil
+        end
+        telescope.tag_references(tag_name)
+    end, {
+        nargs = "?",
+        desc = "Open davewiki tag references picker",
+        complete = function(_, cmdline, _)
+            -- Provide basic tag completion if possible
+            local tags = core.scan_for_tags()
+            local results = {}
+            for _, tag_data in ipairs(tags) do
+                table.insert(results, tag_data.tag)
+            end
+            return results
+        end,
+    })
 end
 
 return telescope

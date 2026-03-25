@@ -59,8 +59,6 @@ function M.setup(user_config)
     if config.telescope.enabled then
         M.telescope = require("davewiki.telescope")
         M.telescope.setup({ enabled = true })
-        -- Define user commands for telescope integration
-        M.setup_commands()
     end
 
     if config.show_tag_backlinks then
@@ -158,45 +156,6 @@ function M.setup_backlinks_autocmd()
 
             -- Close quickfix window
             vim.cmd("cclose")
-        end,
-    })
-end
-
---- Set up user commands for telescope integration
-function M.setup_commands()
-    -- Command to open tags picker
-    vim.api.nvim_create_user_command("DavewikiTags", function()
-        if M.telescope then
-            M.telescope.tags()
-        else
-            vim.notify("davewiki: telescope integration not enabled", vim.log.levels.WARN)
-        end
-    end, {
-        desc = "Open davewiki tags picker",
-    })
-
-    -- Command to open tag references picker
-    vim.api.nvim_create_user_command("DavewikiTagReferences", function(opts)
-        if M.telescope then
-            local tag_name = opts.args
-            if tag_name == "" then
-                tag_name = nil
-            end
-            M.telescope.tag_references(tag_name)
-        else
-            vim.notify("davewiki: telescope integration not enabled", vim.log.levels.WARN)
-        end
-    end, {
-        nargs = "?",
-        desc = "Open davewiki tag references picker",
-        complete = function(_, cmdline, _)
-            -- Provide basic tag completion if possible
-            local tags = core.scan_for_tags()
-            local results = {}
-            for _, tag_data in ipairs(tags) do
-                table.insert(results, tag_data.tag)
-            end
-            return results
         end,
     })
 end
