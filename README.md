@@ -204,17 +204,29 @@ When telescope integration is enabled, the following commands are available:
 :DavewikiTagReferences
 ```
 
-**Lua API:**
+**Keymap Examples:**
 
 ```lua
--- Open tags picker
-require('davewiki').telescope.tags()
+-- Open tags picker with <leader>wt
+vim.keymap.set('n', '<leader>wt', function()
+    require('davewiki').telescope.tags()
+end, { desc = 'Open davewiki tags picker' })
 
--- Search for references to a specific tag
-require('davewiki').telescope.tag_references("#bengal")
+-- Search for references to tag under cursor with <leader>wr
+vim.keymap.set('n', '<leader>wr', function()
+    local tag = require('davewiki').core.get_tag_under_cursor()
+    if tag then
+        require('davewiki').telescope.tag_references(tag)
+    else
+        -- Show all tag references if cursor not on a tag
+        require('davewiki').telescope.tag_references()
+    end
+end, { desc = 'Search tag references' })
 
--- Show all tag references
-require('davewiki').telescope.tag_references()
+-- Show all tag references with <leader>wR
+vim.keymap.set('n', '<leader>wR', function()
+    require('davewiki').telescope.tag_references()
+end, { desc = 'Show all tag references' })
 ```
 
 ### nvim-cmp Configuration
