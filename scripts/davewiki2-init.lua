@@ -109,3 +109,12 @@ vim.api.nvim_create_autocmd("FileType", {
         end, { buffer = true, desc = "Jump to tag or link under cursor" })
     end,
 })
+
+-- davewiki telescope keymaps
+vim.keymap.set("n", "<leader>wt", function()
+    require("davewiki").telescope.tags()
+end, { desc = "Open davewiki tags picker" })
+
+vim.keymap.set("n", "<leader>wT", function()
+    require("davewiki").telescope.tag_references()
+end, { desc = "Search davewiki tag references" })
