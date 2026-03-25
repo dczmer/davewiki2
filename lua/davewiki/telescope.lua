@@ -248,6 +248,111 @@ function telescope.tag_references(tag_name)
     return true
 end
 
+--- Get a sorted list of all level-1 headings from the wiki
+--- Uses ripgrep to find lines starting with "# " (but not "##")
+---@return table Array of heading objects with text, file, and lnum fields
+function telescope.get_headings_list()
+    if not core.wiki_root then
+        return {}
+    end
+
+    -- Pattern for level-1 headings: lines starting with "# " followed by non-space text
+    -- ripgrep will output: file:line:column:content
+    local args = {
+        "--line-number",
+        "--column",
+        "^# [^#].*$",
+        core.wiki_root,
+        "--type",
+        "md",
+    }
+
+    local lines = core.ripgrep(args)
+    local headings = {}
+
+    for _, line in ipairs(lines) do
+        -- Parse ripgrep output: file:line:column:content
+        local file_path, line_num, _, content = line:match("^(.-):(%d+):(%d+):(.*)$")
+
+        if file_path and line_num and content then
+            table.insert(headings, {
+                text = content,
+                file = file_path,
+                lnum = tonumber(line_num),
+            })
+        end
+    end
+
+    -- Sort alphabetically by heading text
+    table.sort(headings, function(a, b)
+        return a.text < b.text
+    end)
+
+    return headings
+end
+
+--- Open telescope picker to list all level-1 headings
+--- Allows fuzzy filtering and navigation to headings
+---@return boolean True if picker opened successfully, false otherwise
+function telescope.headings()
+    if not is_telescope_installed() then
+        vim.notify("davewiki: telescope.nvim not installed", vim.log.levels.WARN)
+        return false
+    end
+
+    if not core.wiki_root then
+        vim.notify("davewiki: wiki_root is not configured", vim.log.levels.ERROR)
+        return false
+    end
+
+    local headings_list = telescope.get_headings_list()
+
+    if #headings_list == 0 then
+        -- Silent behavior when no headings found (per spec)
+        return false
+    end
+
+    local pickers = require("telescope.pickers")
+    local finders = require("telescope.finders")
+    local conf = require("telescope.config").values
+
+    pickers
+        .new({}, {
+            prompt_title = "Headings",
+            finder = finders.new_table({
+                results = headings_list,
+                entry_maker = function(entry)
+                    -- Get filename for display
+                    local filename = vim.fn.fnamemodify(entry.file, ":t")
+                    local display = entry.text .. " (" .. filename .. ")"
+                    return {
+                        value = entry,
+                        display = display,
+                        ordinal = entry.text,
+                        filename = entry.file,
+                        lnum = entry.lnum,
+                    }
+                end,
+            }),
+            sorter = conf.file_sorter({}),
+            previewer = conf.grep_previewer({}),
+            attach_mappings = function(_, map)
+                map("i", "<CR>", function(bufnr)
+                    local selection = require("telescope.actions.state").get_selected_entry()
+                    require("telescope.actions").close(bufnr)
+                    if selection then
+                        vim.cmd("edit " .. vim.fn.fnameescape(selection.filename))
+                        vim.api.nvim_win_set_cursor(0, { selection.lnum, 0 })
+                    end
+                end)
+                return true
+            end,
+        })
+        :find()
+
+    return true
+end
+
 --- Set up user commands for telescope integration
 function telescope.setup_commands()
     -- Command to open tags picker
@@ -276,6 +381,13 @@ function telescope.setup_commands()
             end
             return results
         end,
+    })
+
+    -- Command to open headings picker
+    vim.api.nvim_create_user_command("DavewikiHeadings", function()
+        telescope.headings()
+    end, {
+        desc = "Open davewiki headings picker",
     })
 end
 

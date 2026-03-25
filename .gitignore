@@ -1,0 +1,6 @@
+# Nix
+.direnv/
+result/
+
+# Lua
+.luarc.json
