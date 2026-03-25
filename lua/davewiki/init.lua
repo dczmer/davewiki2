@@ -56,6 +56,11 @@ function M.setup(user_config)
         M.cmp.register_tag_names()
     end
 
+    if config.telescope.enabled then
+        M.telescope = require("davewiki.telescope")
+        M.telescope.setup({ enabled = true })
+    end
+
     if config.show_tag_backlinks then
         M.setup_backlinks_autocmd()
     end

@@ -11,20 +11,30 @@ vim.cmd([[
 ]])
 vim.cmd.colorscheme("elflord")
 
--- import davewiki with all modules disabled initially to keep tests simple.
--- when you need to test a sub-system, initialize it by calling it's `setup()` directly.
+local telescope = require("telescope")
+telescope.setup({
+    defaults = {
+        file_ignore_patterns = {
+            "^%.git/",
+            "result/",
+            ".direnv/",
+        },
+    },
+})
+telescope.load_extension("fzf")
+
 -- we use ./test_root as the location for our notes and the tests are allowed to modify this folder.
 local davewiki = require("davewiki").setup({
     wiki_root = "./test_root",
     show_tag_backlinks = true,
     telescope = {
-        enabled = false,
+        enabled = true,
     },
     cmp = {
-        enabled = false,
+        enabled = true,
     },
     journal = {
-        enabled = false,
+        enabled = true,
     },
 })
 
@@ -40,9 +50,3 @@ vim.api.nvim_create_autocmd("FileType", {
         end, { buffer = true, desc = "Jump to tag or link under cursor" })
     end,
 })
-
--- setup whichkey
-require("which-key").setup({})
-vim.keymap.set("n", "<leader>?", function()
-    require("which-key").show()
-end, { desc = "Show which-key" })

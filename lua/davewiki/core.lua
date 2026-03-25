@@ -163,7 +163,7 @@ M.scan_for_tags = function()
 end
 
 --- Finds all tag files in the sources/ directory
---- @return table Array of file paths to tag files
+--- @return table Array of file paths to tag files, sorted alphabetically
 M.find_tag_files = function()
     if not M.wiki_root then
         return {}
@@ -181,7 +181,9 @@ M.find_tag_files = function()
         sources_dir,
     }
 
-    return M.ripgrep(args)
+    local files = M.ripgrep(args)
+    table.sort(files)
+    return files
 end
 
 --- Creates and opens a tag file buffer with YAML frontmatter
