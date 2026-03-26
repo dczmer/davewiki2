@@ -93,6 +93,35 @@ require('davewiki').setup({
 })
 ```
 
+### Tag Highlighting
+
+Tags (`#tag-name`) are automatically highlighted with a custom highlight group `DavewikiTag` when viewing markdown files within your wiki.
+
+**Default Style:**
+- Bright orange foreground (`#FF8C00`)
+- Dark charcoal background (`#2A2A2A`)
+- Underline
+
+**Customization:**
+You can override the highlight group in your Neovim configuration after loading the plugin:
+
+```lua
+-- Example: Custom colors for tags
+require('davewiki').setup({
+  wiki_root = "~/.davewiki",
+})
+
+-- Override the highlight group (must be after setup)
+vim.api.nvim_set_hl(0, "DavewikiTag", {
+  fg = "#00FF00",  -- Green foreground
+  bg = "#000000",  -- Black background
+  underline = true,
+})
+
+-- Or use vim highlight command
+vim.cmd("highlight DavewikiTag guifg=blue guibg=yellow gui=underline")
+```
+
 ### Attachments
 
 Optional attachments (images, files) can be stored in `attachments/` within your wiki root.

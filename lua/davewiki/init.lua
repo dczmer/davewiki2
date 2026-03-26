@@ -50,6 +50,25 @@ function M.setup(user_config)
     core.setup({ wiki_root = config.wiki_root })
     config.wiki_root = core.wiki_root
 
+    -- Define custom highlight group for tag names
+    vim.api.nvim_set_hl(0, "DavewikiTag", {
+        fg = "#FF8C00", -- Bright orange foreground
+        bg = "#2A2A2A", -- Dark charcoal background
+        underline = true,
+    })
+
+    -- Set up syntax matching for tags in markdown files under wiki_root
+    local augroup = vim.api.nvim_create_augroup("DaveWikiTagHighlight", { clear = true })
+    vim.api.nvim_create_autocmd("BufEnter", {
+        group = augroup,
+        pattern = config.wiki_root .. "/*.md," .. config.wiki_root .. "/**/*.md",
+        desc = "Apply tag highlighting to markdown files in wiki",
+        callback = function()
+            -- Match tag pattern: #[A-Za-z0-9-_]+
+            vim.fn.matchadd("DavewikiTag", "#[A-Za-z0-9-_]\\+")
+        end,
+    })
+
     if config.cmp.enabled then
         M.cmp = require("davewiki.cmp")
         M.cmp.setup({ enabled = true })
