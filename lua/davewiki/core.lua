@@ -519,7 +519,8 @@ M.get_markdown_files = function()
     -- Use ripgrep to find all .md files
     local args = {
         "--files",
-        "--type", "md",
+        "--type",
+        "md",
         M.wiki_root,
     }
 

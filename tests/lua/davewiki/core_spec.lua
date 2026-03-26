@@ -65,7 +65,10 @@ describe("davewiki.core markdown file helpers", function()
 
             -- Should not include files from sources/
             for _, file in ipairs(files) do
-                assert.is_false(file:match("/sources/") ~= nil, "Should not include sources files: " .. file)
+                assert.is_false(
+                    file:match("/sources/") ~= nil,
+                    "Should not include sources files: " .. file
+                )
             end
 
             -- Should include files from notes/
@@ -170,11 +173,11 @@ describe("davewiki.core markdown file helpers", function()
             -- Create a test file without H1
             local test_file = test_root .. "/test-no-h1.md"
             vim.fn.writefile({ "Some content without heading", "More text" }, test_file)
-            
+
             local result = lua_core.extract_h1_or_filename(test_file)
-            
+
             vim.fn.delete(test_file)
-            
+
             assert.are.equal("test-no-h1", result)
         end)
 
@@ -192,11 +195,11 @@ describe("davewiki.core markdown file helpers", function()
                 "# Second Heading",
                 "More content",
             }, test_file)
-            
+
             local result = lua_core.extract_h1_or_filename(test_file)
-            
+
             vim.fn.delete(test_file)
-            
+
             assert.are.equal("First Heading", result)
         end)
     end)
@@ -1077,13 +1080,7 @@ describe("davewiki.core tag file backlinks", function()
 
         it("should truncate text to 80 chars", function()
             local long_line = string.rep("x", 100) .. " #tag " .. string.rep("y", 100)
-            local entry = lua_core.format_quickfix_entry(
-                "/path/file.md",
-                1,
-                101,
-                long_line,
-                "#tag"
-            )
+            local entry = lua_core.format_quickfix_entry("/path/file.md", 1, 101, long_line, "#tag")
             assert.are.equal(80, #entry.text)
             assert.is_true(entry.text:match("#tag") ~= nil)
         end)
