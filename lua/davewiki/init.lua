@@ -5,11 +5,6 @@
 
 local M = {}
 
---- Highlight pattern for matching tags in markdown files
---- Matches #[A-Za-z0-9-_]+ pattern (same as core.TAG_PATTERN)
---- @type string
-M.HIGHLIGHT_PATTERN = "#[A-Za-z0-9-_]+"
-
 ---@class DavewikiConfig
 ---@field wiki_root string Root directory for all notes (required)
 ---@field telescope DavewikiTelescopeConfig Telescope integration config
@@ -70,7 +65,7 @@ function M.setup(user_config)
         desc = "Apply tag highlighting to markdown files in wiki",
         callback = function()
             -- Match tag pattern: #[A-Za-z0-9-_]+
-            vim.fn.matchadd("DavewikiTag", M.HIGHLIGHT_PATTERN:gsub("-", "%-"))
+            vim.fn.matchadd("DavewikiTag", core.TAG_PATTERN:gsub("-", "%-"))
         end,
     })
 

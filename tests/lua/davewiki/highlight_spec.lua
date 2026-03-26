@@ -2,12 +2,12 @@
 -- Tests for davewiki highlight pattern
 -- @module davewiki.highlight_spec
 
-local davewiki = require("davewiki")
+local core = require("davewiki.core")
 
-describe("davewiki.HIGHLIGHT_PATTERN", function()
+describe("core.TAG_PATTERN", function()
     it("should be exported as a module variable", function()
-        assert.is_not_nil(davewiki.HIGHLIGHT_PATTERN)
-        assert.are.equal("#[A-Za-z0-9-_]+", davewiki.HIGHLIGHT_PATTERN)
+        assert.is_not_nil(core.TAG_PATTERN)
+        assert.are.equal("#[A-Za-z0-9-_]+", core.TAG_PATTERN)
     end)
 
     describe("valid tag patterns (should match)", function()
@@ -25,7 +25,7 @@ describe("davewiki.HIGHLIGHT_PATTERN", function()
 
         for _, case in ipairs(valid_cases) do
             it(string.format("should match %s: '%s'", case.description, case.input), function()
-                local match = case.input:match("^" .. davewiki.HIGHLIGHT_PATTERN .. "$")
+                local match = case.input:match("^" .. core.TAG_PATTERN .. "$")
                 assert.is_not_nil(match, string.format("Expected '%s' to match pattern", case.input))
             end)
         end
@@ -68,7 +68,7 @@ describe("davewiki.HIGHLIGHT_PATTERN", function()
 
         for _, case in ipairs(invalid_cases) do
             it(string.format("should NOT match %s: '%s'", case.description, case.input), function()
-                local match = case.input:match("^" .. davewiki.HIGHLIGHT_PATTERN .. "$")
+                local match = case.input:match("^" .. core.TAG_PATTERN .. "$")
                 assert.is_nil(match, string.format("Expected '%s' to NOT match pattern", case.input))
             end)
         end
@@ -76,17 +76,17 @@ describe("davewiki.HIGHLIGHT_PATTERN", function()
 
     describe("partial matches (should match portion only)", function()
         it("should match the first tag in '#tag some text'", function()
-            local match = ("#tag some text"):match(davewiki.HIGHLIGHT_PATTERN)
+            local match = ("#tag some text"):match(core.TAG_PATTERN)
             assert.are.equal("#tag", match)
         end)
 
         it("should match tag in middle of 'text #tag more'", function()
-            local match = ("text #tag more"):match(davewiki.HIGHLIGHT_PATTERN)
+            local match = ("text #tag more"):match(core.TAG_PATTERN)
             assert.are.equal("#tag", match)
         end)
 
         it("should match tag at end of 'text #tag'", function()
-            local match = ("text #tag"):match(davewiki.HIGHLIGHT_PATTERN)
+            local match = ("text #tag"):match(core.TAG_PATTERN)
             assert.are.equal("#tag", match)
         end)
     end)
