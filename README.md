@@ -245,6 +245,8 @@ When the journal module is enabled, the following commands are available for dai
 date: 2026-03-26
 ---
 
+# 2026-03-26 - Wednesday
+
 # TASKS
 
 # AGENDA
@@ -256,47 +258,23 @@ date: 2026-03-26
 
 ```lua
 -- Open today's journal
-vim.keymap.set('n', '<leader>wjt', function()
-    require('davewiki').journal_today()
-end, { desc = "Open today's journal" })
+vim.keymap.set('n', '<leader>wjt', '<cmd>DavewikiJournalToday<CR>', { desc = "Open today's journal" })
 
 -- Open yesterday's journal
-vim.keymap.set('n', '<leader>wjy', function()
-    require('davewiki').journal_yesterday()
-end, { desc = "Open yesterday's journal" })
+vim.keymap.set('n', '<leader>wjy', '<cmd>DavewikiJournalYesterday<CR>', { desc = "Open yesterday's journal" })
 
 -- Open tomorrow's journal
-vim.keymap.set('n', '<leader>wjT', function()
-    require('davewiki').journal_tomorrow()
-end, { desc = "Open tomorrow's journal" })
+vim.keymap.set('n', '<leader>wjT', '<cmd>DavewikiJournalTomorrow<CR>', { desc = "Open tomorrow's journal" })
 
 -- Open journal for specific date
-vim.keymap.set('n', '<leader>wjo', function()
-    require('davewiki').journal_open()
-end, { desc = "Open journal for specific date" })
-
--- Or open directly with a date
-vim.keymap.set('n', '<leader>wjod', function()
-    require('davewiki').journal_open('2026-03-15')
-end, { desc = "Open journal for March 15, 2026" })
+vim.keymap.set('n', '<leader>wjo', '<cmd>DavewikiJournalOpen<CR>', { desc = "Open journal for specific date" })
 ```
 
-**API Functions:**
+**Smart Navigation:**
 
-You can also call journal functions programmatically:
-
-```lua
--- Open today's journal
-require('davewiki').journal_today()
-
--- Open a specific date
-require('davewiki').journal_open('2026-12-25')
-
--- Check if journal module is enabled
-if require('davewiki').journal then
-    -- Journal is available
-end
-```
+The `:DavewikiJournalYesterday` and `:DavewikiJournalTomorrow` commands are context-aware:
+- If the current buffer is a journal file, they navigate relative to that journal's date
+- Otherwise, they navigate relative to today's date
 
 **Usage Examples:**
 

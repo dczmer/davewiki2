@@ -128,18 +128,10 @@ vim.keymap.set("n", "<leader>wl", function()
 end, { desc = "Insert markdown link to wiki file" })
 
 -- davewiki journal keymaps
-vim.keymap.set("n", "<leader>wjt", function()
-    require("davewiki").journal_today()
-end, { desc = "Open today's journal" })
+vim.keymap.set("n", "<leader>wjt", "<cmd>DavewikiJournalToday<CR>", { desc = "Open today's journal" })
 
-vim.keymap.set("n", "<leader>wjy", function()
-    require("davewiki").journal_yesterday()
-end, { desc = "Open yesterday's journal" })
+vim.keymap.set("n", "<leader>wjy", "<cmd>DavewikiJournalYesterday<CR>", { desc = "Open yesterday's journal" })
 
-vim.keymap.set("n", "<leader>wjT", function()
-    require("davewiki").journal_tomorrow()
-end, { desc = "Open tomorrow's journal" })
+vim.keymap.set("n", "<leader>wjT", "<cmd>DavewikiJournalTomorrow<CR>", { desc = "Open tomorrow's journal" })
 
-vim.keymap.set("n", "<leader>wjo", function()
-    require("davewiki").journal_open()
-end, { desc = "Open journal for specific date" })
+vim.keymap.set("n", "<leader>wjo", "<cmd>DavewikiJournalOpen<CR>", { desc = "Open journal for specific date" })

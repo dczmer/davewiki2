@@ -5,7 +5,8 @@
 local lua_journal = require("davewiki.journal")
 local lua_core = require("davewiki.core")
 
-local test_root = "/home/dave/source/davewiki2/test_root"
+-- Get the absolute path to test_root directory relative to this script
+local test_root = vim.fn.fnamemodify(vim.fn.expand("<sfile>:h:h:h:h"), ":p") .. "test_root"
 local journals_dir = test_root .. "/journals"
 
 local function cleanup_journals_dir()
