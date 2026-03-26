@@ -764,19 +764,24 @@ describe("davewiki.core markdown hyperlink support", function()
             -- Test relative link without ./ prefix
             local notes_dir = test_root .. "/notes"
             local source_file = notes_dir .. "/raw-fish.md"
-            local target_file = notes_dir .. "/grilled-fish.md"
+            local target_file = notes_dir .. "/relative-link-no-prefix.md"
 
             -- Ensure notes directory exists
             if vim.fn.isdirectory(notes_dir) ~= 1 then
                 vim.fn.mkdir(notes_dir, "p")
             end
 
+            -- Clean up target file if it exists from a previous test run
+            if vim.fn.filereadable(target_file) == 1 then
+                vim.fn.delete(target_file)
+            end
+
             -- Create target file
-            vim.fn.writefile({ "# Grilled Fish", "" }, target_file)
+            vim.fn.writefile({ "# Relative Link Test", "" }, target_file)
 
             -- Create source buffer
             local buf = vim.api.nvim_create_buf(false, true)
-            vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "See [Grilled Fish](grilled-fish.md)" })
+            vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "See [Relative Link](relative-link-no-prefix.md)" })
             vim.api.nvim_buf_set_name(buf, source_file)
             vim.api.nvim_set_current_buf(buf)
             vim.api.nvim_win_set_cursor(0, { 1, 8 })
@@ -786,7 +791,7 @@ describe("davewiki.core markdown hyperlink support", function()
 
             -- Verify we jumped to the target file in the same directory
             local current_file = vim.api.nvim_buf_get_name(0)
-            assert.is_true(current_file:match("notes/grilled%-fish%.md$") ~= nil)
+            assert.is_true(current_file:match("notes/relative%-link%-no%-prefix%.md$") ~= nil)
 
             vim.api.nvim_buf_delete(buf, { force = true })
             vim.fn.delete(target_file)
