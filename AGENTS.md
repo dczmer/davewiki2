@@ -54,7 +54,7 @@ nix run .#nvim-test -- -u scripts/minimal-init.lua --headless -c 'PlenaryBustedF
 - `tests/lua/davewiki/init_spec.lua` - Init module tests (public API)
 - `tests/lua/davewiki/cmp_spec.lua` - Cmp module tests (nvim-cmp tag completion)
 - `tests/lua/davewiki/telescope_spec.lua` - Telescope module tests (telescope.nvim integration)
-- Total: 102 tests covering all implemented features
+- Total: 150+ tests covering all implemented features
 
 ### Testing Rules
 
