@@ -87,6 +87,45 @@ function M.validate_date(date_string)
     return true
 end
 
+--- Parse a date string to a time value
+---@param date_string string The date string in YYYY-MM-DD format
+---@return number|nil The time value, or nil if invalid
+local function parse_date_to_time(date_string)
+    local year, month, day = date_string:match("^(%d%d%d%d)-(%d%d)-(%d%d)$")
+    if not year then
+        return nil
+    end
+
+    return os.time({
+        year = tonumber(year),
+        month = tonumber(month),
+        day = tonumber(day),
+        hour = 12,
+    })
+end
+
+--- Get the day name (Monday, Tuesday, etc.) for a date string
+---@param date_string string The date in YYYY-MM-DD format
+---@return string The day name
+function M.get_day_name(date_string)
+    local time = parse_date_to_time(date_string)
+    if not time then
+        return ""
+    end
+    return os.date("%A", time)
+end
+
+--- Parse the date from the current buffer's filename
+---@return string|nil The date string (YYYY-MM-DD), or nil if not a journal
+function M.parse_buffer_date()
+    local filename = vim.fn.expand("%:t")
+    local year, month, day = filename:match("^(%d%d%d%d)-(%d%d)-(%d%d)%.md$")
+    if year and month and day then
+        return string.format("%04d-%02d-%02d", tonumber(year), tonumber(month), tonumber(day))
+    end
+    return nil
+end
+
 --- Get the journals directory path
 ---@return string|nil The journals directory path, or nil if wiki_root not set
 function M.get_journal_dir()
@@ -119,10 +158,14 @@ end
 ---@param date_string string The date in YYYY-MM-DD format
 ---@return table Array of lines for the template
 function M.create_template(date_string)
+    local day_name = M.get_day_name(date_string)
+    local title = "# " .. date_string .. " - " .. day_name
     return {
         "---",
         "date: " .. date_string,
         "---",
+        "",
+        title,
         "",
         "# TASKS",
         "",
@@ -187,18 +230,34 @@ function M.open_today()
 end
 
 --- Open yesterday's journal
+--- Uses current buffer's date if it's a journal, otherwise uses today's date
 ---@return boolean True if successful, false otherwise
 function M.open_yesterday()
-    local yesterday_time = os.time() - 86400
+    local buffer_date = M.parse_buffer_date()
+    local current_time
+    if buffer_date then
+        current_time = parse_date_to_time(buffer_date)
+    else
+        current_time = os.time()
+    end
+    local yesterday_time = current_time - 86400
     local yesterday = os.date("*t", yesterday_time)
     local date_string = M.format_date(yesterday)
     return M.open_journal(date_string)
 end
 
 --- Open tomorrow's journal
+--- Uses current buffer's date if it's a journal, otherwise uses today's date
 ---@return boolean True if successful, false otherwise
 function M.open_tomorrow()
-    local tomorrow_time = os.time() + 86400
+    local buffer_date = M.parse_buffer_date()
+    local current_time
+    if buffer_date then
+        current_time = parse_date_to_time(buffer_date)
+    else
+        current_time = os.time()
+    end
+    local tomorrow_time = current_time + 86400
     local tomorrow = os.date("*t", tomorrow_time)
     local date_string = M.format_date(tomorrow)
     return M.open_journal(date_string)
