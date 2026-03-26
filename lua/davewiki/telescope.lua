@@ -38,6 +38,37 @@ local function is_telescope_installed()
     return ok
 end
 
+--- Generate an absolute path from wiki_root for a target file
+--- Returns path starting with "/" that is relative to wiki_root
+---
+--- @param target_file string The absolute path to the target file
+--- @return string|nil The absolute path from wiki_root (e.g., "/notes/file.md"), or nil if outside wiki_root
+function telescope.generate_absolute_path(target_file)
+    if not core.wiki_root or not target_file then
+        return nil
+    end
+
+    -- Resolve paths to handle any symlinks
+    local resolved_wiki_root = vim.fn.resolve(core.wiki_root)
+    local resolved_target = vim.fn.resolve(target_file)
+
+    -- Security check: ensure target is within wiki_root
+    if not core.is_path_within_wiki_root(resolved_target) then
+        return nil
+    end
+
+    -- Get the relative path from wiki_root
+    local relative_path = resolved_target:sub(#resolved_wiki_root + 1)
+
+    -- Ensure the path starts with "/"
+    if relative_path:sub(1, 1) ~= "/" then
+        relative_path = "/" .. relative_path
+    end
+
+    -- URL-encode the path for use in markdown links
+    return core.url_encode(relative_path)
+end
+
 --- Get a sorted list of unique tags from the wiki
 --- Uses core.scan_for_tags() to find all tags across wiki_root
 ---@return table Array of tag names (with # prefix), sorted alphabetically
@@ -419,15 +450,12 @@ function telescope.insert_link()
                     require("telescope.actions").close(bufnr)
 
                     if selection then
-                        -- Calculate relative path
-                        local relative_path = core.calculate_relative_path(current_file, selection.filename)
+                        -- Generate absolute path from wiki_root
+                        local absolute_path = telescope.generate_absolute_path(selection.filename)
 
-                        if relative_path then
-                            -- URL-encode the path
-                            local encoded_path = core.url_encode(relative_path)
-
+                        if absolute_path then
                             -- Build the markdown link
-                            local link_text = "[" .. selection.title .. "](" .. encoded_path .. ")"
+                            local link_text = "[" .. selection.title .. "](" .. absolute_path .. ")"
 
                             -- Insert at cursor position
                             vim.api.nvim_put({ link_text }, "c", true, true)

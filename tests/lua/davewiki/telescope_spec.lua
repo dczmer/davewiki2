@@ -187,6 +187,58 @@ describe("davewiki.telescope insert_link function", function()
             assert.is_false(result)
         end)
     end)
+
+    describe("insert_link absolute path generation", function()
+        it("should generate absolute path for file in same directory", function()
+            local current_file = test_root .. "/notes/baked-fish.md"
+            local target_file = test_root .. "/notes/grilled-fish.md"
+
+            local absolute_path = telescope.generate_absolute_path(target_file)
+
+            assert.are.equal("/notes/grilled-fish.md", absolute_path)
+        end)
+
+        it("should generate absolute path for file in different directory", function()
+            local current_file = test_root .. "/notes/recipes/summer.md"
+            local target_file = test_root .. "/notes/grilled-fish.md"
+
+            local absolute_path = telescope.generate_absolute_path(target_file)
+
+            assert.are.equal("/notes/grilled-fish.md", absolute_path)
+        end)
+
+        it("should generate absolute path for file at root", function()
+            local target_file = test_root .. "/README.md"
+
+            local absolute_path = telescope.generate_absolute_path(target_file)
+
+            assert.are.equal("/README.md", absolute_path)
+        end)
+
+        it("should generate absolute path for nested directory", function()
+            local target_file = test_root .. "/notes/deep/nested/file.md"
+
+            local absolute_path = telescope.generate_absolute_path(target_file)
+
+            assert.are.equal("/notes/deep/nested/file.md", absolute_path)
+        end)
+
+        it("should handle files with spaces in names", function()
+            local target_file = test_root .. "/notes/my file.md"
+
+            local absolute_path = telescope.generate_absolute_path(target_file)
+
+            assert.are.equal("/notes/my%20file.md", absolute_path)
+        end)
+
+        it("should return nil when target is outside wiki_root", function()
+            local target_file = "/etc/passwd"
+
+            local absolute_path = telescope.generate_absolute_path(target_file)
+
+            assert.is_nil(absolute_path)
+        end)
+    end)
 end)
 
 describe("davewiki.telescope helper functions", function()
@@ -220,7 +272,6 @@ describe("davewiki.telescope helper functions", function()
             assert.are.equal(0, #tags)
         end)
     end)
-
 end)
 
 describe("davewiki.telescope headings function", function()
@@ -290,8 +341,10 @@ describe("davewiki.telescope headings function", function()
             for _, heading in ipairs(headings) do
                 -- Should not start with "##" (level-2+) or "#" followed by another #
                 local heading_content = heading.text:sub(3) -- Remove "# "
-                assert.is_false(heading_content:match("^#") ~= nil,
-                    "Heading '" .. heading.text .. "' appears to be level-2 or higher")
+                assert.is_false(
+                    heading_content:match("^#") ~= nil,
+                    "Heading '" .. heading.text .. "' appears to be level-2 or higher"
+                )
             end
         end)
 

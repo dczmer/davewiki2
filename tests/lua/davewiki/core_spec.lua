@@ -65,7 +65,10 @@ describe("davewiki.core markdown file helpers", function()
 
             -- Should not include files from sources/
             for _, file in ipairs(files) do
-                assert.is_false(file:match("/sources/") ~= nil, "Should not include sources files: " .. file)
+                assert.is_false(
+                    file:match("/sources/") ~= nil,
+                    "Should not include sources files: " .. file
+                )
             end
 
             -- Should include files from notes/
@@ -84,46 +87,6 @@ describe("davewiki.core markdown file helpers", function()
             local files = lua_core.get_markdown_files()
             assert.is_table(files)
             assert.are.equal(0, #files)
-        end)
-    end)
-
-    describe("calculate_relative_path", function()
-        it("should calculate relative path from file to file in same directory", function()
-            local from = "/wiki/notes/current.md"
-            local to = "/wiki/notes/other.md"
-            local result = lua_core.calculate_relative_path(from, to)
-            assert.are.equal("other.md", result)
-        end)
-
-        it("should calculate relative path from file to file in parent directory", function()
-            local from = "/wiki/notes/subdir/current.md"
-            local to = "/wiki/notes/other.md"
-            local result = lua_core.calculate_relative_path(from, to)
-            assert.are.equal("../other.md", result)
-        end)
-
-        it("should calculate relative path from file to file in subdirectory", function()
-            local from = "/wiki/notes/current.md"
-            local to = "/wiki/notes/subdir/other.md"
-            local result = lua_core.calculate_relative_path(from, to)
-            assert.are.equal("subdir/other.md", result)
-        end)
-
-        it("should calculate relative path from file to file in different branches", function()
-            local from = "/wiki/notes/fish/grilled-fish.md"
-            local to = "/wiki/journals/2024-01-01.md"
-            local result = lua_core.calculate_relative_path(from, to)
-            assert.are.equal("../../journals/2024-01-01.md", result)
-        end)
-
-        it("should return nil when from file is nil", function()
-            local result = lua_core.calculate_relative_path(nil, "/wiki/notes/other.md")
-            assert.is_nil(result)
-        end)
-
-        it("should return nil when to file is nil", function()
-            local result = lua_core.calculate_relative_path("/wiki/notes/current.md", nil)
-            assert.is_nil(result)
         end)
     end)
 
@@ -170,11 +133,11 @@ describe("davewiki.core markdown file helpers", function()
             -- Create a test file without H1
             local test_file = test_root .. "/test-no-h1.md"
             vim.fn.writefile({ "Some content without heading", "More text" }, test_file)
-            
+
             local result = lua_core.extract_h1_or_filename(test_file)
-            
+
             vim.fn.delete(test_file)
-            
+
             assert.are.equal("test-no-h1", result)
         end)
 
@@ -192,11 +155,11 @@ describe("davewiki.core markdown file helpers", function()
                 "# Second Heading",
                 "More content",
             }, test_file)
-            
+
             local result = lua_core.extract_h1_or_filename(test_file)
-            
+
             vim.fn.delete(test_file)
-            
+
             assert.are.equal("First Heading", result)
         end)
     end)
@@ -801,19 +764,24 @@ describe("davewiki.core markdown hyperlink support", function()
             -- Test relative link without ./ prefix
             local notes_dir = test_root .. "/notes"
             local source_file = notes_dir .. "/raw-fish.md"
-            local target_file = notes_dir .. "/grilled-fish.md"
+            local target_file = notes_dir .. "/relative-link-no-prefix.md"
 
             -- Ensure notes directory exists
             if vim.fn.isdirectory(notes_dir) ~= 1 then
                 vim.fn.mkdir(notes_dir, "p")
             end
 
+            -- Clean up target file if it exists from a previous test run
+            if vim.fn.filereadable(target_file) == 1 then
+                vim.fn.delete(target_file)
+            end
+
             -- Create target file
-            vim.fn.writefile({ "# Grilled Fish", "" }, target_file)
+            vim.fn.writefile({ "# Relative Link Test", "" }, target_file)
 
             -- Create source buffer
             local buf = vim.api.nvim_create_buf(false, true)
-            vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "See [Grilled Fish](grilled-fish.md)" })
+            vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "See [Relative Link](relative-link-no-prefix.md)" })
             vim.api.nvim_buf_set_name(buf, source_file)
             vim.api.nvim_set_current_buf(buf)
             vim.api.nvim_win_set_cursor(0, { 1, 8 })
@@ -823,7 +791,7 @@ describe("davewiki.core markdown hyperlink support", function()
 
             -- Verify we jumped to the target file in the same directory
             local current_file = vim.api.nvim_buf_get_name(0)
-            assert.is_true(current_file:match("notes/grilled%-fish%.md$") ~= nil)
+            assert.is_true(current_file:match("notes/relative%-link%-no%-prefix%.md$") ~= nil)
 
             vim.api.nvim_buf_delete(buf, { force = true })
             vim.fn.delete(target_file)
@@ -1077,13 +1045,7 @@ describe("davewiki.core tag file backlinks", function()
 
         it("should truncate text to 80 chars", function()
             local long_line = string.rep("x", 100) .. " #tag " .. string.rep("y", 100)
-            local entry = lua_core.format_quickfix_entry(
-                "/path/file.md",
-                1,
-                101,
-                long_line,
-                "#tag"
-            )
+            local entry = lua_core.format_quickfix_entry("/path/file.md", 1, 101, long_line, "#tag")
             assert.are.equal(80, #entry.text)
             assert.is_true(entry.text:match("#tag") ~= nil)
         end)

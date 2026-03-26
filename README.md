@@ -40,11 +40,13 @@ Tags (`#tag-name`) create connections between notes. When you add a tag to a blo
 Markdown links (`[text](path)`) provide navigation between notes and external resources.
 
 - **Internal links**: Jump to other `.md` files within your wiki
-  - Relative paths: `[notes](./notes.md)` or `[notes](notes.md)`
-  - Absolute paths within wiki: `[sources](/sources/bengal.md)`- **External URLs**: Open in your system's default browser
+  - Absolute paths (recommended): `[notes](/notes/recipes.md)` - paths starting with `/` are resolved relative to `wiki_root`
+  - Relative paths: `[notes](./notes.md)` or `[notes](notes.md)` - resolved relative to the current file
+- **External URLs**: Open in your system's default browser
   - `[website](https://example.com)`
 - **Security**: All paths are validated to stay within `wiki_root`
 - **Keybinding**: Press `<CR>` on any link to navigate (must be configured in your init.lua)
+- **Inserting links**: Use `:DavewikiInsertLink` to insert a link - it will automatically generate an absolute path
 
 ### Blocks
 

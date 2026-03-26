@@ -519,7 +519,8 @@ M.get_markdown_files = function()
     -- Use ripgrep to find all .md files
     local args = {
         "--files",
-        "--type", "md",
+        "--type",
+        "md",
         M.wiki_root,
     }
 
@@ -539,71 +540,6 @@ M.get_markdown_files = function()
     end
 
     return files
-end
-
---- Calculates the relative path from one file to another
---- @param from_file string The source file path
---- @param to_file string The target file path
---- @return string|nil The relative path from from_file to to_file, or nil on error
-M.calculate_relative_path = function(from_file, to_file)
-    if not from_file or not to_file then
-        return nil
-    end
-
-    -- Get the directories
-    local from_dir = vim.fn.fnamemodify(from_file, ":h")
-    local to_dir = vim.fn.fnamemodify(to_file, ":h")
-    local to_filename = vim.fn.fnamemodify(to_file, ":t")
-
-    -- Split paths into components
-    local from_parts = {}
-    local to_parts = {}
-
-    for part in from_dir:gmatch("[^/]+") do
-        table.insert(from_parts, part)
-    end
-
-    for part in to_dir:gmatch("[^/]+") do
-        table.insert(to_parts, part)
-    end
-
-    -- Find common prefix
-    local common_idx = 0
-    for i = 1, math.min(#from_parts, #to_parts) do
-        if from_parts[i] == to_parts[i] then
-            common_idx = i
-        else
-            break
-        end
-    end
-
-    -- Build relative path
-    local result = ""
-
-    -- Add .. for each directory we need to go up
-    for i = common_idx + 1, #from_parts do
-        if result ~= "" then
-            result = result .. "/"
-        end
-        result = result .. ".."
-    end
-
-    -- Add path components for target
-    for i = common_idx + 1, #to_parts do
-        if result ~= "" then
-            result = result .. "/"
-        end
-        result = result .. to_parts[i]
-    end
-
-    -- Add the filename
-    if result ~= "" then
-        result = result .. "/" .. to_filename
-    else
-        result = to_filename
-    end
-
-    return result
 end
 
 --- URL-encodes a path for use in markdown links
