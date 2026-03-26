@@ -191,6 +191,7 @@ When telescope integration is enabled, the following commands are available:
 | `:DavewikiTags` | Open a telescope picker to search and navigate to tag files |
 | `:DavewikiTagReferences [tag_name]` | Search for tag references across the wiki |
 | `:DavewikiHeadings` | Search for level-1 headings across all markdown files |
+| `:DavewikiInsertLink` | Insert a markdown link to another wiki file using a telescope picker |
 
 **Usage Examples:**
 

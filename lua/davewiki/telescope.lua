@@ -353,6 +353,95 @@ function telescope.headings()
     return true
 end
 
+--- Open telescope picker to insert a markdown link
+--- Shows all non-tag markdown files and inserts a link at cursor position
+---@return boolean True if picker opened successfully, false otherwise
+function telescope.insert_link()
+    if not is_telescope_installed() then
+        vim.notify("davewiki: telescope.nvim not installed", vim.log.levels.WARN)
+        return false
+    end
+
+    if not core.wiki_root then
+        vim.notify("davewiki: wiki_root is not configured", vim.log.levels.ERROR)
+        return false
+    end
+
+    -- Get current file path for relative path calculation
+    local current_file = vim.api.nvim_buf_get_name(0)
+    if current_file == "" then
+        vim.notify("davewiki: No file open in current buffer", vim.log.levels.ERROR)
+        return false
+    end
+
+    -- Validate current file is within wiki_root
+    if not core.is_path_within_wiki_root(current_file) then
+        vim.notify("davewiki: Current file is not within wiki_root", vim.log.levels.ERROR)
+        return false
+    end
+
+    -- Get all markdown files
+    local markdown_files = core.get_markdown_files()
+
+    if #markdown_files == 0 then
+        vim.notify("davewiki: No markdown files found in wiki_root", vim.log.levels.INFO)
+        return false
+    end
+
+    local pickers = require("telescope.pickers")
+    local finders = require("telescope.finders")
+    local conf = require("telescope.config").values
+
+    pickers
+        .new({}, {
+            prompt_title = "Insert Link",
+            finder = finders.new_table({
+                results = markdown_files,
+                entry_maker = function(entry)
+                    -- Extract title from file
+                    local title = core.extract_h1_or_filename(entry)
+                    local filename = vim.fn.fnamemodify(entry, ":t")
+                    local display = title .. " (" .. filename .. ")"
+                    return {
+                        value = entry,
+                        display = display,
+                        ordinal = title .. " " .. filename,
+                        filename = entry,
+                        title = title,
+                    }
+                end,
+            }),
+            sorter = conf.file_sorter({}),
+            previewer = conf.grep_previewer({}),
+            attach_mappings = function(_, map)
+                map("i", "<CR>", function(bufnr)
+                    local selection = require("telescope.actions.state").get_selected_entry()
+                    require("telescope.actions").close(bufnr)
+
+                    if selection then
+                        -- Calculate relative path
+                        local relative_path = core.calculate_relative_path(current_file, selection.filename)
+
+                        if relative_path then
+                            -- URL-encode the path
+                            local encoded_path = core.url_encode(relative_path)
+
+                            -- Build the markdown link
+                            local link_text = "[" .. selection.title .. "](" .. encoded_path .. ")"
+
+                            -- Insert at cursor position
+                            vim.api.nvim_put({ link_text }, "c", true, true)
+                        end
+                    end
+                end)
+                return true
+            end,
+        })
+        :find()
+
+    return true
+end
+
 --- Set up user commands for telescope integration
 function telescope.setup_commands()
     -- Command to open tags picker
@@ -388,6 +477,13 @@ function telescope.setup_commands()
         telescope.headings()
     end, {
         desc = "Open davewiki headings picker",
+    })
+
+    -- Command to open insert link picker
+    vim.api.nvim_create_user_command("DavewikiInsertLink", function()
+        telescope.insert_link()
+    end, {
+        desc = "Insert a markdown link to another wiki file",
     })
 end
 

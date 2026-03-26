@@ -5,7 +5,7 @@
 local lua_core = require("davewiki.core")
 
 -- Get the absolute path to test_root directory
-local test_root = "../test_root"
+local test_root = "/home/dave/source/davewiki2/test_root"
 
 describe("davewiki.core wiki_root resolution", function()
     before_each(function()
@@ -48,6 +48,156 @@ describe("davewiki.core wiki_root resolution", function()
         it("should return nil before setup is called", function()
             lua_core.wiki_root = nil
             assert.are.equal(nil, lua_core.wiki_root)
+        end)
+    end)
+end)
+
+describe("davewiki.core markdown file helpers", function()
+    before_each(function()
+        lua_core.wiki_root = test_root
+    end)
+
+    describe("get_markdown_files", function()
+        it("should return list of markdown files excluding sources/", function()
+            local files = lua_core.get_markdown_files()
+            assert.is_table(files)
+            assert.is_true(#files > 0)
+
+            -- Should not include files from sources/
+            for _, file in ipairs(files) do
+                assert.is_false(file:match("/sources/") ~= nil, "Should not include sources files: " .. file)
+            end
+
+            -- Should include files from notes/
+            local found_notes = false
+            for _, file in ipairs(files) do
+                if file:match("/notes/") then
+                    found_notes = true
+                    break
+                end
+            end
+            assert.is_true(found_notes, "Should include notes/ directory files")
+        end)
+
+        it("should return empty table when wiki_root is nil", function()
+            lua_core.wiki_root = nil
+            local files = lua_core.get_markdown_files()
+            assert.is_table(files)
+            assert.are.equal(0, #files)
+        end)
+    end)
+
+    describe("calculate_relative_path", function()
+        it("should calculate relative path from file to file in same directory", function()
+            local from = "/wiki/notes/current.md"
+            local to = "/wiki/notes/other.md"
+            local result = lua_core.calculate_relative_path(from, to)
+            assert.are.equal("other.md", result)
+        end)
+
+        it("should calculate relative path from file to file in parent directory", function()
+            local from = "/wiki/notes/subdir/current.md"
+            local to = "/wiki/notes/other.md"
+            local result = lua_core.calculate_relative_path(from, to)
+            assert.are.equal("../other.md", result)
+        end)
+
+        it("should calculate relative path from file to file in subdirectory", function()
+            local from = "/wiki/notes/current.md"
+            local to = "/wiki/notes/subdir/other.md"
+            local result = lua_core.calculate_relative_path(from, to)
+            assert.are.equal("subdir/other.md", result)
+        end)
+
+        it("should calculate relative path from file to file in different branches", function()
+            local from = "/wiki/notes/fish/grilled-fish.md"
+            local to = "/wiki/journals/2024-01-01.md"
+            local result = lua_core.calculate_relative_path(from, to)
+            assert.are.equal("../../journals/2024-01-01.md", result)
+        end)
+
+        it("should return nil when from file is nil", function()
+            local result = lua_core.calculate_relative_path(nil, "/wiki/notes/other.md")
+            assert.is_nil(result)
+        end)
+
+        it("should return nil when to file is nil", function()
+            local result = lua_core.calculate_relative_path("/wiki/notes/current.md", nil)
+            assert.is_nil(result)
+        end)
+    end)
+
+    describe("url_encode", function()
+        it("should encode spaces as %20", function()
+            local result = lua_core.url_encode("file with spaces.md")
+            assert.are.equal("file%20with%20spaces.md", result)
+        end)
+
+        it("should encode special characters", function()
+            local result = lua_core.url_encode("file#name.md")
+            assert.are.equal("file%23name.md", result)
+        end)
+
+        it("should not encode safe characters", function()
+            local result = lua_core.url_encode("regular-file_name.md")
+            assert.are.equal("regular-file_name.md", result)
+        end)
+
+        it("should encode multiple special characters", function()
+            local result = lua_core.url_encode("file with # special & chars.md")
+            assert.are.equal("file%20with%20%23%20special%20%26%20chars.md", result)
+        end)
+
+        it("should return empty string for empty input", function()
+            local result = lua_core.url_encode("")
+            assert.are.equal("", result)
+        end)
+    end)
+
+    describe("extract_h1_or_filename", function()
+        it("should extract H1 heading from file", function()
+            -- Use an existing test file with H1
+            local file_path = test_root .. "/notes/baked-fish.md"
+            local result = lua_core.extract_h1_or_filename(file_path)
+            -- The file should have a heading like "# Baked Fish"
+            assert.is_string(result)
+            assert.is_true(#result > 0)
+            -- Should not include the # prefix
+            assert.is_false(result:match("^#") ~= nil)
+        end)
+
+        it("should return filename if no H1 exists", function()
+            -- Create a test file without H1
+            local test_file = test_root .. "/test-no-h1.md"
+            vim.fn.writefile({ "Some content without heading", "More text" }, test_file)
+            
+            local result = lua_core.extract_h1_or_filename(test_file)
+            
+            vim.fn.delete(test_file)
+            
+            assert.are.equal("test-no-h1", result)
+        end)
+
+        it("should return nil for non-existent file", function()
+            local result = lua_core.extract_h1_or_filename("/nonexistent/path/file.md")
+            assert.is_nil(result)
+        end)
+
+        it("should extract title from first H1 only", function()
+            -- Create a test file with multiple H1s
+            local test_file = test_root .. "/test-multi-h1.md"
+            vim.fn.writefile({
+                "# First Heading",
+                "Content here",
+                "# Second Heading",
+                "More content",
+            }, test_file)
+            
+            local result = lua_core.extract_h1_or_filename(test_file)
+            
+            vim.fn.delete(test_file)
+            
+            assert.are.equal("First Heading", result)
         end)
     end)
 end)
