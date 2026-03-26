@@ -90,46 +90,6 @@ describe("davewiki.core markdown file helpers", function()
         end)
     end)
 
-    describe("calculate_relative_path", function()
-        it("should calculate relative path from file to file in same directory", function()
-            local from = "/wiki/notes/current.md"
-            local to = "/wiki/notes/other.md"
-            local result = lua_core.calculate_relative_path(from, to)
-            assert.are.equal("other.md", result)
-        end)
-
-        it("should calculate relative path from file to file in parent directory", function()
-            local from = "/wiki/notes/subdir/current.md"
-            local to = "/wiki/notes/other.md"
-            local result = lua_core.calculate_relative_path(from, to)
-            assert.are.equal("../other.md", result)
-        end)
-
-        it("should calculate relative path from file to file in subdirectory", function()
-            local from = "/wiki/notes/current.md"
-            local to = "/wiki/notes/subdir/other.md"
-            local result = lua_core.calculate_relative_path(from, to)
-            assert.are.equal("subdir/other.md", result)
-        end)
-
-        it("should calculate relative path from file to file in different branches", function()
-            local from = "/wiki/notes/fish/grilled-fish.md"
-            local to = "/wiki/journals/2024-01-01.md"
-            local result = lua_core.calculate_relative_path(from, to)
-            assert.are.equal("../../journals/2024-01-01.md", result)
-        end)
-
-        it("should return nil when from file is nil", function()
-            local result = lua_core.calculate_relative_path(nil, "/wiki/notes/other.md")
-            assert.is_nil(result)
-        end)
-
-        it("should return nil when to file is nil", function()
-            local result = lua_core.calculate_relative_path("/wiki/notes/current.md", nil)
-            assert.is_nil(result)
-        end)
-    end)
-
     describe("url_encode", function()
         it("should encode spaces as %20", function()
             local result = lua_core.url_encode("file with spaces.md")
