@@ -122,3 +122,7 @@ end, { desc = "Search davewiki tag references" })
 vim.keymap.set("n", "<leader>wh", function()
     require("davewiki").telescope.headings()
 end, { desc = "Search davewiki headings" })
+
+vim.keymap.set("n", "<leader>wl", function()
+    require("davewiki").telescope.insert_link()
+end, { desc = "Insert markdown link to wiki file" })
