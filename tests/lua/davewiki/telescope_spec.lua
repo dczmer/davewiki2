@@ -108,6 +108,87 @@ describe("davewiki.telescope tag_references function", function()
     end)
 end)
 
+describe("davewiki.telescope insert_link function", function()
+    before_each(function()
+        core.setup({ wiki_root = test_root })
+        telescope.config.enabled = true
+    end)
+
+    describe("insert_link", function()
+        it("should return false when telescope is not installed", function()
+            -- Mock telescope module as not installed
+            local original_require = _G.require
+            _G.require = function(mod)
+                if mod == "telescope" then
+                    error("module 'telescope' not found")
+                end
+                return original_require(mod)
+            end
+
+            local result = telescope.insert_link()
+
+            _G.require = original_require
+
+            assert.is_false(result)
+        end)
+
+        it("should return false when wiki_root is not set", function()
+            core.wiki_root = nil
+            local result = telescope.insert_link()
+            assert.is_false(result)
+        end)
+
+        it("should return false when no file is open", function()
+            -- Mock nvim_buf_get_name to return empty string
+            local original_nvim_buf_get_name = vim.api.nvim_buf_get_name
+            vim.api.nvim_buf_get_name = function()
+                return ""
+            end
+
+            local result = telescope.insert_link()
+
+            vim.api.nvim_buf_get_name = original_nvim_buf_get_name
+
+            assert.is_false(result)
+        end)
+
+        it("should return false when current file is outside wiki_root", function()
+            -- Mock nvim_buf_get_name to return a file outside wiki_root
+            local original_nvim_buf_get_name = vim.api.nvim_buf_get_name
+            vim.api.nvim_buf_get_name = function()
+                return "/outside/wiki/file.md"
+            end
+
+            local result = telescope.insert_link()
+
+            vim.api.nvim_buf_get_name = original_nvim_buf_get_name
+
+            assert.is_false(result)
+        end)
+
+        it("should return false when no markdown files exist", function()
+            -- Mock nvim_buf_get_name
+            local original_nvim_buf_get_name = vim.api.nvim_buf_get_name
+            vim.api.nvim_buf_get_name = function()
+                return test_root .. "/notes/baked-fish.md"
+            end
+
+            -- Temporarily set wiki_root to empty directory
+            local original_root = core.wiki_root
+            core.wiki_root = "/tmp/empty-davewiki-test"
+            vim.fn.mkdir(core.wiki_root, "p")
+
+            local result = telescope.insert_link()
+
+            core.wiki_root = original_root
+            vim.fn.delete("/tmp/empty-davewiki-test", "rf")
+            vim.api.nvim_buf_get_name = original_nvim_buf_get_name
+
+            assert.is_false(result)
+        end)
+    end)
+end)
+
 describe("davewiki.telescope helper functions", function()
     before_each(function()
         core.setup({ wiki_root = test_root })

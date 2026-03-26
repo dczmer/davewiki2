@@ -505,6 +505,181 @@ M.jump_to_link = function()
 end
 
 -- ============================================================================
+-- MARKDOWN FILE HELPERS
+-- ============================================================================
+
+--- Gets a list of all markdown files under wiki_root, excluding tag files and attachments
+--- Uses ripgrep for efficient file searching
+--- @return table Array of markdown file paths
+M.get_markdown_files = function()
+    if not M.wiki_root then
+        return {}
+    end
+
+    -- Use ripgrep to find all .md files
+    local args = {
+        "--files",
+        "--type", "md",
+        M.wiki_root,
+    }
+
+    local lines = M.ripgrep(args)
+    local files = {}
+
+    for _, line in ipairs(lines) do
+        -- Skip files in sources/ directory (tag files)
+        -- Skip files in attachments/ directory (attachments)
+        local resolved_line = vim.fn.resolve(line)
+        local is_tag_file = M.is_tag_file(resolved_line)
+        local is_attachment = resolved_line:match("/attachments/") ~= nil
+
+        if not is_tag_file and not is_attachment then
+            table.insert(files, resolved_line)
+        end
+    end
+
+    return files
+end
+
+--- Calculates the relative path from one file to another
+--- @param from_file string The source file path
+--- @param to_file string The target file path
+--- @return string|nil The relative path from from_file to to_file, or nil on error
+M.calculate_relative_path = function(from_file, to_file)
+    if not from_file or not to_file then
+        return nil
+    end
+
+    -- Get the directories
+    local from_dir = vim.fn.fnamemodify(from_file, ":h")
+    local to_dir = vim.fn.fnamemodify(to_file, ":h")
+    local to_filename = vim.fn.fnamemodify(to_file, ":t")
+
+    -- Split paths into components
+    local from_parts = {}
+    local to_parts = {}
+
+    for part in from_dir:gmatch("[^/]+") do
+        table.insert(from_parts, part)
+    end
+
+    for part in to_dir:gmatch("[^/]+") do
+        table.insert(to_parts, part)
+    end
+
+    -- Find common prefix
+    local common_idx = 0
+    for i = 1, math.min(#from_parts, #to_parts) do
+        if from_parts[i] == to_parts[i] then
+            common_idx = i
+        else
+            break
+        end
+    end
+
+    -- Build relative path
+    local result = ""
+
+    -- Add .. for each directory we need to go up
+    for i = common_idx + 1, #from_parts do
+        if result ~= "" then
+            result = result .. "/"
+        end
+        result = result .. ".."
+    end
+
+    -- Add path components for target
+    for i = common_idx + 1, #to_parts do
+        if result ~= "" then
+            result = result .. "/"
+        end
+        result = result .. to_parts[i]
+    end
+
+    -- Add the filename
+    if result ~= "" then
+        result = result .. "/" .. to_filename
+    else
+        result = to_filename
+    end
+
+    return result
+end
+
+--- URL-encodes a path for use in markdown links
+--- Only encodes characters that need encoding in local file paths
+--- Keeps path separators (/) unencoded
+--- @param str string The path to encode
+--- @return string The URL-encoded path
+M.url_encode = function(str)
+    if not str or str == "" then
+        return ""
+    end
+
+    local result = ""
+    for i = 1, #str do
+        local char = str:sub(i, i)
+        local byte = string.byte(char)
+
+        -- Safe characters that don't need encoding in file paths:
+        -- A-Z, a-z, 0-9, hyphen, underscore, period, tilde, forward slash
+        if (byte >= 65 and byte <= 90) or     -- A-Z
+           (byte >= 97 and byte <= 122) or    -- a-z
+           (byte >= 48 and byte <= 57) or     -- 0-9
+           byte == 45 or                      -- -
+           byte == 95 or                      -- _
+           byte == 46 or                      -- .
+           byte == 47 or                      -- / (path separator)
+           byte == 126 then                   -- ~
+            result = result .. char
+        else
+            -- Encode as %XX
+            result = result .. string.format("%%%02X", byte)
+        end
+    end
+
+    return result
+end
+
+--- Extracts the first H1 heading from a file, or returns the filename without extension
+--- @param file_path string The file path to read
+--- @return string|nil The title (H1 content or filename), or nil if file doesn't exist
+M.extract_h1_or_filename = function(file_path)
+    if not file_path then
+        return nil
+    end
+
+    -- Expand the path (handle ~ and relative paths)
+    local expanded_path = vim.fn.expand(file_path)
+    expanded_path = vim.fn.fnamemodify(expanded_path, ":p")
+
+    -- Try to open the file
+    local file = io.open(expanded_path, "r")
+    if not file then
+        return nil
+    end
+
+    -- Read the file content line by line
+    local lines = {}
+    for line in file:lines() do
+        table.insert(lines, line)
+    end
+    file:close()
+
+    -- Look for first H1 heading (line starting with "# ")
+    for _, line in ipairs(lines) do
+        local heading = line:match("^#%s+(.+)$")
+        if heading then
+            return heading
+        end
+    end
+
+    -- No H1 found, return filename without extension
+    local filename = vim.fn.fnamemodify(expanded_path, ":t:r")
+    return filename
+end
+
+-- ============================================================================
 -- TAG FILE BACKLINKS
 -- ============================================================================
 
