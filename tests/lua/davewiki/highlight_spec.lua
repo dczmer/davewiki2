@@ -4,6 +4,29 @@
 
 local core = require("davewiki.core")
 
+--- Build the highlight pattern as it's constructed in init.lua
+--- @return string The vim regex pattern for highlighting
+local function get_highlight_pattern()
+    return core.TAG_PATTERN:gsub("+", "\\+") .. "\\>"
+end
+
+describe("highlight pattern construction", function()
+    it("should escape + for vim regex", function()
+        local pattern = get_highlight_pattern()
+        assert.is_true(pattern:find("\\+") ~= nil, "Pattern should have escaped +")
+    end)
+
+    it("should include word boundary at end", function()
+        local pattern = get_highlight_pattern()
+        assert.is_true(pattern:find("\\>$") ~= nil, "Pattern should end with word boundary")
+    end)
+
+    it("should match expected format", function()
+        local pattern = get_highlight_pattern()
+        assert.are.equal("#[A-Za-z0-9-_]\\+\\>", pattern)
+    end)
+end)
+
 describe("core.TAG_PATTERN", function()
     it("should be exported as a module variable", function()
         assert.is_not_nil(core.TAG_PATTERN)

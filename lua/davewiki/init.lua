@@ -65,7 +65,7 @@ function M.setup(user_config)
         desc = "Apply tag highlighting to markdown files in wiki",
         callback = function()
             -- Match tag pattern: #[A-Za-z0-9-_]+
-            vim.fn.matchadd("DavewikiTag", core.TAG_PATTERN:gsub("-", "%-"))
+            vim.fn.matchadd("DavewikiTag", core.TAG_PATTERN:gsub("+", "\\+") .. "\\>")
         end,
     })
 
