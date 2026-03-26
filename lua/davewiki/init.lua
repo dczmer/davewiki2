@@ -84,6 +84,12 @@ function M.setup(user_config)
         M.setup_backlinks_autocmd()
     end
 
+    if config.journal.enabled then
+        M.journal = require("davewiki.journal")
+        M.journal.setup({ enabled = true })
+        M.journal.create_user_commands()
+    end
+
     return M
 end
 
@@ -113,6 +119,47 @@ end
 ---@return DavewikiConfig
 function M.get_config()
     return config
+end
+
+--- Open today's journal
+---@return boolean True if successful, false otherwise
+function M.journal_today()
+    if not M.journal then
+        return false
+    end
+    return M.journal.open_today()
+end
+
+--- Open yesterday's journal
+---@return boolean True if successful, false otherwise
+function M.journal_yesterday()
+    if not M.journal then
+        return false
+    end
+    return M.journal.open_yesterday()
+end
+
+--- Open tomorrow's journal
+---@return boolean True if successful, false otherwise
+function M.journal_tomorrow()
+    if not M.journal then
+        return false
+    end
+    return M.journal.open_tomorrow()
+end
+
+--- Open a journal for a specific date
+---@param date_string string|nil The date in YYYY-MM-DD format (prompts if nil)
+---@return boolean True if successful, false otherwise
+function M.journal_open(date_string)
+    if not M.journal then
+        return false
+    end
+    if date_string then
+        return M.journal.open_journal(date_string)
+    else
+        return M.journal.open_date()
+    end
 end
 
 --- Sets up autocommands for tag file backlink display

@@ -781,7 +781,13 @@ describe("davewiki.core markdown hyperlink support", function()
 
             -- Create source buffer
             local buf = vim.api.nvim_create_buf(false, true)
-            vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "See [Relative Link](relative-link-no-prefix.md)" })
+            vim.api.nvim_buf_set_lines(
+                buf,
+                0,
+                -1,
+                false,
+                { "See [Relative Link](relative-link-no-prefix.md)" }
+            )
             vim.api.nvim_buf_set_name(buf, source_file)
             vim.api.nvim_set_current_buf(buf)
             vim.api.nvim_win_set_cursor(0, { 1, 8 })
