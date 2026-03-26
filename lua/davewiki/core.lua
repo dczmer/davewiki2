@@ -619,22 +619,14 @@ M.url_encode = function(str)
     local result = ""
     for i = 1, #str do
         local char = str:sub(i, i)
-        local byte = string.byte(char)
 
         -- Safe characters that don't need encoding in file paths:
         -- A-Z, a-z, 0-9, hyphen, underscore, period, tilde, forward slash
-        if (byte >= 65 and byte <= 90) or     -- A-Z
-           (byte >= 97 and byte <= 122) or    -- a-z
-           (byte >= 48 and byte <= 57) or     -- 0-9
-           byte == 45 or                      -- -
-           byte == 95 or                      -- _
-           byte == 46 or                      -- .
-           byte == 47 or                      -- / (path separator)
-           byte == 126 then                   -- ~
+        if char:match("[A-Za-z0-9%-_./~]") then
             result = result .. char
         else
             -- Encode as %XX
-            result = result .. string.format("%%%02X", byte)
+            result = result .. string.format("%%%02X", string.byte(char))
         end
     end
 
