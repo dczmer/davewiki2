@@ -211,8 +211,6 @@ require('davewiki').setup({
 | `journal.enabled` | boolean | `true` | Enable journal module |
 | `show_tag_backlinks` | boolean | `true` | Enable automatic backlink display when opening tag files |
 
-**Note:** The `journal` configuration option is a placeholder for future features and is not yet functional.
-
 ### Telescope Commands
 
 When telescope integration is enabled, the following commands are available:
@@ -223,6 +221,60 @@ When telescope integration is enabled, the following commands are available:
 | `:DavewikiTagReferences [tag_name]` | Search for tag references across the wiki |
 | `:DavewikiHeadings` | Search for level-1 headings across all markdown files |
 | `:DavewikiInsertLink` | Insert a markdown link to another wiki file using a telescope picker |
+
+### Journal Commands
+
+When the journal module is enabled, the following commands are available for daily journaling:
+
+| Command | Description |
+|---------|-------------|
+| `:DavewikiJournalToday` | Open today's journal |
+| `:DavewikiJournalYesterday` | Open yesterday's journal |
+| `:DavewikiJournalTomorrow` | Open tomorrow's journal |
+| `:DavewikiJournalOpen` | Prompt for a date and open that journal |
+
+**Journal Features:**
+- Journals are stored as `YYYY-MM-DD.md` files in `${wiki_root}/journals/`
+- New journals automatically include YAML frontmatter with the date and sections for TASKS, AGENDA, and NOTES
+- The journals directory is created automatically if it doesn't exist
+- Multiple journals can be open simultaneously
+
+**Journal Template:**
+```markdown
+---
+date: 2026-03-26
+---
+
+# 2026-03-26 - Wednesday
+
+# TASKS
+
+# AGENDA
+
+# NOTES
+```
+
+**Keymap Examples:**
+
+```lua
+-- Open today's journal
+vim.keymap.set('n', '<leader>wjt', '<cmd>DavewikiJournalToday<CR>', { desc = "Open today's journal" })
+
+-- Open yesterday's journal
+vim.keymap.set('n', '<leader>wjy', '<cmd>DavewikiJournalYesterday<CR>', { desc = "Open yesterday's journal" })
+
+-- Open tomorrow's journal
+vim.keymap.set('n', '<leader>wjT', '<cmd>DavewikiJournalTomorrow<CR>', { desc = "Open tomorrow's journal" })
+
+-- Open journal for specific date
+vim.keymap.set('n', '<leader>wjo', '<cmd>DavewikiJournalOpen<CR>', { desc = "Open journal for specific date" })
+```
+
+**Smart Navigation:**
+
+The `:DavewikiJournalYesterday` and `:DavewikiJournalTomorrow` commands are context-aware:
+- If the current buffer is a journal file, they navigate relative to that journal's date
+- Otherwise, they navigate relative to today's date
 
 **Usage Examples:**
 

@@ -8,6 +8,6 @@ Firm-fleshed fish work best on the grill. #salmon and #swordfish hold their shap
 
 See also: [Baked Fish](baked-fish.md) | [Fried Fish](fried-fish.md) | [Poached Fish](poached-fish.md) | [Smoked Fish](smoked-fish.md) | [Raw Fish](raw%20fish.md)
 
-Related entry: [Journal: 2024-01-05](../journals/2024-01-05.md)
+Related entry: [Journal: 2025-01-05](../journals/2025-01-05.md)
 
 #grilling #cooking #fish

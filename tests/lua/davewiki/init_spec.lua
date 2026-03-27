@@ -158,13 +158,19 @@ describe("highlight pattern", function()
                 { input = "#a-b-c", description = "multiple hyphens" },
                 { input = "#a_b_c", description = "multiple underscores" },
                 { input = "#TAG", description = "uppercase tag" },
-                { input = "#Tag-Name_123", description = "mixed case with hyphen, underscore, and numbers" },
+                {
+                    input = "#Tag-Name_123",
+                    description = "mixed case with hyphen, underscore, and numbers",
+                },
             }
 
             for _, case in ipairs(valid_cases) do
                 it(string.format("should match %s: '%s'", case.description, case.input), function()
                     local match = case.input:match("^" .. core.TAG_PATTERN .. "$")
-                    assert.is_not_nil(match, string.format("Expected '%s' to match pattern", case.input))
+                    assert.is_not_nil(
+                        match,
+                        string.format("Expected '%s' to match pattern", case.input)
+                    )
                 end)
             end
         end)
@@ -195,7 +201,7 @@ describe("highlight pattern", function()
                 { input = "#tag:invalid", description = "special character :" },
                 { input = "#tag;invalid", description = "special character ;" },
                 { input = "#tag'invalid", description = "special character '" },
-                { input = "#tag\"invalid", description = "special character \"" },
+                { input = '#tag"invalid', description = 'special character "' },
                 { input = "#tag<invalid", description = "special character <" },
                 { input = "#tag>invalid", description = "special character >" },
                 { input = "#tag/invalid", description = "special character /" },
@@ -205,10 +211,16 @@ describe("highlight pattern", function()
             }
 
             for _, case in ipairs(invalid_cases) do
-                it(string.format("should NOT match %s: '%s'", case.description, case.input), function()
-                    local match = case.input:match("^" .. core.TAG_PATTERN .. "$")
-                    assert.is_nil(match, string.format("Expected '%s' to NOT match pattern", case.input))
-                end)
+                it(
+                    string.format("should NOT match %s: '%s'", case.description, case.input),
+                    function()
+                        local match = case.input:match("^" .. core.TAG_PATTERN .. "$")
+                        assert.is_nil(
+                            match,
+                            string.format("Expected '%s' to NOT match pattern", case.input)
+                        )
+                    end
+                )
             end
         end)
 

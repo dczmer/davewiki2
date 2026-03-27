@@ -126,3 +126,12 @@ end, { desc = "Search davewiki headings" })
 vim.keymap.set("n", "<leader>wl", function()
     require("davewiki").telescope.insert_link()
 end, { desc = "Insert markdown link to wiki file" })
+
+-- davewiki journal keymaps
+vim.keymap.set("n", "<leader>wjt", "<cmd>DavewikiJournalToday<CR>", { desc = "Open today's journal" })
+
+vim.keymap.set("n", "<leader>wjy", "<cmd>DavewikiJournalYesterday<CR>", { desc = "Open yesterday's journal" })
+
+vim.keymap.set("n", "<leader>wjT", "<cmd>DavewikiJournalTomorrow<CR>", { desc = "Open tomorrow's journal" })
+
+vim.keymap.set("n", "<leader>wjo", "<cmd>DavewikiJournalOpen<CR>", { desc = "Open journal for specific date" })

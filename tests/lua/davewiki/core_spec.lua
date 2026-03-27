@@ -4,8 +4,8 @@
 
 local lua_core = require("davewiki.core")
 
--- Get the absolute path to test_root directory
-local test_root = "/home/dave/source/davewiki2/test_root"
+-- Get the absolute path to test_root directory relative to this script
+local test_root = vim.fn.fnamemodify(vim.fn.expand("<sfile>:h:h:h:h"), ":p") .. "test_root"
 
 describe("davewiki.core wiki_root resolution", function()
     before_each(function()
@@ -781,7 +781,13 @@ describe("davewiki.core markdown hyperlink support", function()
 
             -- Create source buffer
             local buf = vim.api.nvim_create_buf(false, true)
-            vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "See [Relative Link](relative-link-no-prefix.md)" })
+            vim.api.nvim_buf_set_lines(
+                buf,
+                0,
+                -1,
+                false,
+                { "See [Relative Link](relative-link-no-prefix.md)" }
+            )
             vim.api.nvim_buf_set_name(buf, source_file)
             vim.api.nvim_set_current_buf(buf)
             vim.api.nvim_win_set_cursor(0, { 1, 8 })

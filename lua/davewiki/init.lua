@@ -84,6 +84,12 @@ function M.setup(user_config)
         M.setup_backlinks_autocmd()
     end
 
+    if config.journal.enabled then
+        M.journal = require("davewiki.journal")
+        M.journal.setup({ enabled = true })
+        M.journal.create_user_commands()
+    end
+
     return M
 end
 
