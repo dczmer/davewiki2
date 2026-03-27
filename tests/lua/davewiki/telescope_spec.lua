@@ -5,7 +5,8 @@
 local telescope = require("davewiki.telescope")
 local core = require("davewiki.core")
 
-local test_root = "/home/dave/source/davewiki2/test_root"
+-- Get the absolute path to test_root directory relative to this script
+local test_root = vim.fn.fnamemodify(vim.fn.expand("<sfile>:h:h:h:h"), ":p") .. "test_root"
 
 describe("davewiki.telescope setup", function()
     before_each(function()

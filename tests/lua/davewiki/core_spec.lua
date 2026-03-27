@@ -4,8 +4,8 @@
 
 local lua_core = require("davewiki.core")
 
--- Get the absolute path to test_root directory
-local test_root = "/home/dave/source/davewiki2/test_root"
+-- Get the absolute path to test_root directory relative to this script
+local test_root = vim.fn.fnamemodify(vim.fn.expand("<sfile>:h:h:h:h"), ":p") .. "test_root"
 
 describe("davewiki.core wiki_root resolution", function()
     before_each(function()
