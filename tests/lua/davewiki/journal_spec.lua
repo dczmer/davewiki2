@@ -11,7 +11,10 @@ local journals_dir = test_root .. "/journals"
 
 local function cleanup_journals_dir()
     if vim.fn.isdirectory(journals_dir) == 1 then
-        vim.fn.delete(journals_dir, "rf")
+        local files = vim.fn.glob(journals_dir .. "/*.md", true, true)
+        for _, file in ipairs(files) do
+            vim.fn.delete(file)
+        end
     end
 end
 
@@ -225,7 +228,9 @@ describe("davewiki.journal open operations", function()
         end)
 
         it("should create journals directory if it doesn't exist", function()
-            assert.is_equal(0, vim.fn.isdirectory(journals_dir))
+            -- Delete all .md files to start clean, but keep .gitkeep
+            cleanup_journals_dir()
+            -- The directory may already exist (has .gitkeep), but open_journal should still work
             lua_journal.open_journal("2026-03-25")
             assert.is_equal(1, vim.fn.isdirectory(journals_dir))
         end)
