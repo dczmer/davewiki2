@@ -7,7 +7,7 @@ This document contains absolute links for testing the new feature.
 - Link to grilled fish: [Grilled Fish](/notes/grilled-fish.md)
 - Link to baked fish: [Baked Fish](/notes/baked-fish.md)
 - Link to a source file: [Bengal](/sources/bengal.md)
-- Link to a journal: [Journal Entry](/journals/2024-01-01.md)
+- Link to a journal: [Journal Entry](/journals/2025-01-01.md)
 
 ## Relative Links (should still work)
 

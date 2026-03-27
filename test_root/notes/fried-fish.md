@@ -8,6 +8,6 @@ White, flaky fish are ideal for frying. #cod is the traditional choice for fish 
 
 See also: [Grilled Fish](grilled-fish.md) | [Baked Fish](baked-fish.md) | [Poached Fish](poached-fish.md) | [Smoked Fish](smoked-fish.md) | [Raw Fish](raw%20fish.md)
 
-Related entry: [Journal: 2024-03-15](../journals/2024-03-15.md)
+Related entry: [Journal: 2025-03-15](../journals/2025-03-15.md)
 
 #frying #cooking #fish

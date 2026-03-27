@@ -8,6 +8,6 @@ Notes about #vim configuration and usage.
 - nvim-cmp for completion
 - plenary.nvim for testing
 
-See also: [[journal:2024-01-15]]
+See also: [[journal:2025-01-15]]
 
 #vim #plugins

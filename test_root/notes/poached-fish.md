@@ -8,6 +8,6 @@ Delicate fish shine when poached. #salmon poached in wine or court bouillon is e
 
 See also: [Grilled Fish](grilled-fish.md) | [Baked Fish](baked-fish.md) | [Fried Fish](fried-fish.md) | [Smoked Fish](smoked-fish.md) | [Raw Fish](raw%20fish.md)
 
-Related entry: [Journal: 2024-04-01](../journals/2024-04-01.md)
+Related entry: [Journal: 2025-04-01](../journals/2025-04-01.md)
 
 #poaching #cooking #fish

@@ -8,6 +8,6 @@ Fatty fish absorb smoke flavors beautifully. #salmon is the most popular smoked 
 
 See also: [Grilled Fish](grilled-fish.md) | [Baked Fish](baked-fish.md) | [Fried Fish](fried-fish.md) | [Poached Fish](poached-fish.md) | [Raw Fish](raw%20fish.md)
 
-Related entry: [Journal: 2024-05-01](../journals/2024-05-01.md)
+Related entry: [Journal: 2025-05-01](../journals/2025-05-01.md)
 
 #smoking #cooking #fish
