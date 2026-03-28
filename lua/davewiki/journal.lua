@@ -304,4 +304,110 @@ function M.create_user_commands()
     end, { desc = "Open journal for a specific date" })
 end
 
+--- Get a list of all journal files under wiki_root/journals/
+--- Returns files sorted alphabetically with relative paths for display
+--- @return table Array of journal file entries with file, display, and ordinal fields
+function M.get_journals_list()
+    if not core.wiki_root then
+        return {}
+    end
+
+    local journals_dir = M.get_journal_dir()
+    if not journals_dir or vim.fn.isdirectory(journals_dir) ~= 1 then
+        return {}
+    end
+
+    -- Use ripgrep to find all .md files in journals directory
+    local args = {
+        "--files",
+        "--type",
+        "md",
+        journals_dir,
+    }
+
+    local lines = core.ripgrep(args)
+    local journals = {}
+
+    for _, line in ipairs(lines) do
+        local resolved_path = vim.fn.resolve(line)
+
+        -- Security check: ensure file is within journals directory
+        if resolved_path:sub(1, #journals_dir) == journals_dir then
+            table.insert(journals, {
+                file = resolved_path,
+                display = resolved_path,
+                ordinal = resolved_path,
+            })
+        end
+    end
+
+    -- Sort alphabetically by path
+    table.sort(journals, function(a, b)
+        return a.display < b.display
+    end)
+
+    return journals
+end
+
+--- Open telescope picker to list all journal files
+--- Allows fuzzy filtering and navigation to journal files with preview
+--- @return boolean True if picker opened successfully, false otherwise
+function M.jump_to_journal()
+    if not M.is_enabled() then
+        return false
+    end
+
+    if not core.is_telescope_installed() then
+        vim.notify("davewiki: telescope.nvim not installed", vim.log.levels.WARN)
+        return false
+    end
+
+    if not core.wiki_root then
+        vim.notify("davewiki: wiki_root is not configured", vim.log.levels.ERROR)
+        return false
+    end
+
+    local journals_list = M.get_journals_list()
+
+    if #journals_list == 0 then
+        vim.notify("davewiki: No journal files found in wiki_root/journals/", vim.log.levels.INFO)
+        return false
+    end
+
+    local pickers = require("telescope.pickers")
+    local finders = require("telescope.finders")
+    local conf = require("telescope.config").values
+
+    pickers
+        .new({}, {
+            prompt_title = "Journals",
+            finder = finders.new_table({
+                results = journals_list,
+                entry_maker = function(entry)
+                    return {
+                        value = entry,
+                        display = entry.display,
+                        ordinal = entry.ordinal,
+                        filename = entry.file,
+                    }
+                end,
+            }),
+            sorter = conf.file_sorter({}),
+            previewer = conf.grep_previewer({}),
+            attach_mappings = function(_, map)
+                map("i", "<CR>", function(bufnr)
+                    local selection = require("telescope.actions.state").get_selected_entry()
+                    require("telescope.actions").close(bufnr)
+                    if selection then
+                        vim.cmd("edit " .. vim.fn.fnameescape(selection.filename))
+                    end
+                end)
+                return true
+            end,
+        })
+        :find()
+
+    return true
+end
+
 return M

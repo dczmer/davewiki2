@@ -88,6 +88,13 @@ function M.setup(user_config)
         M.journal = require("davewiki.journal")
         M.journal.setup({ enabled = true })
         M.journal.create_user_commands()
+
+        -- Create journal telescope command only if telescope is also enabled
+        if config.telescope.enabled then
+            vim.api.nvim_create_user_command("DavewikiJournals", function()
+                M.journal.jump_to_journal()
+            end, { desc = "Open telescope picker for journal files" })
+        end
     end
 
     return M

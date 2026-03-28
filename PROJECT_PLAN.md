@@ -106,7 +106,7 @@ Command-line neovim users who want a simple journal-based note-taking system.
    - `davewiki/core.lua` - Core utilities including wiki_root resolution
    - `davewiki/cmp.lua` - nvim-cmp integration
    - `davewiki/telescope.lua` - Telescope integration for tag and heading search
-   - `davewiki/calendar.lua` - Daily calendar system implementation (placeholder - future implementation)
+   - `davewiki/journal.lua` - Daily journal management and navigation
 
 2. **Tests:**
    - `tests/` - plenary.nvim test suite
@@ -125,7 +125,7 @@ lua/                     (lua modules)
     ├── core.lua
     ├── cmp.lua
     ├── telescope.lua
-    └── calendar.lua
+    └── journal.lua
 tests/                   (plenary tests)
 tests/lua/davewiki/      (test files mirroring lua/ structure)
 test_root/               (example/test wiki)
@@ -251,7 +251,7 @@ wiki_root/               (configurable, e.g., ~/.davewiki)
   - `lua/davewiki/core.lua` - General utilities
   - `lua/davewiki/cmp.lua` - nvim-cmp integration
   - `lua/davewiki/telescope.lua` - Telescope integration
-  - `lua/davewiki/calendar.lua` - Daily calendar system
+  - `lua/davewiki/journal.lua` - Daily journal management and navigation
 
 **Naming Conventions:**
 - Follow lua-language-server (LuaLS) naming conventions

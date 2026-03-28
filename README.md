@@ -221,6 +221,7 @@ When telescope integration is enabled, the following commands are available:
 | `:DavewikiTagReferences [tag_name]` | Search for tag references across the wiki |
 | `:DavewikiHeadings` | Search for level-1 headings across all markdown files |
 | `:DavewikiInsertLink` | Insert a markdown link to another wiki file using a telescope picker |
+| `:DavewikiJournals` | Open a telescope picker to browse and open journal files (requires journal module) |
 
 ### Journal Commands
 
@@ -314,6 +315,11 @@ end, { desc = 'Search davewiki headings' })
 vim.keymap.set('n', '<leader>wl', function()
     require('davewiki').telescope.insert_link()
 end, { desc = 'Insert markdown link to wiki file' })
+
+-- Browse journal files with <leader>wj
+vim.keymap.set('n', '<leader>wj', function()
+    require('davewiki').journal.jump_to_journal()
+end, { desc = 'Browse journal files with telescope' })
 ```
 
 ### nvim-cmp Configuration
