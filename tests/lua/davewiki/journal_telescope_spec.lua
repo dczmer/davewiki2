@@ -87,15 +87,15 @@ describe("davewiki.journal jump_to_journal function", function()
             assert.are.equal(0, #journals)
         end)
 
-        it("should show relative paths from wiki_root in display", function()
+        it("should use absolute paths in display", function()
             local journals = journal.get_journals_list()
 
             for _, entry in ipairs(journals) do
-                -- Display should be relative path, not absolute
-                assert.is_false(entry.display:match("^/"),
-                    "Display should be relative path, not absolute: " .. entry.display)
-                assert.is_false(entry.display:match(test_root),
-                    "Display should not contain test_root path: " .. entry.display)
+                -- Display should be the same as file (absolute path)
+                assert.are.equal(entry.file, entry.display)
+                -- Should be an absolute path
+                assert.is_true(entry.display:match("^/") ~= nil,
+                    "Display should be absolute path: " .. entry.display)
             end
         end)
     end)

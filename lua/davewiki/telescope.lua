@@ -31,13 +31,6 @@ function telescope.is_enabled()
     return telescope.config.enabled
 end
 
---- Check if telescope.nvim is installed
----@return boolean
-local function is_telescope_installed()
-    local ok, _ = pcall(require, "telescope")
-    return ok
-end
-
 --- Generate an absolute path from wiki_root for a target file
 --- Returns path starting with "/" that is relative to wiki_root
 ---
@@ -149,7 +142,7 @@ end
 --- Allows fuzzy filtering and navigation to tag files
 ---@return boolean True if picker opened successfully, false otherwise
 function telescope.tags()
-    if not is_telescope_installed() then
+    if not core.is_telescope_installed() then
         vim.notify("davewiki: telescope.nvim not installed", vim.log.levels.WARN)
         return false
     end
@@ -209,7 +202,7 @@ end
 ---@param tag_name string? The tag name to search for (with # prefix), optional
 ---@return boolean True if picker opened successfully, false otherwise
 function telescope.tag_references(tag_name)
-    if not is_telescope_installed() then
+    if not core.is_telescope_installed() then
         vim.notify("davewiki: telescope.nvim not installed", vim.log.levels.WARN)
         return false
     end
@@ -326,7 +319,7 @@ end
 --- Allows fuzzy filtering and navigation to headings
 ---@return boolean True if picker opened successfully, false otherwise
 function telescope.headings()
-    if not is_telescope_installed() then
+    if not core.is_telescope_installed() then
         vim.notify("davewiki: telescope.nvim not installed", vim.log.levels.WARN)
         return false
     end
@@ -388,7 +381,7 @@ end
 --- Shows all non-tag markdown files and inserts a link at cursor position
 ---@return boolean True if picker opened successfully, false otherwise
 function telescope.insert_link()
-    if not is_telescope_installed() then
+    if not core.is_telescope_installed() then
         vim.notify("davewiki: telescope.nvim not installed", vim.log.levels.WARN)
         return false
     end

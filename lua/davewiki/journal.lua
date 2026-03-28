@@ -7,13 +7,6 @@ local M = {}
 
 local core = require("davewiki.core")
 
---- Check if telescope.nvim is installed
---- @return boolean
-local function is_telescope_installed()
-    local ok, _ = pcall(require, "telescope")
-    return ok
-end
-
 ---@class DavewikiJournalConfig
 ---@field enabled boolean Enable journal module
 
@@ -340,22 +333,15 @@ function M.get_journals_list()
 
         -- Security check: ensure file is within journals directory
         if resolved_path:sub(1, #journals_dir) == journals_dir then
-            -- Get relative path from wiki_root for display
-            local relative_path = resolved_path:sub(#core.wiki_root + 1)
-            -- Remove leading slash if present
-            if relative_path:sub(1, 1) == "/" then
-                relative_path = relative_path:sub(2)
-            end
-
             table.insert(journals, {
                 file = resolved_path,
-                display = relative_path,
-                ordinal = relative_path,
+                display = resolved_path,
+                ordinal = resolved_path,
             })
         end
     end
 
-    -- Sort alphabetically by display path
+    -- Sort alphabetically by path
     table.sort(journals, function(a, b)
         return a.display < b.display
     end)
@@ -371,7 +357,7 @@ function M.jump_to_journal()
         return false
     end
 
-    if not is_telescope_installed() then
+    if not core.is_telescope_installed() then
         vim.notify("davewiki: telescope.nvim not installed", vim.log.levels.WARN)
         return false
     end

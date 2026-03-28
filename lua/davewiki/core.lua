@@ -67,6 +67,13 @@ M.ripgrep = function(args)
     return lines
 end
 
+--- Check if telescope.nvim is installed
+--- @return boolean
+M.is_telescope_installed = function()
+    local ok, _ = pcall(require, "telescope")
+    return ok
+end
+
 -- ============================================================================
 -- TAG FILE MANAGEMENT
 -- ============================================================================
