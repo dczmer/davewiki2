@@ -352,7 +352,7 @@ end, { desc = 'Insert markdown link to wiki file' })
 
 -- Browse journal files with <leader>wj
 vim.keymap.set('n', '<leader>wj', function()
-    require('davewiki').journal.jump_to_journal()
+    require('davewiki').telescope.jump_to_journal()
 end, { desc = 'Browse journal files with telescope' })
 ```
 
