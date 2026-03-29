@@ -97,7 +97,15 @@ require('davewiki').setup({
 
 ### Tag Highlighting
 
-Tags (`#tag-name`) are automatically highlighted with a custom highlight group `DavewikiTag` when viewing markdown files within your wiki.
+Tags (`#tag-name`) are automatically highlighted with a custom highlight group `DavewikiTag` when viewing markdown files within your wiki. This feature can be disabled by setting `highlight_tags = false` in your configuration.
+
+**Configuration:**
+```lua
+require('davewiki').setup({
+  wiki_root = "~/.davewiki",
+  highlight_tags = false,  -- Disable tag highlighting
+})
+```
 
 **Default Style:**
 - Bright orange foreground (`#FF8C00`)
@@ -234,6 +242,7 @@ require('davewiki').setup({
 | `cmp.enabled` | boolean | `true` | Enable nvim-cmp integration |
 | `journal.enabled` | boolean | `true` | Enable journal module |
 | `show_tag_backlinks` | boolean | `true` | Enable automatic backlink display when opening tag files |
+| `highlight_tags` | boolean | `true` | Enable automatic tag syntax highlighting |
 
 ### Telescope Commands
 
