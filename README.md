@@ -196,7 +196,9 @@ require('lazy').setup({
 - `nvim-telescope/telescope.nvim` - search UI
 - `nvim-cmp` - tag completion
 - `mattn/calendar-vim` - calendar support for daily journals
-- `nvim-lua/plenary.nvim` - testing framework (required for development)
+
+**Development:**
+- `nvim-lua/plenary.nvim` - testing framework
 
 **Optional:**
 - `cmp-buffer` - buffer word completion

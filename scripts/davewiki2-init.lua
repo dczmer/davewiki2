@@ -110,6 +110,11 @@ vim.api.nvim_create_autocmd("FileType", {
     end,
 })
 
+-- davewiki view keymaps
+vim.keymap.set("n", "<leader>wv", "<cmd>DavewikiGenerateViewFromCursor<CR>", { desc = "Generate tag view from cursor" })
+
+vim.keymap.set("n", "<leader>wV", "<cmd>DavewikiGenerateView<CR>", { desc = "Pick tag and generate view" })
+
 -- davewiki telescope keymaps
 vim.keymap.set("n", "<leader>wt", function()
     require("davewiki").telescope.tags()
