@@ -27,6 +27,7 @@ telescope.load_extension("fzf")
 local davewiki = require("davewiki").setup({
     wiki_root = "./test_root",
     show_tag_backlinks = true,
+    highlight_tags = true,
     telescope = {
         enabled = true,
     },
