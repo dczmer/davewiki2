@@ -209,10 +209,10 @@ M.create_tag_file = function(tag_name)
         return false
     end
 
-    local sources_dir = M.wiki_root .. "/sources"
-    local tag_file_path = sources_dir .. "/" .. name .. ".md"
+    local tag_file_path = M.get_tag_file_path(tag_name)
 
     -- Ensure sources directory exists
+    local sources_dir = M.wiki_root .. "/sources"
     if vim.fn.isdirectory(sources_dir) ~= 1 then
         vim.fn.mkdir(sources_dir, "p")
     end
@@ -637,6 +637,18 @@ M.is_tag_file = function(file_path)
     local resolved_sources = vim.fn.resolve(sources_dir)
 
     return resolved_path:sub(1, #resolved_sources) == resolved_sources
+end
+
+--- Gets the file path for a tag's source file
+--- @param tag_name string The tag name (with or without # prefix)
+--- @return string|nil The path to the tag file, or nil if wiki_root not set
+M.get_tag_file_path = function(tag_name)
+    if not M.wiki_root or not tag_name then
+        return nil
+    end
+
+    local name = tag_name:gsub("^#", "")
+    return M.wiki_root .. "/sources/" .. name .. ".md"
 end
 
 --- Extracts the tag name from a tag file path

@@ -9,18 +9,24 @@ local lua_core = require("davewiki.core")
 local test_root = vim.fn.fnamemodify(vim.fn.expand("<sfile>:h:h:h:h"), ":p") .. "test_root"
 local journals_dir = test_root .. "/journals"
 
-local function cleanup_journals_dir()
-    if vim.fn.isdirectory(journals_dir) == 1 then
-        local files = vim.fn.glob(journals_dir .. "/*.md", true, true)
-        for _, file in ipairs(files) do
-            vim.fn.delete(file)
-        end
+-- Track files created by tests for cleanup
+local created_files = {}
+
+local function track_file(filepath)
+    created_files[filepath] = true
+end
+
+local function cleanup_created_files()
+    for filepath, _ in pairs(created_files) do
+        pcall(vim.fn.delete, filepath)
+        created_files[filepath] = nil
     end
 end
 
-local function setup_journals_dir()
-    cleanup_journals_dir()
-    vim.fn.mkdir(journals_dir, "p")
+local function ensure_journals_dir()
+    if vim.fn.isdirectory(journals_dir) == 0 then
+        vim.fn.mkdir(journals_dir, "p")
+    end
 end
 
 describe("davewiki.journal module setup", function()
@@ -200,12 +206,12 @@ describe("davewiki.journal open operations", function()
     before_each(function()
         lua_core.wiki_root = test_root
         lua_journal.setup({ enabled = true })
-        cleanup_journals_dir()
+        ensure_journals_dir()
         vim.cmd("enew")
     end)
 
     after_each(function()
-        cleanup_journals_dir()
+        cleanup_created_files()
         vim.cmd("enew!")
     end)
 
@@ -228,41 +234,39 @@ describe("davewiki.journal open operations", function()
         end)
 
         it("should create journals directory if it doesn't exist", function()
-            -- Delete all .md files to start clean, but keep .gitkeep
-            cleanup_journals_dir()
-            -- The directory may already exist (has .gitkeep), but open_journal should still work
-            lua_journal.open_journal("2026-03-25")
+            ensure_journals_dir()
+            lua_journal.open_journal("2099-01-15")
             assert.is_equal(1, vim.fn.isdirectory(journals_dir))
         end)
 
         it("should create buffer with template for new journal", function()
-            lua_journal.open_journal("2026-03-25")
+            lua_journal.open_journal("2099-01-16")
             local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
             assert.are.equal("---", lines[1])
-            assert.are.equal("date: 2026-03-25", lines[2])
+            assert.are.equal("date: 2099-01-16", lines[2])
             assert.are.equal("# TASKS", lines[7])
         end)
 
         it("should open existing journal without modification", function()
-            setup_journals_dir()
-            local existing_content = { "---", "date: 2025-12-25", "---", "", "Existing content" }
-            vim.fn.writefile(existing_content, journals_dir .. "/2025-12-25.md")
+            local test_file = journals_dir .. "/2099-01-17.md"
+            local existing_content = { "---", "date: 2099-01-17", "---", "", "Existing content" }
+            vim.fn.writefile(existing_content, test_file)
+            track_file(test_file)
 
-            lua_journal.open_journal("2025-12-25")
+            lua_journal.open_journal("2099-01-17")
             local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
             assert.are.equal("Existing content", lines[5])
         end)
 
         it("should create buffer at correct path", function()
-            lua_journal.open_journal("2026-03-25")
+            lua_journal.open_journal("2099-01-18")
             local bufname = vim.api.nvim_buf_get_name(0)
-            assert.are.equal(journals_dir .. "/2026-03-25.md", bufname)
+            assert.are.equal(journals_dir .. "/2099-01-18.md", bufname)
         end)
     end)
 
     describe("open_today", function()
         it("should open journal for today's date", function()
-            cleanup_journals_dir()
             local result = lua_journal.open_today()
             assert.is_true(result)
 
@@ -274,7 +278,6 @@ describe("davewiki.journal open operations", function()
 
     describe("open_yesterday", function()
         it("should open journal for yesterday's date", function()
-            cleanup_journals_dir()
             local result = lua_journal.open_yesterday()
             assert.is_true(result)
 
@@ -286,7 +289,6 @@ describe("davewiki.journal open operations", function()
 
     describe("open_tomorrow", function()
         it("should open journal for tomorrow's date", function()
-            cleanup_journals_dir()
             local result = lua_journal.open_tomorrow()
             assert.is_true(result)
 
@@ -305,30 +307,28 @@ describe("davewiki.journal open operations", function()
 
         it("parse_buffer_date should extract date from journal filename", function()
             vim.cmd("enew!")
-            local test_path = journals_dir .. "/2099-01-01.md"
+            local test_path = journals_dir .. "/2099-02-01.md"
             vim.api.nvim_buf_set_name(0, test_path)
             local result = lua_journal.parse_buffer_date()
-            assert.are.equal("2099-01-01", result)
+            assert.are.equal("2099-02-01", result)
         end)
 
         it("open_yesterday should use buffer date when in a journal", function()
-            cleanup_journals_dir()
             vim.cmd("enew!")
-            vim.api.nvim_buf_set_name(0, journals_dir .. "/2099-02-02.md")
+            vim.api.nvim_buf_set_name(0, journals_dir .. "/2099-02-03.md")
             local result = lua_journal.open_yesterday()
             assert.is_true(result)
             local bufname = vim.api.nvim_buf_get_name(0)
-            assert.are.equal(journals_dir .. "/2099-02-01.md", bufname)
+            assert.are.equal(journals_dir .. "/2099-02-02.md", bufname)
         end)
 
         it("open_tomorrow should use buffer date when in a journal", function()
-            cleanup_journals_dir()
             vim.cmd("enew!")
-            vim.api.nvim_buf_set_name(0, journals_dir .. "/2099-03-01.md")
+            vim.api.nvim_buf_set_name(0, journals_dir .. "/2099-03-04.md")
             local result = lua_journal.open_tomorrow()
             assert.is_true(result)
             local bufname = vim.api.nvim_buf_get_name(0)
-            assert.are.equal(journals_dir .. "/2099-03-02.md", bufname)
+            assert.are.equal(journals_dir .. "/2099-03-05.md", bufname)
         end)
     end)
 end)
@@ -337,11 +337,11 @@ describe("davewiki.journal user commands", function()
     before_each(function()
         lua_core.wiki_root = test_root
         lua_journal.setup({ enabled = true })
-        cleanup_journals_dir()
+        ensure_journals_dir()
     end)
 
     after_each(function()
-        cleanup_journals_dir()
+        cleanup_created_files()
     end)
 
     describe("create_user_commands", function()
@@ -422,7 +422,7 @@ describe("davewiki.journal jump_to_journal function", function()
             local journals = journal.get_journals_list()
 
             assert.is_table(journals)
-            -- test_root has some journal files
+            -- test_root has some journal files (git-tracked ones)
             assert.is_true(#journals >= 0)
 
             -- Each entry should be a table with required fields
@@ -447,13 +447,14 @@ describe("davewiki.journal jump_to_journal function", function()
         it("should return empty table when journals directory does not exist", function()
             -- Temporarily set wiki_root to a directory without journals
             local original_root = core.wiki_root
-            core.wiki_root = "/tmp/empty-davewiki-test-" .. os.time()
+            local temp_dir = "/tmp/empty-davewiki-test-" .. os.time()
+            core.wiki_root = temp_dir
             vim.fn.mkdir(core.wiki_root, "p")
 
             local journals = journal.get_journals_list()
 
             core.wiki_root = original_root
-            vim.fn.delete("/tmp/empty-davewiki-test-" .. os.time(), "rf")
+            vim.fn.delete(temp_dir, "rf")
 
             assert.is_table(journals)
             assert.are.equal(0, #journals)

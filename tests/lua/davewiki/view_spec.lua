@@ -25,17 +25,25 @@ describe("davewiki.view setup", function()
 end)
 
 describe("davewiki.view generate_view", function()
+    local test_journal_file
+    local test_note_file
+
     before_each(function()
         core.setup({ wiki_root = test_root })
-        -- Create test files for view testing
-        -- Journal file with #cooking tag
+
         local journal_dir = test_root .. "/journals"
         if vim.fn.isdirectory(journal_dir) == 0 then
             vim.fn.mkdir(journal_dir, "p")
         end
 
-        -- Create a test journal with blocks
-        local journal_file = journal_dir .. "/2024-01-15.md"
+        local notes_dir = test_root .. "/notes"
+        if vim.fn.isdirectory(notes_dir) == 0 then
+            vim.fn.mkdir(notes_dir, "p")
+        end
+
+        test_journal_file = journal_dir .. "/test-view-unique-generate-20240115.md"
+        test_note_file = notes_dir .. "/test-view-unique-generate-note.md"
+
         vim.fn.writefile({
             "# 2024-01-15",
             "",
@@ -50,15 +58,8 @@ describe("davewiki.view generate_view", function()
             "",
             "More #cooking notes here.",
             "",
-        }, journal_file)
+        }, test_journal_file)
 
-        -- Create a test note file with #cooking tag
-        local notes_dir = test_root .. "/notes"
-        if vim.fn.isdirectory(notes_dir) == 0 then
-            vim.fn.mkdir(notes_dir, "p")
-        end
-
-        local note_file = notes_dir .. "/test-view-note.md"
         vim.fn.writefile({
             "# Test View Note",
             "",
@@ -67,22 +68,13 @@ describe("davewiki.view generate_view", function()
             "It mentions #cooking techniques and recipes.",
             "",
             "A separate paragraph without the tag.",
-        }, note_file)
+        }, test_note_file)
     end)
 
     after_each(function()
-        -- Clean up test files
-        local journal_file = test_root .. "/journals/2024-01-15.md"
-        if vim.fn.filereadable(journal_file) == 1 then
-            vim.fn.delete(journal_file)
-        end
+        pcall(vim.fn.delete, test_journal_file)
+        pcall(vim.fn.delete, test_note_file)
 
-        local note_file = test_root .. "/notes/test-view-note.md"
-        if vim.fn.filereadable(note_file) == 1 then
-            vim.fn.delete(note_file)
-        end
-
-        -- Clean up any created view buffers
         for _, buf in ipairs(vim.api.nvim_list_bufs()) do
             local name = vim.api.nvim_buf_get_name(buf)
             if name:match("-view%.md$") then
@@ -252,42 +244,52 @@ describe("davewiki.view handler functions", function()
     end)
 
     describe("find_tag_mentions", function()
+        local test_journal_file
+        local test_note_file
+
         before_each(function()
-            -- Create test files with known tag mentions
             local journal_dir = test_root .. "/journals"
             if vim.fn.isdirectory(journal_dir) == 0 then
                 vim.fn.mkdir(journal_dir, "p")
             end
 
+            local notes_dir = test_root .. "/notes"
+            if vim.fn.isdirectory(notes_dir) == 0 then
+                vim.fn.mkdir(notes_dir, "p")
+            end
+
+            test_journal_file = journal_dir .. "/test-view-unique-mentions-journal.md"
+            test_note_file = notes_dir .. "/test-view-unique-mentions-note.md"
+
             vim.fn.writefile({
                 "# Journal Entry",
-                "Notes about #testviewfind.",
+                "Notes about #testviewfindunique.",
                 "",
                 "---",
                 "",
-                "Block two with #testviewfind again.",
-            }, journal_dir .. "/2024-01-20.md")
+                "Block two with #testviewfindunique again.",
+            }, test_journal_file)
 
             vim.fn.writefile({
                 "# A Note",
                 "",
-                "Paragraph about #testviewfind in a note.",
-            }, test_root .. "/notes/testviewfind-note.md")
+                "Paragraph about #testviewfindunique in a note.",
+            }, test_note_file)
         end)
 
         after_each(function()
-            pcall(vim.fn.delete, test_root .. "/journals/2024-01-20.md")
-            pcall(vim.fn.delete, test_root .. "/notes/testviewfind-note.md")
+            pcall(vim.fn.delete, test_journal_file)
+            pcall(vim.fn.delete, test_note_file)
         end)
 
         it("should find all files mentioning a tag", function()
-            local mentions = view.find_tag_mentions("#testviewfind")
+            local mentions = view.find_tag_mentions("#testviewfindunique")
             assert.is_table(mentions)
-            assert.is_true(#mentions >= 2) -- At least journal and note file
+            assert.are.equal(2, #mentions)
         end)
 
         it("should return empty table for tag with no mentions", function()
-            local mentions = view.find_tag_mentions("#uniquenotagmentions123")
+            local mentions = view.find_tag_mentions("#uniquenotagmentions123xyz")
             assert.is_table(mentions)
             assert.are.equal(0, #mentions)
         end)
@@ -298,16 +300,15 @@ describe("davewiki.view handler functions", function()
         end)
 
         it("should distinguish between journals and wiki files", function()
-            local mentions = view.find_tag_mentions("#testviewfind")
+            local mentions = view.find_tag_mentions("#testviewfindunique")
             assert.is_table(mentions)
 
-            -- Should have separate entries for journals and wiki files
             local has_journal = false
             local has_note = false
             for _, mention in ipairs(mentions) do
-                if mention.file:match("/journals/") then
+                if mention.file:match("test%-view%-unique%-mentions%-journal") then
                     has_journal = true
-                elseif mention.file:match("/notes/") then
+                elseif mention.file:match("test%-view%-unique%-mentions%-note") then
                     has_note = true
                 end
             end
@@ -317,13 +318,16 @@ describe("davewiki.view handler functions", function()
     end)
 
     describe("extract_journal_blocks", function()
+        local test_journal_file
+
         before_each(function()
             local journal_dir = test_root .. "/journals"
             if vim.fn.isdirectory(journal_dir) == 0 then
                 vim.fn.mkdir(journal_dir, "p")
             end
 
-            -- Create journal with multiple blocks
+            test_journal_file = journal_dir .. "/test-view-unique-blocks.md"
+
             vim.fn.writefile({
                 "# Journal",
                 "",
@@ -331,27 +335,27 @@ describe("davewiki.view handler functions", function()
                 "",
                 "---",
                 "",
-                "Second block has #blocktest here.",
+                "Second block has #blocktestunique here.",
                 "",
                 "---",
                 "",
-                "Third block also has #blocktest.",
+                "Third block also has #blocktestunique.",
                 "Multi line block.",
-            }, journal_dir .. "/2024-01-25.md")
+            }, test_journal_file)
         end)
 
         after_each(function()
-            pcall(vim.fn.delete, test_root .. "/journals/2024-01-25.md")
+            pcall(vim.fn.delete, test_journal_file)
         end)
 
         it("should extract complete blocks containing the tag", function()
-            local blocks = view.extract_journal_blocks("#blocktest")
+            local blocks = view.extract_journal_blocks("#blocktestunique")
             assert.is_table(blocks)
-            assert.is_true(#blocks >= 2) -- At least two blocks contain the tag
+            assert.are.equal(2, #blocks)
         end)
 
         it("should include source file link for each block", function()
-            local blocks = view.extract_journal_blocks("#blocktest")
+            local blocks = view.extract_journal_blocks("#blocktestunique")
             assert.is_table(blocks)
 
             for _, block in ipairs(blocks) do
@@ -363,32 +367,41 @@ describe("davewiki.view handler functions", function()
     end)
 
     describe("extract_wiki_paragraphs", function()
+        local test_note_file
+
         before_each(function()
+            local notes_dir = test_root .. "/notes"
+            if vim.fn.isdirectory(notes_dir) == 0 then
+                vim.fn.mkdir(notes_dir, "p")
+            end
+
+            test_note_file = notes_dir .. "/test-view-unique-wiki-note.md"
+
             vim.fn.writefile({
                 "# Wiki Page",
                 "",
-                "First paragraph has #wikitest tag.",
+                "First paragraph has #wikitestunique tag.",
                 "",
                 "Second paragraph without the tag.",
                 "",
-                "Third paragraph with #wikitest again.",
+                "Third paragraph with #wikitestunique again.",
                 "Spanning multiple lines.",
                 "",
-            }, test_root .. "/notes/wikitest-note.md")
+            }, test_note_file)
         end)
 
         after_each(function()
-            pcall(vim.fn.delete, test_root .. "/notes/wikitest-note.md")
+            pcall(vim.fn.delete, test_note_file)
         end)
 
         it("should extract paragraphs containing the tag", function()
-            local paragraphs = view.extract_wiki_paragraphs("#wikitest")
+            local paragraphs = view.extract_wiki_paragraphs("#wikitestunique")
             assert.is_table(paragraphs)
-            assert.is_true(#paragraphs >= 2) -- At least two paragraphs contain the tag
+            assert.are.equal(2, #paragraphs)
         end)
 
         it("should include source file link for each paragraph", function()
-            local paragraphs = view.extract_wiki_paragraphs("#wikitest")
+            local paragraphs = view.extract_wiki_paragraphs("#wikitestunique")
             assert.is_table(paragraphs)
 
             for _, para in ipairs(paragraphs) do

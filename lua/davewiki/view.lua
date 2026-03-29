@@ -31,8 +31,10 @@ function M.get_tag_file_content(tag_name)
         return nil
     end
 
-    local tag_name_clean = tag_name:gsub("^#", "")
-    local tag_file_path = core.wiki_root .. "/sources/" .. tag_name_clean .. ".md"
+    local tag_file_path = core.get_tag_file_path(tag_name)
+    if not tag_file_path then
+        return nil
+    end
 
     if vim.fn.filereadable(tag_file_path) == 1 then
         local lines = vim.fn.readfile(tag_file_path)
@@ -42,9 +44,9 @@ function M.get_tag_file_content(tag_name)
     return "NO TAG FILE"
 end
 
---- Finds all files mentioning a tag
+--- Finds all unique files mentioning a tag
 --- @param tag_name string The tag name (with # prefix)
---- @return table|nil Array of TagMention objects, or nil for invalid tag
+--- @return table|nil Array of TagMention objects (deduplicated by file path), or nil for invalid tag
 function M.find_tag_mentions(tag_name)
     if not core.is_valid_tag(tag_name) then
         return nil
@@ -64,32 +66,33 @@ function M.find_tag_mentions(tag_name)
 
     local all_files = core.ripgrep(args)
     local mentions = {}
+    local seen_files = {}
 
     for _, file_path in ipairs(all_files) do
         local resolved_path = vim.fn.resolve(file_path)
 
-        -- Skip tag files (sources directory)
-        if core.is_tag_file(resolved_path) then
-            goto continue
+        -- Only process non-tag files
+        if not core.is_tag_file(resolved_path) then
+            -- Skip if we've already seen this file
+            if not seen_files[resolved_path] then
+                -- Check if this file contains the tag
+                local grep_args = {
+                    "--fixed-strings",
+                    tag_name,
+                    resolved_path,
+                }
+                local matches = core.ripgrep(grep_args)
+
+                if #matches > 0 then
+                    seen_files[resolved_path] = true
+                    local is_journal = resolved_path:match("/journals/") ~= nil
+                    table.insert(mentions, {
+                        file = resolved_path,
+                        is_journal = is_journal,
+                    })
+                end
+            end
         end
-
-        -- Check if this file contains the tag
-        local grep_args = {
-            "--fixed-strings",
-            tag_name,
-            resolved_path,
-        }
-        local matches = core.ripgrep(grep_args)
-
-        if #matches > 0 then
-            local is_journal = resolved_path:match("/journals/") ~= nil
-            table.insert(mentions, {
-                file = resolved_path,
-                is_journal = is_journal,
-            })
-        end
-
-        ::continue::
     end
 
     return mentions
@@ -171,14 +174,14 @@ end
 
 --- Extracts blocks from journal files containing the tag
 --- @param tag_name string The tag name (with # prefix)
+--- @param mentions table|nil Optional pre-computed mentions (from find_tag_mentions)
 --- @return table Array of ContentBlock objects
-function M.extract_journal_blocks(tag_name)
-    if not core.is_valid_tag(tag_name) then
-        return {}
+function M.extract_journal_blocks(tag_name, mentions)
+    if not mentions then
+        mentions = M.find_tag_mentions(tag_name)
     end
 
-    local mentions = M.find_tag_mentions(tag_name)
-    if not mentions then
+    if not mentions or #mentions == 0 then
         return {}
     end
 
@@ -210,14 +213,14 @@ end
 
 --- Extracts paragraphs from wiki files containing the tag
 --- @param tag_name string The tag name (with # prefix)
+--- @param mentions table|nil Optional pre-computed mentions (from find_tag_mentions)
 --- @return table Array of ContentBlock objects
-function M.extract_wiki_paragraphs(tag_name)
-    if not core.is_valid_tag(tag_name) then
-        return {}
+function M.extract_wiki_paragraphs(tag_name, mentions)
+    if not mentions then
+        mentions = M.find_tag_mentions(tag_name)
     end
 
-    local mentions = M.find_tag_mentions(tag_name)
-    if not mentions then
+    if not mentions or #mentions == 0 then
         return {}
     end
 
@@ -348,8 +351,10 @@ function M.generate_view(tag_name)
         return nil
     end
 
-    local journal_blocks = M.extract_journal_blocks(tag_name)
-    local wiki_paragraphs = M.extract_wiki_paragraphs(tag_name)
+    -- Find mentions once and pass to extract functions
+    local mentions = M.find_tag_mentions(tag_name)
+    local journal_blocks = M.extract_journal_blocks(tag_name, mentions)
+    local wiki_paragraphs = M.extract_wiki_paragraphs(tag_name, mentions)
 
     -- Format view content
     local lines =
