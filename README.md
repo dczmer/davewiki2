@@ -122,6 +122,55 @@ vim.api.nvim_set_hl(0, "DavewikiTag", {
 vim.cmd("highlight DavewikiTag guifg=blue guibg=yellow gui=underline")
 ```
 
+### Tag Views
+
+Synthetic tag views aggregate all references to a specific tag into a single buffer, providing a consolidated research view across your entire wiki.
+
+**Features:**
+- Generates a synthetic view file containing tag file content, journal blocks, and wiki references
+- Each section includes markdown links to source documents
+- View is created as an unsaved buffer - you can save it manually if desired
+- Automatically regenerates content when invoked for an existing view
+
+**View Content:**
+When you generate a tag view for `#cooking`, the buffer contains:
+1. **Tag File Content**: Full content of the `sources/cooking.md` tag file (or "NO TAG FILE" placeholder)
+2. **Journal Blocks**: Complete `---` separated blocks from journal files that mention `#cooking`
+3. **Wiki References**: Paragraphs from non-journal wiki files that mention `#cooking`
+
+**Commands:**
+
+| Command | Description |
+|---------|-------------|
+| `:DavewikiGenerateView` | Open telescope picker to select a tag and generate its view |
+| `:DavewikiGenerateViewFromCursor` | Generate view for the tag under cursor |
+| `:DavewikiGenerateViewFromTagFile` | Generate view for the current tag file (when editing a tag file) |
+
+**API:**
+```lua
+-- Generate view for a specific tag
+require('davewiki').generate_tag_view("#cooking")
+
+-- Generate view from tag under cursor
+require('davewiki').generate_tag_view_from_cursor()
+
+-- Generate view from current tag file
+require('davewiki').generate_tag_view_from_tag_file()
+```
+
+**Keymap Examples:**
+```lua
+-- Generate view for tag under cursor
+vim.keymap.set('n', '<leader>wv', function()
+    require('davewiki').generate_tag_view_from_cursor()
+end, { desc = "Generate tag view from cursor" })
+
+-- Pick a tag and generate view
+vim.keymap.set('n', '<leader>wV', function()
+    require('davewiki.telescope').tag_view()
+end, { desc = "Pick tag and generate view" })
+```
+
 ### Attachments
 
 Optional attachments (images, files) can be stored in `attachments/` within your wiki root.
@@ -222,6 +271,7 @@ When telescope integration is enabled, the following commands are available:
 | `:DavewikiHeadings` | Search for level-1 headings across all markdown files |
 | `:DavewikiInsertLink` | Insert a markdown link to another wiki file using a telescope picker |
 | `:DavewikiJournals` | Open a telescope picker to browse and open journal files (requires journal module) |
+| `:DavewikiGenerateView` | Open telescope picker to select a tag and generate its synthetic view |
 
 ### Journal Commands
 
