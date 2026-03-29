@@ -565,6 +565,13 @@ function telescope.setup_commands()
     end, {
         desc = "Insert a markdown link to another wiki file",
     })
+
+    -- Command to open tag view picker
+    vim.api.nvim_create_user_command("DavewikiGenerateView", function()
+        telescope.tag_view()
+    end, {
+        desc = "Open picker to generate tag view",
+    })
 end
 
 return telescope

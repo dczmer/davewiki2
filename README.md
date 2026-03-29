@@ -146,29 +146,13 @@ When you generate a tag view for `#cooking`, the buffer contains:
 | `:DavewikiGenerateViewFromCursor` | Generate view for the tag under cursor |
 | `:DavewikiGenerateViewFromTagFile` | Generate view for the current tag file (when editing a tag file) |
 
-**API:**
-```lua
--- Generate view for a specific tag
-require('davewiki').generate_tag_view("#cooking")
-
--- Generate view from tag under cursor
-require('davewiki').generate_tag_view_from_cursor()
-
--- Generate view from current tag file
-require('davewiki').generate_tag_view_from_tag_file()
-```
-
 **Keymap Examples:**
 ```lua
 -- Generate view for tag under cursor
-vim.keymap.set('n', '<leader>wv', function()
-    require('davewiki').generate_tag_view_from_cursor()
-end, { desc = "Generate tag view from cursor" })
+vim.keymap.set('n', '<leader>wv', '<cmd>DavewikiGenerateViewFromCursor<CR>', { desc = "Generate tag view from cursor" })
 
 -- Pick a tag and generate view
-vim.keymap.set('n', '<leader>wV', function()
-    require('davewiki.telescope').tag_view()
-end, { desc = "Pick tag and generate view" })
+vim.keymap.set('n', '<leader>wV', '<cmd>DavewikiGenerateView<CR>', { desc = "Pick tag and generate view" })
 ```
 
 ### Attachments

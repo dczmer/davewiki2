@@ -375,4 +375,24 @@ function M.generate_view(tag_name)
     return bufnr
 end
 
+--- Set up user commands for tag view feature
+function M.setup_commands()
+    -- Command to generate view from tag under cursor
+    vim.api.nvim_create_user_command("DavewikiGenerateViewFromCursor", function()
+        local tag = core.get_tag_under_cursor()
+        if tag then
+            M.generate_view(tag)
+        end
+    end, { desc = "Generate tag view from tag under cursor" })
+
+    -- Command to generate view from current tag file
+    vim.api.nvim_create_user_command("DavewikiGenerateViewFromTagFile", function()
+        local file_path = vim.api.nvim_buf_get_name(0)
+        local tag_name = core.extract_tag_from_filename(file_path)
+        if tag_name then
+            M.generate_view("#" .. tag_name)
+        end
+    end, { desc = "Generate tag view from current tag file" })
+end
+
 return M

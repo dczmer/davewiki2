@@ -39,56 +39,6 @@ local config = vim.deepcopy(default_config)
 
 local core = require("davewiki.core")
 
---- Generate a synthetic tag view aggregating all references to a tag
---- @param tag_name string The tag name (with # prefix)
---- @return integer|nil The buffer number of the view buffer, or nil on failure
-function M.generate_tag_view(tag_name)
-    local view = require("davewiki.view")
-    return view.generate_view(tag_name)
-end
-
---- Generate tag view for the tag under cursor
---- @return integer|nil The buffer number of the view buffer, or nil on failure
-function M.generate_tag_view_from_cursor()
-    local tag = core.get_tag_under_cursor()
-    if tag then
-        return M.generate_tag_view(tag)
-    end
-    return nil
-end
-
---- Generate tag view for the current tag file (if buffer is a tag file)
---- @return integer|nil The buffer number of the view buffer, or nil on failure
-function M.generate_tag_view_from_tag_file()
-    local file_path = vim.api.nvim_buf_get_name(0)
-    local tag_name = core.extract_tag_from_filename(file_path)
-    if tag_name then
-        return M.generate_tag_view("#" .. tag_name)
-    end
-    return nil
-end
-
---- Set up user commands for tag view feature (local function)
-local function setup_view_commands()
-    -- Command to open tag view via telescope picker
-    if config.telescope.enabled then
-        vim.api.nvim_create_user_command("DavewikiGenerateView", function()
-            local telescope = require("davewiki.telescope")
-            telescope.tag_view()
-        end, { desc = "Open picker to generate tag view" })
-    end
-
-    -- Command to generate view from tag under cursor
-    vim.api.nvim_create_user_command("DavewikiGenerateViewFromCursor", function()
-        M.generate_tag_view_from_cursor()
-    end, { desc = "Generate tag view from tag under cursor" })
-
-    -- Command to generate view from current tag file
-    vim.api.nvim_create_user_command("DavewikiGenerateViewFromTagFile", function()
-        M.generate_tag_view_from_tag_file()
-    end, { desc = "Generate tag view from current tag file" })
-end
-
 --- Setup the davewiki plugin with the given configuration
 ---@param user_config DavewikiConfig?
 ---@return table
@@ -128,8 +78,11 @@ function M.setup(user_config)
     if config.telescope.enabled then
         M.telescope = require("davewiki.telescope")
         M.telescope.setup({ enabled = true })
-        M.view = require("davewiki.view")
     end
+
+    -- Set up view commands
+    local view = require("davewiki.view")
+    view.setup_commands()
 
     if config.show_tag_backlinks then
         M.setup_backlinks_autocmd()
@@ -147,8 +100,6 @@ function M.setup(user_config)
             end, { desc = "Open telescope picker for journal files" })
         end
     end
-
-    setup_view_commands()
 
     return M
 end
