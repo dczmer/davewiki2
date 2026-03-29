@@ -172,10 +172,58 @@ local function extract_paragraphs_with_tag(content, tag_name)
     return paragraphs
 end
 
+--- Extracts blocks from a single journal file mention
+---@param tag_name string The tag name (with # prefix)
+---@param mention table A single mention object with file path
+---@return table Array of ContentBlock objects
+function M.extract_journal_blocks_from_mention(tag_name, mention)
+    local blocks = {}
+    local content = vim.fn.readfile(mention.file)
+    local file_content = table.concat(content, "\n")
+
+    local file_blocks = split_into_blocks(file_content)
+
+    for _, block_content in ipairs(file_blocks) do
+        if block_content:find(tag_name, 1, true) then
+            local filename = vim.fn.fnamemodify(mention.file, ":t:r")
+            local link = make_markdown_link(mention.file, filename)
+            table.insert(blocks, {
+                link = link,
+                content = block_content,
+            })
+        end
+    end
+
+    return blocks
+end
+
+--- Extracts paragraphs from a single wiki file mention
+---@param tag_name string The tag name (with # prefix)
+---@param mention table A single mention object with file path
+---@return table Array of ContentBlock objects
+function M.extract_wiki_paragraphs_from_mention(tag_name, mention)
+    local paragraphs = {}
+    local content = vim.fn.readfile(mention.file)
+    local file_content = table.concat(content, "\n")
+
+    local found_paras = extract_paragraphs_with_tag(file_content, tag_name)
+
+    for _, para in ipairs(found_paras) do
+        local filename = vim.fn.fnamemodify(mention.file, ":t:r")
+        local link = make_markdown_link(mention.file, filename)
+        table.insert(paragraphs, {
+            link = link,
+            content = para,
+        })
+    end
+
+    return paragraphs
+end
+
 --- Extracts blocks from journal files containing the tag
---- @param tag_name string The tag name (with # prefix)
---- @param mentions table|nil Optional pre-computed mentions (from find_tag_mentions)
---- @return table Array of ContentBlock objects
+---@param tag_name string The tag name (with # prefix)
+---@param mentions table|nil Optional pre-computed mentions (from find_tag_mentions)
+---@return table Array of ContentBlock objects
 function M.extract_journal_blocks(tag_name, mentions)
     if not mentions then
         mentions = M.find_tag_mentions(tag_name)
@@ -192,7 +240,6 @@ function M.extract_journal_blocks(tag_name, mentions)
             local content = vim.fn.readfile(mention.file)
             local file_content = table.concat(content, "\n")
 
-            -- Split into blocks by ---
             local file_blocks = split_into_blocks(file_content)
 
             for _, block_content in ipairs(file_blocks) do
@@ -212,9 +259,9 @@ function M.extract_journal_blocks(tag_name, mentions)
 end
 
 --- Extracts paragraphs from wiki files containing the tag
---- @param tag_name string The tag name (with # prefix)
---- @param mentions table|nil Optional pre-computed mentions (from find_tag_mentions)
---- @return table Array of ContentBlock objects
+---@param tag_name string The tag name (with # prefix)
+---@param mentions table|nil Optional pre-computed mentions (from find_tag_mentions)
+---@return table Array of ContentBlock objects
 function M.extract_wiki_paragraphs(tag_name, mentions)
     if not mentions then
         mentions = M.find_tag_mentions(tag_name)
@@ -231,7 +278,6 @@ function M.extract_wiki_paragraphs(tag_name, mentions)
             local content = vim.fn.readfile(mention.file)
             local file_content = table.concat(content, "\n")
 
-            -- Find paragraphs containing the tag
             local found_paras = extract_paragraphs_with_tag(file_content, tag_name)
 
             for _, para in ipairs(found_paras) do
@@ -351,10 +397,24 @@ function M.generate_view(tag_name)
         return nil
     end
 
-    -- Find mentions once and pass to extract functions
+    -- Find mentions once and extract content in a single loop
     local mentions = M.find_tag_mentions(tag_name)
-    local journal_blocks = M.extract_journal_blocks(tag_name, mentions)
-    local wiki_paragraphs = M.extract_wiki_paragraphs(tag_name, mentions)
+    local journal_blocks = {}
+    local wiki_paragraphs = {}
+
+    for _, mention in ipairs(mentions) do
+        if mention.is_journal then
+            local blocks = M.extract_journal_blocks_from_mention(tag_name, mention)
+            for _, block in ipairs(blocks) do
+                table.insert(journal_blocks, block)
+            end
+        else
+            local paragraphs = M.extract_wiki_paragraphs_from_mention(tag_name, mention)
+            for _, para in ipairs(paragraphs) do
+                table.insert(wiki_paragraphs, para)
+            end
+        end
+    end
 
     -- Format view content
     local lines =
