@@ -86,6 +86,7 @@ end, { desc = "Show which-key" })
 local davewiki = require("davewiki").setup({
     wiki_root = "./test_root",
     show_tag_backlinks = true,
+    highlight_tags = true,
     telescope = {
         enabled = true,
     },
@@ -131,6 +132,10 @@ end, { desc = "Search davewiki headings" })
 vim.keymap.set("n", "<leader>wl", function()
     require("davewiki").telescope.insert_link()
 end, { desc = "Insert markdown link to wiki file" })
+
+vim.keymap.set("n", "<leader>wj", function()
+    require("davewiki").telescope.jump_to_journal()
+end, { desc = "Browse journal files with telescope" })
 
 -- davewiki journal keymaps
 vim.keymap.set("n", "<leader>wjt", "<cmd>DavewikiJournalToday<CR>", { desc = "Open today's journal" })

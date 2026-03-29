@@ -250,11 +250,12 @@ wiki_root/               (configurable, e.g., ~/.davewiki)
 **Code Organization:**
 - Follow neovim plugin conventions
 - Module structure as documented in Architecture Overview:
-  - `lua/davewiki/init.lua` - Public interface with `setup()`
-  - `lua/davewiki/core.lua` - General utilities
-  - `lua/davewiki/cmp.lua` - nvim-cmp integration
-  - `lua/davewiki/telescope.lua` - Telescope integration
-  - `lua/davewiki/journal.lua` - Daily journal management and navigation
+- `lua/davewiki/init.lua` - Public interface with `setup()`
+   - `lua/davewiki/core.lua` - General utilities
+   - `lua/davewiki/cmp.lua` - nvim-cmp integration
+   - `lua/davewiki/telescope.lua` - Telescope integration
+   - `lua/davewiki/journal.lua` - Daily journal management and navigation
+   - `lua/davewiki/view.lua` - Synthetic tag view generation
 
 **Naming Conventions:**
 - Follow lua-language-server (LuaLS) naming conventions

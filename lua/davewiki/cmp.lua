@@ -21,12 +21,6 @@ function cmp.setup(config)
     end
 end
 
---- Check if cmp integration is enabled
----@return boolean
-function cmp.is_enabled()
-    return cmp.config.enabled
-end
-
 --- Wiki tags cmp source definition
 local wiki_tags_source = {}
 

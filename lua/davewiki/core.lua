@@ -339,8 +339,18 @@ M.jump_to_tag_file = function(tag_name)
         return false
     end
 
-    -- create_tag_file opens the buffer (existing file or new unsaved buffer)
     return M.create_tag_file(tag_name)
+end
+
+--- Jumps to the tag file under the cursor
+--- Creates the tag file if it doesn't exist
+--- @return boolean True if jump was successful, false otherwise
+M.jump_to_tag = function()
+    local tag = M.get_tag_under_cursor()
+    if tag then
+        return M.jump_to_tag_file(tag)
+    end
+    return false
 end
 
 -- ============================================================================
@@ -787,6 +797,198 @@ M.find_backlinks = function(tag_name)
     end
 
     return backlinks
+end
+
+-- ============================================================================
+-- TAG LISTS AND HEADINGS
+-- ============================================================================
+
+--- Get a sorted list of unique tags from the wiki
+--- Uses core.scan_for_tags() to find all tags across wiki_root
+---@return table Array of tag names (with # prefix), sorted alphabetically
+M.get_tags_list = function()
+    if not M.wiki_root then
+        return {}
+    end
+
+    local tag_data = M.scan_for_tags()
+    local tags = {}
+
+    for _, data in ipairs(tag_data) do
+        table.insert(tags, data.tag)
+    end
+
+    table.sort(tags)
+
+    return tags
+end
+
+--- Get all references for a tag or all tag references in the wiki
+--- When tag_name is provided, returns references to that specific tag
+--- When tag_name is nil, returns all references to any tag
+---@param tag_name string? The tag name to search for (with # prefix), optional
+---@return table Array of reference objects with file, lnum, col, line, tag fields
+M.get_tag_references = function(tag_name)
+    if not M.wiki_root then
+        return {}
+    end
+
+    if tag_name then
+        if not M.is_valid_tag(tag_name) then
+            return {}
+        end
+        return M.find_backlinks(tag_name)
+    end
+
+    local args = {
+        "--line-number",
+        "--column",
+        "--only-matching",
+        M.TAG_PATTERN,
+        M.wiki_root,
+    }
+
+    local lines = M.ripgrep(args)
+    local references = {}
+    local seen = {}
+
+    for _, line in ipairs(lines) do
+        local file_path, line_num, col_num, tag = line:match("^(.-):(%d+):(%d+):(#.+)$")
+        if file_path and line_num and col_num then
+            if not M.is_tag_file(file_path) then
+                local key = file_path .. ":" .. line_num .. ":" .. col_num
+                if not seen[key] then
+                    seen[key] = true
+                    table.insert(references, {
+                        file = file_path,
+                        lnum = tonumber(line_num),
+                        col = tonumber(col_num),
+                        line = tag,
+                        tag = tag,
+                    })
+                end
+            end
+        end
+    end
+
+    return references
+end
+
+--- Get a sorted list of all level-1 headings from the wiki
+--- Uses ripgrep to find lines starting with "# " (but not "##")
+---@return table Array of heading objects with text, file, and lnum fields
+M.get_headings_list = function()
+    if not M.wiki_root then
+        return {}
+    end
+
+    local args = {
+        "--line-number",
+        "--column",
+        "^# [^#].*$",
+        M.wiki_root,
+        "--type",
+        "md",
+    }
+
+    local lines = M.ripgrep(args)
+    local headings = {}
+
+    for _, line in ipairs(lines) do
+        local file_path, line_num, _, content = line:match("^(.-):(%d+):(%d+):(.*)$")
+
+        if file_path and line_num and content then
+            table.insert(headings, {
+                text = content,
+                file = file_path,
+                lnum = tonumber(line_num),
+            })
+        end
+    end
+
+    table.sort(headings, function(a, b)
+        return a.text < b.text
+    end)
+
+    return headings
+end
+
+--- Generate an absolute path from wiki_root for a target file
+--- Returns path starting with "/" that is relative to wiki_root
+---
+---@param target_file string The absolute path to the target file
+---@return string|nil The absolute path from wiki_root (e.g., "/notes/file.md"), or nil if outside wiki_root
+M.generate_absolute_path = function(target_file)
+    if not M.wiki_root or not target_file then
+        return nil
+    end
+
+    local resolved_wiki_root = vim.fn.resolve(M.wiki_root)
+    local resolved_target = vim.fn.resolve(target_file)
+
+    if not M.is_path_within_wiki_root(resolved_target) then
+        return nil
+    end
+
+    local relative_path = resolved_target:sub(#resolved_wiki_root + 1)
+
+    if relative_path:sub(1, 1) ~= "/" then
+        relative_path = "/" .. relative_path
+    end
+
+    return M.url_encode(relative_path)
+end
+
+--- Setup user commands and autocommands for core functionality
+---@param config table Configuration table with show_tag_backlinks and wiki_root
+function M.setup_commands(config)
+    if config.show_tag_backlinks then
+        local augroup = vim.api.nvim_create_augroup("DaveWikiBacklinks", { clear = true })
+
+        vim.api.nvim_create_autocmd("BufReadPost", {
+            group = augroup,
+            pattern = config.wiki_root .. "/sources/*.md",
+            desc = "Show backlinks when entering a tag file",
+            callback = function(args)
+                local file_path = vim.api.nvim_buf_get_name(args.buf)
+                local tag_name = M.extract_tag_from_filename(file_path)
+                if not tag_name then
+                    return
+                end
+
+                local backlinks = M.find_backlinks("#" .. tag_name)
+                if #backlinks == 0 then
+                    return
+                end
+
+                local qf_list = {}
+                for _, backlink in ipairs(backlinks) do
+                    table.insert(qf_list, {
+                        filename = backlink.file,
+                        lnum = backlink.lnum,
+                        col = backlink.col,
+                        text = backlink.line,
+                    })
+                end
+
+                vim.fn.setqflist(qf_list, "r")
+                vim.cmd("copen")
+            end,
+        })
+
+        vim.api.nvim_create_autocmd("BufLeave", {
+            group = augroup,
+            pattern = config.wiki_root .. "/sources/*.md",
+            desc = "Close quickfix when leaving a tag file",
+            callback = function(args)
+                local file_path = vim.api.nvim_buf_get_name(args.buf)
+                if not M.is_tag_file(file_path) then
+                    return
+                end
+                vim.cmd("cclose")
+            end,
+        })
+    end
 end
 
 return M

@@ -52,15 +52,15 @@ describe("davewiki.journal module setup", function()
         end)
     end)
 
-    describe("is_enabled", function()
+    describe("config.enabled", function()
         it("should return true when enabled", function()
             lua_journal.setup({ enabled = true })
-            assert.is_true(lua_journal.is_enabled())
+            assert.is_true(lua_journal.config.enabled)
         end)
 
         it("should return false when disabled", function()
             lua_journal.setup({ enabled = false })
-            assert.is_false(lua_journal.is_enabled())
+            assert.is_false(lua_journal.config.enabled)
         end)
     end)
 end)
@@ -344,43 +344,44 @@ describe("davewiki.journal user commands", function()
         cleanup_created_files()
     end)
 
-    describe("create_user_commands", function()
+    describe("setup_commands", function()
         it("should create DavewikiJournalToday command", function()
-            lua_journal.create_user_commands()
+            lua_journal.setup_commands()
             local commands = vim.api.nvim_get_commands({ builtin = false })
             assert.is_not_nil(commands.DavewikiJournalToday)
         end)
 
         it("should create DavewikiJournalYesterday command", function()
-            lua_journal.create_user_commands()
+            lua_journal.setup_commands()
             local commands = vim.api.nvim_get_commands({ builtin = false })
             assert.is_not_nil(commands.DavewikiJournalYesterday)
         end)
 
         it("should create DavewikiJournalTomorrow command", function()
-            lua_journal.create_user_commands()
+            lua_journal.setup_commands()
             local commands = vim.api.nvim_get_commands({ builtin = false })
             assert.is_not_nil(commands.DavewikiJournalTomorrow)
         end)
 
         it("should create DavewikiJournalOpen command", function()
-            lua_journal.create_user_commands()
+            lua_journal.setup_commands()
             local commands = vim.api.nvim_get_commands({ builtin = false })
             assert.is_not_nil(commands.DavewikiJournalOpen)
         end)
     end)
 end)
 ---
--- Tests for davewiki.journal telescope integration
--- @module davewiki.journal_telescope_spec
+-- Tests for davewiki.telescope journal integration
+-- @module davewiki.telescope_journal_spec
 
-local journal = require("davewiki.journal")
+local telescope = require("davewiki.telescope")
 local core = require("davewiki.core")
+local journal = require("davewiki.journal")
 
 -- Get the absolute path to test_root directory relative to this script
 local test_root = vim.fn.fnamemodify(vim.fn.expand("<sfile>:h:h:h:h"), ":p") .. "test_root"
 
-describe("davewiki.journal jump_to_journal function", function()
+describe("davewiki.telescope jump_to_journal function", function()
     before_each(function()
         core.setup({ wiki_root = test_root })
         journal.config.enabled = true
@@ -397,7 +398,7 @@ describe("davewiki.journal jump_to_journal function", function()
                 return original_require(mod)
             end
 
-            local result = journal.jump_to_journal()
+            local result = telescope.jump_to_journal()
 
             _G.require = original_require
 
@@ -406,20 +407,20 @@ describe("davewiki.journal jump_to_journal function", function()
 
         it("should return false when wiki_root is not set", function()
             core.wiki_root = nil
-            local result = journal.jump_to_journal()
+            local result = telescope.jump_to_journal()
             assert.is_false(result)
         end)
 
         it("should return false when journal module is disabled", function()
             journal.config.enabled = false
-            local result = journal.jump_to_journal()
+            local result = telescope.jump_to_journal()
             assert.is_false(result)
         end)
     end)
 
     describe("get_journals_list", function()
         it("should return list of journal files from wiki_root/journals/", function()
-            local journals = journal.get_journals_list()
+            local journals = telescope.get_journals_list()
 
             assert.is_table(journals)
             -- test_root has some journal files (git-tracked ones)
@@ -439,7 +440,7 @@ describe("davewiki.journal jump_to_journal function", function()
 
         it("should return empty table when wiki_root is nil", function()
             core.wiki_root = nil
-            local journals = journal.get_journals_list()
+            local journals = telescope.get_journals_list()
             assert.is_table(journals)
             assert.are.equal(0, #journals)
         end)
@@ -451,7 +452,7 @@ describe("davewiki.journal jump_to_journal function", function()
             core.wiki_root = temp_dir
             vim.fn.mkdir(core.wiki_root, "p")
 
-            local journals = journal.get_journals_list()
+            local journals = telescope.get_journals_list()
 
             core.wiki_root = original_root
             vim.fn.delete(temp_dir, "rf")
@@ -461,32 +462,38 @@ describe("davewiki.journal jump_to_journal function", function()
         end)
 
         it("should use absolute paths in display", function()
-            local journals = journal.get_journals_list()
+            local journals = telescope.get_journals_list()
 
             for _, entry in ipairs(journals) do
                 -- Display should be the same as file (absolute path)
                 assert.are.equal(entry.file, entry.display)
                 -- Should be an absolute path
-                assert.is_true(entry.display:match("^/") ~= nil,
-                    "Display should be absolute path: " .. entry.display)
+                assert.is_true(
+                    entry.display:match("^/") ~= nil,
+                    "Display should be absolute path: " .. entry.display
+                )
             end
         end)
     end)
 end)
 
-describe("davewiki.journal get_journals_list sorting", function()
+describe("davewiki.telescope get_journals_list sorting", function()
     before_each(function()
         core.setup({ wiki_root = test_root })
     end)
 
     it("should return journal files sorted alphabetically", function()
-        local journals = journal.get_journals_list()
+        local journals = telescope.get_journals_list()
 
         if #journals > 1 then
             for i = 2, #journals do
-                assert.is_true(journals[i - 1].display <= journals[i].display,
-                    "Journals should be sorted alphabetically: " ..
-                    journals[i - 1].display .. " > " .. journals[i].display)
+                assert.is_true(
+                    journals[i - 1].display <= journals[i].display,
+                    "Journals should be sorted alphabetically: "
+                        .. journals[i - 1].display
+                        .. " > "
+                        .. journals[i].display
+                )
             end
         end
     end)

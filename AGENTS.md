@@ -56,7 +56,7 @@ nix run .#nvim-test -- -u scripts/minimal-init.lua --headless -c 'PlenaryBustedF
 - `tests/lua/davewiki/telescope_spec.lua` - Telescope module tests (telescope.nvim integration)
 - `tests/lua/davewiki/journal_spec.lua` - Journal module tests (daily journal management, telescope journal picker)
 - `tests/lua/davewiki/view_spec.lua` - View module tests (synthetic tag view generation)
-- Total: 264 tests covering all implemented features
+- Total: 226 tests covering all implemented features
 
 ### Testing Rules
 

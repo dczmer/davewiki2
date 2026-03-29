@@ -34,7 +34,7 @@ describe("davewiki public interface", function()
     end)
 end)
 
-describe("davewiki.jump_to_tag", function()
+describe("davewiki.core.jump_to_tag", function()
     before_each(function()
         davewiki.setup({ wiki_root = test_root })
     end)
@@ -53,7 +53,7 @@ describe("davewiki.jump_to_tag", function()
         vim.api.nvim_set_current_buf(buf)
         vim.api.nvim_win_set_cursor(0, { 1, 0 })
 
-        local success = davewiki.jump_to_tag()
+        local success = davewiki.core.jump_to_tag()
         assert.is_false(success)
 
         vim.api.nvim_buf_delete(buf, { force = true })
@@ -65,10 +65,9 @@ describe("davewiki.jump_to_tag", function()
         vim.api.nvim_set_current_buf(buf)
         vim.api.nvim_win_set_cursor(0, { 1, 6 }) -- On #bengal
 
-        local success = davewiki.jump_to_tag()
+        local success = davewiki.core.jump_to_tag()
         assert.is_true(success)
 
-        -- Verify we jumped to the file
         local current_file = vim.api.nvim_buf_get_name(0)
         assert.is_true(current_file:match("bengal%.md$") ~= nil)
 
@@ -79,22 +78,19 @@ describe("davewiki.jump_to_tag", function()
         local buf = vim.api.nvim_create_buf(false, true)
         vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "Text #jump-to-tag-test here" })
         vim.api.nvim_set_current_buf(buf)
-        vim.api.nvim_win_set_cursor(0, { 1, 6 }) -- On #jump-to-tag-test
+        vim.api.nvim_win_set_cursor(0, { 1, 6 })
 
-        -- Ensure file doesn't exist
         local test_file = test_root .. "/sources/jump-to-tag-test.md"
         if vim.fn.filereadable(test_file) == 1 then
             vim.fn.delete(test_file)
         end
 
-        local success = davewiki.jump_to_tag()
+        local success = davewiki.core.jump_to_tag()
         assert.is_true(success)
 
-        -- Verify buffer was opened with correct path
         local current_file = vim.api.nvim_buf_get_name(0)
         assert.is_true(current_file:match("jump%-to%-tag%-test%.md$") ~= nil)
 
-        -- Verify buffer has frontmatter content
         local lines = vim.api.nvim_buf_get_lines(0, 0, -1, false)
         local content_str = table.concat(lines, "\n")
         assert.is_true(content_str:match("name: jump%-to%-tag%-test") ~= nil)
@@ -107,9 +103,8 @@ describe("davewiki.jump_to_tag", function()
         vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "The #siamese cat likes fish" })
         vim.api.nvim_set_current_buf(buf)
 
-        -- Cursor at start of tag
         vim.api.nvim_win_set_cursor(0, { 1, 4 })
-        local success = davewiki.jump_to_tag()
+        local success = davewiki.core.jump_to_tag()
         assert.is_true(success)
 
         vim.api.nvim_buf_delete(buf, { force = true })

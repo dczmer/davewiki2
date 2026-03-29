@@ -8,11 +8,13 @@ A personal knowledge base system for neovim with journal-based note-taking, insp
 - Organizes notes using flat tags (`#tag-name`) with back-reference tracking
 - Provides quick search and navigation between tags, notes, and journals
 - Integrates with telescope.nvim for tag search and nvim-cmp for completion
+- Generates synthetic tag views that aggregate all references to a tag across the wiki
 
 ## Key features
 
 - Journal-based daily note-taking
 - Tag-based organization with back-references
+- Tag views for consolidated research across the entire wiki
 - Markdown link navigation
 - Tag autocomplete
 - Telescope integration for tag search, heading search, and navigation
@@ -95,7 +97,15 @@ require('davewiki').setup({
 
 ### Tag Highlighting
 
-Tags (`#tag-name`) are automatically highlighted with a custom highlight group `DavewikiTag` when viewing markdown files within your wiki.
+Tags (`#tag-name`) are automatically highlighted with a custom highlight group `DavewikiTag` when viewing markdown files within your wiki. This feature can be disabled by setting `highlight_tags = false` in your configuration.
+
+**Configuration:**
+```lua
+require('davewiki').setup({
+  wiki_root = "~/.davewiki",
+  highlight_tags = false,  -- Disable tag highlighting
+})
+```
 
 **Default Style:**
 - Bright orange foreground (`#FF8C00`)
@@ -160,19 +170,6 @@ vim.keymap.set('n', '<leader>wV', '<cmd>DavewikiGenerateView<CR>', { desc = "Pic
 Optional attachments (images, files) can be stored in `attachments/` within your wiki root.
 
 ## Installation
-
-### With Nix (recommended)
-
-The plugin can be installed as a Nix package, providing a reproducible build with a bundled standalone neovim instance.
-
-```nix
-# In your flake.nix or NixOS configuration
-inputs.davewiki.url = "github:dczmer/davewiki2";
-
-# Use the davewiki package or nvim-test for development
-nix build .#davewiki
-nix run .#davewiki
-```
 
 ### With lazy.nvim
 
@@ -245,6 +242,7 @@ require('davewiki').setup({
 | `cmp.enabled` | boolean | `true` | Enable nvim-cmp integration |
 | `journal.enabled` | boolean | `true` | Enable journal module |
 | `show_tag_backlinks` | boolean | `true` | Enable automatic backlink display when opening tag files |
+| `highlight_tags` | boolean | `true` | Enable automatic tag syntax highlighting |
 
 ### Telescope Commands
 
@@ -354,7 +352,7 @@ end, { desc = 'Insert markdown link to wiki file' })
 
 -- Browse journal files with <leader>wj
 vim.keymap.set('n', '<leader>wj', function()
-    require('davewiki').journal.jump_to_journal()
+    require('davewiki').telescope.jump_to_journal()
 end, { desc = 'Browse journal files with telescope' })
 ```
 
@@ -391,7 +389,7 @@ The priority for wiki_root is: setup option > `g:davewiki_wiki_root` > default `
 For manual acceptance testing, you can run an interactive neovim instance pre-configured with davewiki:
 
 ```sh
-nix run .#nvim-test
+nix run .#nvim-test -- -u scripts/minimal-init.lua
 ```
 
 This opens neovim with the `scripts/minimal-init.lua` configuration, which:
@@ -402,6 +400,12 @@ This opens neovim with the `scripts/minimal-init.lua` configuration, which:
 You can test the tag navigation by opening any markdown file in `test_root/` and pressing `<CR>` on a tag (e.g., `#bengal`).
 
 You can test hyperlink navigation by pressing `<CR>` on a markdown link like `[notes](./notes.md)`or `[website](https://example.com)`.
+
+For a fuller configuration with all features enabled and keymaps configured:
+
+```sh
+nix run .#nvim-test -- -u scripts/davewiki2-init.lua
+```
 
 ### Running Tests
 
