@@ -463,6 +463,65 @@ function telescope.insert_link()
     return true
 end
 
+--- Open telescope picker to select a tag and generate view
+--- @return boolean True if picker opened successfully, false otherwise
+function telescope.tag_view()
+    if not core.is_telescope_installed() then
+        vim.notify("davewiki: telescope.nvim not installed", vim.log.levels.WARN)
+        return false
+    end
+
+    if not core.wiki_root then
+        vim.notify("davewiki: wiki_root is not configured", vim.log.levels.ERROR)
+        return false
+    end
+
+    local tag_files = core.find_tag_files()
+
+    if #tag_files == 0 then
+        vim.notify("davewiki: No tags found in wiki_root", vim.log.levels.INFO)
+        return false
+    end
+
+    local pickers = require("telescope.pickers")
+    local finders = require("telescope.finders")
+    local conf = require("telescope.config").values
+    local view = require("davewiki.view")
+
+    pickers
+        .new({}, {
+            prompt_title = "Generate Tag View",
+            finder = finders.new_table({
+                results = tag_files,
+                entry_maker = function(entry)
+                    local tag_name = core.extract_tag_from_filename(entry)
+                    return {
+                        value = entry,
+                        display = tag_name or entry,
+                        ordinal = tag_name or entry,
+                        filename = entry,
+                    }
+                end,
+            }),
+            sorter = conf.file_sorter({}),
+            previewer = conf.grep_previewer({}),
+            attach_mappings = function(_, map)
+                map("i", "<CR>", function(bufnr)
+                    local selection = require("telescope.actions.state").get_selected_entry()
+                    require("telescope.actions").close(bufnr)
+                    if selection then
+                        local tag_name = "#" .. selection.display
+                        view.generate_view(tag_name)
+                    end
+                end)
+                return true
+            end,
+        })
+        :find()
+
+    return true
+end
+
 --- Set up user commands for telescope integration
 function telescope.setup_commands()
     -- Command to open tags picker
@@ -505,6 +564,13 @@ function telescope.setup_commands()
         telescope.insert_link()
     end, {
         desc = "Insert a markdown link to another wiki file",
+    })
+
+    -- Command to open tag view picker
+    vim.api.nvim_create_user_command("DavewikiGenerateView", function()
+        telescope.tag_view()
+    end, {
+        desc = "Open picker to generate tag view",
     })
 end
 

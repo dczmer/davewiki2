@@ -54,13 +54,55 @@ nix run .#nvim-test -- -u scripts/minimal-init.lua --headless -c 'PlenaryBustedF
 - `tests/lua/davewiki/init_spec.lua` - Init module tests (public API)
 - `tests/lua/davewiki/cmp_spec.lua` - Cmp module tests (nvim-cmp tag completion)
 - `tests/lua/davewiki/telescope_spec.lua` - Telescope module tests (telescope.nvim integration)
-- Total: 150+ tests covering all implemented features
+- `tests/lua/davewiki/journal_spec.lua` - Journal module tests (daily journal management, telescope journal picker)
+- `tests/lua/davewiki/view_spec.lua` - View module tests (synthetic tag view generation)
+- Total: 264 tests covering all implemented features
 
 ### Testing Rules
 
 - **Never mock** vim internal functions or filesystem operations unless there is no alternative.
 - Tests run against **real files** in `test_root/` — no mocking the filesystem.
 - Tests must use `test_root` as the `wiki_root` and **never access files outside it**.
+
+### Test File Management
+
+When creating, reading, or modifying files in `test_root/` during tests:
+
+1. **Do not modify or delete** files tracked by git (e.g., existing test fixtures)
+2. **Use unique names** for each test's files to avoid collisions (e.g., `test-view-unique-*.md`, dates like `2099-01-15`)
+3. **Cleanup only files created** by that test in `after_each` — never delete all files in a directory
+4. **Create files before testing deletion** — if testing file deletion, create the file first
+5. **Never add test files to git** — files created during tests should remain untracked
+6. **Tests are broken if they fail from test pollution** — each test must be isolated and not depend on state from other tests
+
+Example pattern for tracked cleanup:
+```lua
+local created_files = {}
+
+local function track_file(filepath)
+    created_files[filepath] = true
+end
+
+local function cleanup_created_files()
+    for filepath, _ in pairs(created_files) do
+        pcall(vim.fn.delete, filepath)
+        created_files[filepath] = nil
+    end
+end
+
+describe("some tests", function()
+    after_each(function()
+        cleanup_created_files()
+    end)
+
+    it("creates a file", function()
+        local test_file = test_root .. "/unique-filename.md"
+        vim.fn.writefile({ "content" }, test_file)
+        track_file(test_file)
+        -- assertions...
+    end)
+end)
+```
 
 ### Test File Structure
 

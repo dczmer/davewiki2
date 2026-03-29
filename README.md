@@ -122,6 +122,39 @@ vim.api.nvim_set_hl(0, "DavewikiTag", {
 vim.cmd("highlight DavewikiTag guifg=blue guibg=yellow gui=underline")
 ```
 
+### Tag Views
+
+Synthetic tag views aggregate all references to a specific tag into a single buffer, providing a consolidated research view across your entire wiki.
+
+**Features:**
+- Generates a synthetic view file containing tag file content, journal blocks, and wiki references
+- Each section includes markdown links to source documents
+- View is created as an unsaved buffer - you can save it manually if desired
+- Automatically regenerates content when invoked for an existing view
+
+**View Content:**
+When you generate a tag view for `#cooking`, the buffer contains:
+1. **Tag File Content**: Full content of the `sources/cooking.md` tag file (or "NO TAG FILE" placeholder)
+2. **Journal Blocks**: Complete `---` separated blocks from journal files that mention `#cooking`
+3. **Wiki References**: Paragraphs from non-journal wiki files that mention `#cooking`
+
+**Commands:**
+
+| Command | Description |
+|---------|-------------|
+| `:DavewikiGenerateView` | Open telescope picker to select a tag and generate its view |
+| `:DavewikiGenerateViewFromCursor` | Generate view for the tag under cursor |
+| `:DavewikiGenerateViewFromTagFile` | Generate view for the current tag file (when editing a tag file) |
+
+**Keymap Examples:**
+```lua
+-- Generate view for tag under cursor
+vim.keymap.set('n', '<leader>wv', '<cmd>DavewikiGenerateViewFromCursor<CR>', { desc = "Generate tag view from cursor" })
+
+-- Pick a tag and generate view
+vim.keymap.set('n', '<leader>wV', '<cmd>DavewikiGenerateView<CR>', { desc = "Pick tag and generate view" })
+```
+
 ### Attachments
 
 Optional attachments (images, files) can be stored in `attachments/` within your wiki root.
@@ -163,7 +196,9 @@ require('lazy').setup({
 - `nvim-telescope/telescope.nvim` - search UI
 - `nvim-cmp` - tag completion
 - `mattn/calendar-vim` - calendar support for daily journals
-- `nvim-lua/plenary.nvim` - testing framework (required for development)
+
+**Development:**
+- `nvim-lua/plenary.nvim` - testing framework
 
 **Optional:**
 - `cmp-buffer` - buffer word completion
@@ -222,6 +257,7 @@ When telescope integration is enabled, the following commands are available:
 | `:DavewikiHeadings` | Search for level-1 headings across all markdown files |
 | `:DavewikiInsertLink` | Insert a markdown link to another wiki file using a telescope picker |
 | `:DavewikiJournals` | Open a telescope picker to browse and open journal files (requires journal module) |
+| `:DavewikiGenerateView` | Open telescope picker to select a tag and generate its synthetic view |
 
 ### Journal Commands
 

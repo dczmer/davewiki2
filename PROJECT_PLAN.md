@@ -31,6 +31,7 @@ Command-line neovim users who want a simple journal-based note-taking system.
   - Jump to file for tag under cursor
   - Jump to target of markdown link under cursor
   - Auto-complete tags with nvim-cmp
+  - Generate synthetic tag views aggregating all references to a tag
 - Search for tags, headings, etc. across all files
 - Integration with nvim-cmp and telescope.nvim
 
@@ -107,6 +108,7 @@ Command-line neovim users who want a simple journal-based note-taking system.
    - `davewiki/cmp.lua` - nvim-cmp integration
    - `davewiki/telescope.lua` - Telescope integration for tag and heading search
    - `davewiki/journal.lua` - Daily journal management and navigation
+   - `davewiki/view.lua` - Synthetic tag view generation
 
 2. **Tests:**
    - `tests/` - plenary.nvim test suite
@@ -125,7 +127,8 @@ lua/                     (lua modules)
     ├── core.lua
     ├── cmp.lua
     ├── telescope.lua
-    └── journal.lua
+    ├── journal.lua
+    └── view.lua         (synthetic tag views)
 tests/                   (plenary tests)
 tests/lua/davewiki/      (test files mirroring lua/ structure)
 test_root/               (example/test wiki)

@@ -80,6 +80,10 @@ function M.setup(user_config)
         M.telescope.setup({ enabled = true })
     end
 
+    -- Set up view commands
+    local view = require("davewiki.view")
+    view.setup_commands()
+
     if config.show_tag_backlinks then
         M.setup_backlinks_autocmd()
     end
