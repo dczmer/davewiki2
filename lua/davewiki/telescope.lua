@@ -25,119 +25,6 @@ function telescope.setup(config)
     telescope.setup_commands()
 end
 
---- Check if telescope integration is enabled
----@return boolean
-function telescope.is_enabled()
-    return telescope.config.enabled
-end
-
---- Generate an absolute path from wiki_root for a target file
---- Returns path starting with "/" that is relative to wiki_root
----
---- @param target_file string The absolute path to the target file
---- @return string|nil The absolute path from wiki_root (e.g., "/notes/file.md"), or nil if outside wiki_root
-function telescope.generate_absolute_path(target_file)
-    if not core.wiki_root or not target_file then
-        return nil
-    end
-
-    -- Resolve paths to handle any symlinks
-    local resolved_wiki_root = vim.fn.resolve(core.wiki_root)
-    local resolved_target = vim.fn.resolve(target_file)
-
-    -- Security check: ensure target is within wiki_root
-    if not core.is_path_within_wiki_root(resolved_target) then
-        return nil
-    end
-
-    -- Get the relative path from wiki_root
-    local relative_path = resolved_target:sub(#resolved_wiki_root + 1)
-
-    -- Ensure the path starts with "/"
-    if relative_path:sub(1, 1) ~= "/" then
-        relative_path = "/" .. relative_path
-    end
-
-    -- URL-encode the path for use in markdown links
-    return core.url_encode(relative_path)
-end
-
---- Get a sorted list of unique tags from the wiki
---- Uses core.scan_for_tags() to find all tags across wiki_root
----@return table Array of tag names (with # prefix), sorted alphabetically
-function telescope.get_tags_list()
-    if not core.wiki_root then
-        return {}
-    end
-
-    local tag_data = core.scan_for_tags()
-    local tags = {}
-
-    for _, data in ipairs(tag_data) do
-        table.insert(tags, data.tag)
-    end
-
-    -- Sort alphabetically
-    table.sort(tags)
-
-    return tags
-end
-
---- Get all references for a tag or all tag references in the wiki
---- When tag_name is provided, returns references to that specific tag
---- When tag_name is nil, returns all references to any tag
----@param tag_name string? The tag name to search for (with # prefix), optional
----@return table Array of reference objects with file, lnum, col, line, tag fields
-function telescope.get_all_references(tag_name)
-    if not core.wiki_root then
-        return {}
-    end
-
-    -- If specific tag provided, use find_backlinks
-    if tag_name then
-        if not core.is_valid_tag(tag_name) then
-            return {}
-        end
-        return core.find_backlinks(tag_name)
-    end
-
-    -- Otherwise, find all tag references using ripgrep
-    local args = {
-        "--line-number",
-        "--column",
-        "--only-matching",
-        core.TAG_PATTERN,
-        core.wiki_root,
-    }
-
-    local lines = core.ripgrep(args)
-    local references = {}
-    local seen = {}
-
-    for _, line in ipairs(lines) do
-        -- Parse: file:line:col:tag
-        local file_path, line_num, col_num, tag = line:match("^(.-):(%d+):(%d+):(#.+)$")
-        if file_path and line_num and col_num then
-            -- Skip tag files
-            if not core.is_tag_file(file_path) then
-                local key = file_path .. ":" .. line_num .. ":" .. col_num
-                if not seen[key] then
-                    seen[key] = true
-                    table.insert(references, {
-                        file = file_path,
-                        lnum = tonumber(line_num),
-                        col = tonumber(col_num),
-                        line = tag,
-                        tag = tag,
-                    })
-                end
-            end
-        end
-    end
-
-    return references
-end
-
 --- Open telescope picker to list all tags
 --- Allows fuzzy filtering and navigation to tag files
 ---@return boolean True if picker opened successfully, false otherwise
@@ -219,7 +106,7 @@ function telescope.tag_references(tag_name)
     end
 
     -- Get references (either for specific tag or all tags)
-    local references = telescope.get_all_references(tag_name)
+    local references = core.get_tag_references(tag_name)
 
     if #references == 0 then
         if tag_name then
@@ -272,49 +159,6 @@ function telescope.tag_references(tag_name)
     return true
 end
 
---- Get a sorted list of all level-1 headings from the wiki
---- Uses ripgrep to find lines starting with "# " (but not "##")
----@return table Array of heading objects with text, file, and lnum fields
-function telescope.get_headings_list()
-    if not core.wiki_root then
-        return {}
-    end
-
-    -- Pattern for level-1 headings: lines starting with "# " followed by non-space text
-    -- ripgrep will output: file:line:column:content
-    local args = {
-        "--line-number",
-        "--column",
-        "^# [^#].*$",
-        core.wiki_root,
-        "--type",
-        "md",
-    }
-
-    local lines = core.ripgrep(args)
-    local headings = {}
-
-    for _, line in ipairs(lines) do
-        -- Parse ripgrep output: file:line:column:content
-        local file_path, line_num, _, content = line:match("^(.-):(%d+):(%d+):(.*)$")
-
-        if file_path and line_num and content then
-            table.insert(headings, {
-                text = content,
-                file = file_path,
-                lnum = tonumber(line_num),
-            })
-        end
-    end
-
-    -- Sort alphabetically by heading text
-    table.sort(headings, function(a, b)
-        return a.text < b.text
-    end)
-
-    return headings
-end
-
 --- Open telescope picker to list all level-1 headings
 --- Allows fuzzy filtering and navigation to headings
 ---@return boolean True if picker opened successfully, false otherwise
@@ -329,7 +173,7 @@ function telescope.headings()
         return false
     end
 
-    local headings_list = telescope.get_headings_list()
+    local headings_list = core.get_headings_list()
 
     if #headings_list == 0 then
         -- Silent behavior when no headings found (per spec)
@@ -444,7 +288,7 @@ function telescope.insert_link()
 
                     if selection then
                         -- Generate absolute path from wiki_root
-                        local absolute_path = telescope.generate_absolute_path(selection.filename)
+                        local absolute_path = core.generate_absolute_path(selection.filename)
 
                         if absolute_path then
                             -- Build the markdown link
@@ -572,6 +416,126 @@ function telescope.setup_commands()
     end, {
         desc = "Open picker to generate tag view",
     })
+
+    -- Command to open journals picker
+    vim.api.nvim_create_user_command("DavewikiJournals", function()
+        telescope.jump_to_journal()
+    end, {
+        desc = "Open telescope picker for journal files",
+    })
+end
+
+--- Get a list of all journal files under wiki_root/journals/
+--- Returns files sorted alphabetically with relative paths for display
+---@return table Array of journal file entries with file, display, and ordinal fields
+function telescope.get_journals_list()
+    if not core.wiki_root then
+        return {}
+    end
+
+    local journals_dir = core.wiki_root .. "/journals"
+    if vim.fn.isdirectory(journals_dir) ~= 1 then
+        return {}
+    end
+
+    local args = {
+        "--files",
+        "--type",
+        "md",
+        journals_dir,
+    }
+
+    local lines = core.ripgrep(args)
+    local journals = {}
+
+    for _, line in ipairs(lines) do
+        local resolved_path = vim.fn.resolve(line)
+
+        if resolved_path:sub(1, #journals_dir) == journals_dir then
+            table.insert(journals, {
+                file = resolved_path,
+                display = resolved_path,
+                ordinal = resolved_path,
+            })
+        end
+    end
+
+    table.sort(journals, function(a, b)
+        return a.display < b.display
+    end)
+
+    return journals
+end
+
+--- Get the journals directory path
+---@return string|nil The journals directory path, or nil if wiki_root not set
+function telescope.get_journal_dir()
+    if not core.wiki_root then
+        return nil
+    end
+    return core.wiki_root .. "/journals"
+end
+
+--- Open telescope picker to list all journal files
+--- Allows fuzzy filtering and navigation to journal files with preview
+---@return boolean True if picker opened successfully, false otherwise
+function telescope.jump_to_journal()
+    local journal = require("davewiki.journal")
+    if not journal.config.enabled then
+        return false
+    end
+
+    if not core.is_telescope_installed() then
+        vim.notify("davewiki: telescope.nvim not installed", vim.log.levels.WARN)
+        return false
+    end
+
+    if not core.wiki_root then
+        vim.notify("davewiki: wiki_root is not configured", vim.log.levels.ERROR)
+        return false
+    end
+
+    local journals_list = telescope.get_journals_list()
+
+    if #journals_list == 0 then
+        vim.notify("davewiki: No journal files found in wiki_root/journals/", vim.log.levels.INFO)
+        return false
+    end
+
+    local pickers = require("telescope.pickers")
+    local finders = require("telescope.finders")
+    local conf = require("telescope.config").values
+
+    pickers
+        .new({}, {
+            prompt_title = "Journals",
+            finder = finders.new_table({
+                results = journals_list,
+                entry_maker = function(entry)
+                    return {
+                        value = entry,
+                        display = entry.display,
+                        ordinal = entry.ordinal,
+                        filename = entry.file,
+                    }
+                end,
+            }),
+            sorter = conf.file_sorter({}),
+            previewer = conf.grep_previewer({}),
+            attach_mappings = function(_, map)
+                map("i", "<CR>", function(bufnr)
+                    local selection = require("telescope.actions.state").get_selected_entry()
+                    require("telescope.actions").close(bufnr)
+                    if selection then
+                        vim.cmd("edit " .. vim.fn.fnameescape(selection.filename))
+                    end
+                end)
+                return true
+            end,
+        })
+        :find()
+
+    return true
 end
 
 return telescope

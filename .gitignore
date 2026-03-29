@@ -2,8 +2,5 @@
 .direnv/
 result/
 
-# Lua
-.luarc.json
-
 # Test files created during test runs
 test_root/notes/relative-link-no-prefix.md

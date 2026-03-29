@@ -14,28 +14,28 @@ describe("davewiki.telescope setup", function()
         core.wiki_root = nil
     end)
 
-    describe("is_enabled", function()
+    describe("config.enabled", function()
         it("should return true by default", function()
             telescope.config.enabled = true
-            assert.is_true(telescope.is_enabled())
+            assert.is_true(telescope.config.enabled)
         end)
 
         it("should return false when disabled", function()
             telescope.config.enabled = false
-            assert.is_false(telescope.is_enabled())
+            assert.is_false(telescope.config.enabled)
         end)
     end)
 
     describe("setup", function()
         it("should update config when passed options", function()
             telescope.setup({ enabled = false })
-            assert.is_false(telescope.is_enabled())
+            assert.is_false(telescope.config.enabled)
         end)
 
         it("should preserve existing config when no options passed", function()
             telescope.config.enabled = false
             telescope.setup({})
-            assert.is_false(telescope.is_enabled())
+            assert.is_false(telescope.config.enabled)
         end)
     end)
 end)
@@ -189,12 +189,16 @@ describe("davewiki.telescope insert_link function", function()
         end)
     end)
 
-    describe("insert_link absolute path generation", function()
+    describe("davewiki.core generate_absolute_path", function()
+        before_each(function()
+            core.setup({ wiki_root = test_root })
+        end)
+
         it("should generate absolute path for file in same directory", function()
             local current_file = test_root .. "/notes/baked-fish.md"
             local target_file = test_root .. "/notes/grilled-fish.md"
 
-            local absolute_path = telescope.generate_absolute_path(target_file)
+            local absolute_path = core.generate_absolute_path(target_file)
 
             assert.are.equal("/notes/grilled-fish.md", absolute_path)
         end)
@@ -203,7 +207,7 @@ describe("davewiki.telescope insert_link function", function()
             local current_file = test_root .. "/notes/recipes/summer.md"
             local target_file = test_root .. "/notes/grilled-fish.md"
 
-            local absolute_path = telescope.generate_absolute_path(target_file)
+            local absolute_path = core.generate_absolute_path(target_file)
 
             assert.are.equal("/notes/grilled-fish.md", absolute_path)
         end)
@@ -211,7 +215,7 @@ describe("davewiki.telescope insert_link function", function()
         it("should generate absolute path for file at root", function()
             local target_file = test_root .. "/README.md"
 
-            local absolute_path = telescope.generate_absolute_path(target_file)
+            local absolute_path = core.generate_absolute_path(target_file)
 
             assert.are.equal("/README.md", absolute_path)
         end)
@@ -219,7 +223,7 @@ describe("davewiki.telescope insert_link function", function()
         it("should generate absolute path for nested directory", function()
             local target_file = test_root .. "/notes/deep/nested/file.md"
 
-            local absolute_path = telescope.generate_absolute_path(target_file)
+            local absolute_path = core.generate_absolute_path(target_file)
 
             assert.are.equal("/notes/deep/nested/file.md", absolute_path)
         end)
@@ -227,7 +231,7 @@ describe("davewiki.telescope insert_link function", function()
         it("should handle files with spaces in names", function()
             local target_file = test_root .. "/notes/my file.md"
 
-            local absolute_path = telescope.generate_absolute_path(target_file)
+            local absolute_path = core.generate_absolute_path(target_file)
 
             assert.are.equal("/notes/my%20file.md", absolute_path)
         end)
@@ -235,7 +239,7 @@ describe("davewiki.telescope insert_link function", function()
         it("should return nil when target is outside wiki_root", function()
             local target_file = "/etc/passwd"
 
-            local absolute_path = telescope.generate_absolute_path(target_file)
+            local absolute_path = core.generate_absolute_path(target_file)
 
             assert.is_nil(absolute_path)
         end)
@@ -247,20 +251,18 @@ describe("davewiki.telescope helper functions", function()
         core.setup({ wiki_root = test_root })
     end)
 
-    describe("get_tags_list", function()
+    describe("davewiki.core get_tags_list", function()
         it("should return list of unique tags from wiki", function()
-            local tags = telescope.get_tags_list()
+            local tags = core.get_tags_list()
 
             assert.is_table(tags)
             assert.is_true(#tags > 0)
 
-            -- Each tag should be a string
             for _, tag in ipairs(tags) do
                 assert.is_string(tag)
                 assert.is_true(tag:match("^#") ~= nil)
             end
 
-            -- Tags should be alphabetically sorted
             for i = 2, #tags do
                 assert.is_true(tags[i - 1] <= tags[i])
             end
@@ -268,7 +270,7 @@ describe("davewiki.telescope helper functions", function()
 
         it("should return empty table when wiki_root is nil", function()
             core.wiki_root = nil
-            local tags = telescope.get_tags_list()
+            local tags = core.get_tags_list()
             assert.is_table(tags)
             assert.are.equal(0, #tags)
         end)
@@ -306,24 +308,21 @@ describe("davewiki.telescope headings function", function()
         end)
     end)
 
-    describe("get_headings_list", function()
+    describe("davewiki.core get_headings_list", function()
         it("should return list of all level-1 headings from wiki", function()
-            local headings = telescope.get_headings_list()
+            local headings = core.get_headings_list()
 
             assert.is_table(headings)
             assert.is_true(#headings > 0)
 
-            -- Each heading should be a table with required fields
             for _, heading in ipairs(headings) do
                 assert.is_table(heading)
                 assert.is_string(heading.text)
                 assert.is_string(heading.file)
                 assert.is_number(heading.lnum)
-                -- Level-1 headings start with "# " and have content
                 assert.is_true(heading.text:match("^# .+") ~= nil)
             end
 
-            -- Headings should be alphabetically sorted by text
             for i = 2, #headings do
                 assert.is_true(headings[i - 1].text <= headings[i].text)
             end
@@ -331,17 +330,16 @@ describe("davewiki.telescope headings function", function()
 
         it("should return empty table when wiki_root is nil", function()
             core.wiki_root = nil
-            local headings = telescope.get_headings_list()
+            local headings = core.get_headings_list()
             assert.is_table(headings)
             assert.are.equal(0, #headings)
         end)
 
         it("should only include level-1 headings", function()
-            local headings = telescope.get_headings_list()
+            local headings = core.get_headings_list()
 
             for _, heading in ipairs(headings) do
-                -- Should not start with "##" (level-2+) or "#" followed by another #
-                local heading_content = heading.text:sub(3) -- Remove "# "
+                local heading_content = heading.text:sub(3)
                 assert.is_false(
                     heading_content:match("^#") ~= nil,
                     "Heading '" .. heading.text .. "' appears to be level-2 or higher"
@@ -350,12 +348,11 @@ describe("davewiki.telescope headings function", function()
         end)
 
         it("should include filename in each heading entry", function()
-            local headings = telescope.get_headings_list()
+            local headings = core.get_headings_list()
             assert.is_true(#headings > 0)
 
             for _, heading in ipairs(headings) do
                 assert.is_string(heading.file)
-                -- File should contain the wiki_root path
                 assert.is_true(heading.file:match(test_root) ~= nil)
             end
         end)

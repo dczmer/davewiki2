@@ -8,11 +8,13 @@ A personal knowledge base system for neovim with journal-based note-taking, insp
 - Organizes notes using flat tags (`#tag-name`) with back-reference tracking
 - Provides quick search and navigation between tags, notes, and journals
 - Integrates with telescope.nvim for tag search and nvim-cmp for completion
+- Generates synthetic tag views that aggregate all references to a tag across the wiki
 
 ## Key features
 
 - Journal-based daily note-taking
 - Tag-based organization with back-references
+- Tag views for consolidated research across the entire wiki
 - Markdown link navigation
 - Tag autocomplete
 - Telescope integration for tag search, heading search, and navigation
@@ -160,19 +162,6 @@ vim.keymap.set('n', '<leader>wV', '<cmd>DavewikiGenerateView<CR>', { desc = "Pic
 Optional attachments (images, files) can be stored in `attachments/` within your wiki root.
 
 ## Installation
-
-### With Nix (recommended)
-
-The plugin can be installed as a Nix package, providing a reproducible build with a bundled standalone neovim instance.
-
-```nix
-# In your flake.nix or NixOS configuration
-inputs.davewiki.url = "github:dczmer/davewiki2";
-
-# Use the davewiki package or nvim-test for development
-nix build .#davewiki
-nix run .#davewiki
-```
 
 ### With lazy.nvim
 
@@ -391,7 +380,7 @@ The priority for wiki_root is: setup option > `g:davewiki_wiki_root` > default `
 For manual acceptance testing, you can run an interactive neovim instance pre-configured with davewiki:
 
 ```sh
-nix run .#nvim-test
+nix run .#nvim-test -- -u scripts/minimal-init.lua
 ```
 
 This opens neovim with the `scripts/minimal-init.lua` configuration, which:
@@ -402,6 +391,12 @@ This opens neovim with the `scripts/minimal-init.lua` configuration, which:
 You can test the tag navigation by opening any markdown file in `test_root/` and pressing `<CR>` on a tag (e.g., `#bengal`).
 
 You can test hyperlink navigation by pressing `<CR>` on a markdown link like `[notes](./notes.md)`or `[website](https://example.com)`.
+
+For a fuller configuration with all features enabled and keymaps configured:
+
+```sh
+nix run .#nvim-test -- -u scripts/davewiki2-init.lua
+```
 
 ### Running Tests
 

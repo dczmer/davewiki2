@@ -63,13 +63,6 @@
           '';
           inherit runtimeInputs;
         };
-        davewiki-app = pkgs.writeShellApplication {
-          name = "davewiki";
-          text = ''
-            ${neovimWrapped}/bin/nvim "$@"
-          '';
-          inherit runtimeInputs;
-        };
       in
       {
         packages = {
@@ -81,14 +74,10 @@
           gh = pkgs.gh;
         };
         apps = rec {
-          default = davewiki;
+          default = nvim-test;
           nvim-test = {
             type = "app";
             program = "${nvim-test-app}/bin/nvim-test";
-          };
-          davewiki = {
-            type = "app";
-            program = "${davewiki-app}/bin/davewiki";
           };
         };
 

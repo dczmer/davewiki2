@@ -13,28 +13,28 @@ describe("davewiki.cmp setup", function()
         cmp.config.enabled = true
     end)
 
-    describe("is_enabled", function()
+    describe("config.enabled", function()
         it("should return true by default", function()
             cmp.config.enabled = true
-            assert.is_true(cmp.is_enabled())
+            assert.is_true(cmp.config.enabled)
         end)
 
         it("should return false when disabled", function()
             cmp.config.enabled = false
-            assert.is_false(cmp.is_enabled())
+            assert.is_false(cmp.config.enabled)
         end)
     end)
 
     describe("setup", function()
         it("should update config when passed options", function()
             cmp.setup({ enabled = false })
-            assert.is_false(cmp.is_enabled())
+            assert.is_false(cmp.config.enabled)
         end)
 
         it("should preserve existing config when no options passed", function()
             cmp.config.enabled = false
             cmp.setup({})
-            assert.is_false(cmp.is_enabled())
+            assert.is_false(cmp.config.enabled)
         end)
     end)
 end)
