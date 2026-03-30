@@ -33,6 +33,12 @@ Or run individual test files:
 # Run core module tests
 nix run .#nvim-test -- -u scripts/minimal-init.lua --headless -c 'PlenaryBustedFile tests/lua/davewiki/core_spec.lua' -c 'qa!'
 
+# Run tags module tests
+nix run .#nvim-test -- -u scripts/minimal-init.lua --headless -c 'PlenaryBustedFile tests/lua/davewiki/tags_spec.lua' -c 'qa!'
+
+# Run markdown module tests
+nix run .#nvim-test -- -u scripts/minimal-init.lua --headless -c 'PlenaryBustedFile tests/lua/davewiki/markdown_spec.lua' -c 'qa!'
+
 # Run init module tests
 nix run .#nvim-test -- -u scripts/minimal-init.lua --headless -c 'PlenaryBustedFile tests/lua/davewiki/init_spec.lua' -c 'qa!'
 
@@ -50,7 +56,9 @@ nix run .#nvim-test -- -u scripts/minimal-init.lua --headless -c 'PlenaryBustedF
 
 ### Current Test Suite
 
-- `tests/lua/davewiki/core_spec.lua` - Core module tests (wiki_root resolution, tag management, markdown hyperlink support)
+- `tests/lua/davewiki/core_spec.lua` - Core module tests (wiki_root resolution, utility functions)
+- `tests/lua/davewiki/tags_spec.lua` - Tags module tests (tag file management, tag operations)
+- `tests/lua/davewiki/markdown_spec.lua` - Markdown module tests (markdown links, file operations)
 - `tests/lua/davewiki/init_spec.lua` - Init module tests (public API)
 - `tests/lua/davewiki/cmp_spec.lua` - Cmp module tests (nvim-cmp tag completion)
 - `tests/lua/davewiki/telescope_spec.lua` - Telescope module tests (telescope.nvim integration)

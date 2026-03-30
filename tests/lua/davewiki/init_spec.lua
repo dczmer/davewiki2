@@ -34,7 +34,7 @@ describe("davewiki public interface", function()
     end)
 end)
 
-describe("davewiki.core.jump_to_tag", function()
+describe("davewiki.tags jump_to_tag", function()
     before_each(function()
         davewiki.setup({ wiki_root = test_root })
     end)
@@ -53,7 +53,7 @@ describe("davewiki.core.jump_to_tag", function()
         vim.api.nvim_set_current_buf(buf)
         vim.api.nvim_win_set_cursor(0, { 1, 0 })
 
-        local success = davewiki.core.jump_to_tag()
+        local success = davewiki.tags.jump_to_tag()
         assert.is_false(success)
 
         vim.api.nvim_buf_delete(buf, { force = true })
@@ -65,7 +65,7 @@ describe("davewiki.core.jump_to_tag", function()
         vim.api.nvim_set_current_buf(buf)
         vim.api.nvim_win_set_cursor(0, { 1, 6 }) -- On #bengal
 
-        local success = davewiki.core.jump_to_tag()
+        local success = davewiki.tags.jump_to_tag()
         assert.is_true(success)
 
         local current_file = vim.api.nvim_buf_get_name(0)
@@ -85,7 +85,7 @@ describe("davewiki.core.jump_to_tag", function()
             vim.fn.delete(test_file)
         end
 
-        local success = davewiki.core.jump_to_tag()
+        local success = davewiki.tags.jump_to_tag()
         assert.is_true(success)
 
         local current_file = vim.api.nvim_buf_get_name(0)
@@ -104,7 +104,7 @@ describe("davewiki.core.jump_to_tag", function()
         vim.api.nvim_set_current_buf(buf)
 
         vim.api.nvim_win_set_cursor(0, { 1, 4 })
-        local success = davewiki.core.jump_to_tag()
+        local success = davewiki.tags.jump_to_tag()
         assert.is_true(success)
 
         vim.api.nvim_buf_delete(buf, { force = true })

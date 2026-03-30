@@ -14,6 +14,7 @@
 local M = {}
 
 local core = require("davewiki.core")
+local tags = require("davewiki.tags")
 
 --- @class TagMention
 --- @field file string The file path containing the tag mention
@@ -31,7 +32,7 @@ function M.get_tag_file_content(tag_name)
         return nil
     end
 
-    local tag_file_path = core.get_tag_file_path(tag_name)
+    local tag_file_path = tags.get_tag_file_path(tag_name)
     if not tag_file_path then
         return nil
     end
@@ -444,7 +445,7 @@ end
 function M.setup_commands()
     -- Command to generate view from tag under cursor
     vim.api.nvim_create_user_command("DavewikiGenerateViewFromCursor", function()
-        local tag = core.get_tag_under_cursor()
+        local tag = tags.get_tag_under_cursor()
         if tag then
             M.generate_view(tag)
         end
@@ -453,7 +454,7 @@ function M.setup_commands()
     -- Command to generate view from current tag file
     vim.api.nvim_create_user_command("DavewikiGenerateViewFromTagFile", function()
         local file_path = vim.api.nvim_buf_get_name(0)
-        local tag_name = core.extract_tag_from_filename(file_path)
+        local tag_name = tags.extract_tag_from_filename(file_path)
         if tag_name then
             M.generate_view("#" .. tag_name)
         end

@@ -4,7 +4,7 @@
 -- @version 1.0
 
 local cmp = {}
-local core = require("davewiki.core")
+local tags = require("davewiki.tags")
 
 ---@class DavewikiCmpConfig
 ---@field enabled boolean Enable cmp integration
@@ -28,6 +28,7 @@ local wiki_tags_source = {}
 ---@return table
 function wiki_tags_source.new()
     local self = setmetatable({}, { __index = wiki_tags_source })
+    local core = require("davewiki.core")
     self.wiki_root = core.wiki_root
     return self
 end
@@ -48,15 +49,15 @@ end
 
 --- Performs completion for tag names
 function wiki_tags_source:complete(params, callback)
-    local tags = core.scan_for_tags()
+    local tag_data = tags.scan_for_tags()
 
     local items = {}
-    for _, tag_data in ipairs(tags) do
+    for _, data in ipairs(tag_data) do
         table.insert(items, {
-            label = tag_data.tag,
+            label = data.tag,
             kind = require("cmp").lsp.CompletionItemKind.Text,
-            documentation = "Used " .. tag_data.count .. " times",
-            insertText = tag_data.tag,
+            documentation = "Used " .. data.count .. " times",
+            insertText = data.tag,
         })
     end
 
