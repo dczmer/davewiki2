@@ -176,3 +176,84 @@ describe("davewiki.core is_tag_file", function()
         assert.is_false(core.is_tag_file(nil))
     end)
 end)
+
+describe("davewiki.core generate_absolute_path", function()
+    before_each(function()
+        core.wiki_root = test_root
+    end)
+
+    after_each(function()
+        core.wiki_root = nil
+    end)
+
+    it("should generate absolute path for file within wiki_root", function()
+        local result = core.generate_absolute_path(test_root .. "/notes/file.md")
+        assert.is_not_nil(result)
+        assert.are.equal("/notes/file.md", result)
+    end)
+
+    it("should generate absolute path for file at root", function()
+        local target_file = test_root .. "/README.md"
+        local absolute_path = core.generate_absolute_path(target_file)
+        assert.are.equal("/README.md", absolute_path)
+    end)
+
+    it("should generate absolute path for nested directory", function()
+        local target_file = test_root .. "/notes/deep/nested/file.md"
+        local absolute_path = core.generate_absolute_path(target_file)
+        assert.are.equal("/notes/deep/nested/file.md", absolute_path)
+    end)
+
+    it("should handle files with spaces in names", function()
+        local target_file = test_root .. "/notes/my file.md"
+        local absolute_path = core.generate_absolute_path(target_file)
+        assert.are.equal("/notes/my%20file.md", absolute_path)
+    end)
+
+    it("should return nil for file outside wiki_root", function()
+        local result = core.generate_absolute_path("/etc/passwd")
+        assert.is_nil(result)
+    end)
+
+    it("should return nil when wiki_root is nil", function()
+        core.wiki_root = nil
+        local result = core.generate_absolute_path("/any/path")
+        assert.is_nil(result)
+    end)
+end)
+
+describe("davewiki.core make_markdown_link", function()
+    before_each(function()
+        core.wiki_root = test_root
+    end)
+
+    after_each(function()
+        core.wiki_root = nil
+    end)
+
+    it("should create markdown link for file within wiki_root", function()
+        local result = core.make_markdown_link(test_root .. "/notes/file.md")
+        assert.are.equal("[file](/notes/file.md)", result)
+    end)
+
+    it("should use custom title when provided", function()
+        local result = core.make_markdown_link(test_root .. "/notes/file.md", "My Title")
+        assert.are.equal("[My Title](/notes/file.md)", result)
+    end)
+
+    it("should handle files with spaces in names", function()
+        local result = core.make_markdown_link(test_root .. "/notes/my file.md")
+        assert.are.equal("[my file](/notes/my%20file.md)", result)
+    end)
+
+    it("should return nil for file outside wiki_root", function()
+        local result = core.make_markdown_link("/etc/passwd")
+        assert.is_nil(result)
+    end)
+
+    it("should return nil when wiki_root is nil", function()
+        core.wiki_root = nil
+        local result = core.make_markdown_link("/any/path")
+        assert.is_nil(result)
+    end)
+end)
