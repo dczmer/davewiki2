@@ -3,6 +3,7 @@
 -- @module davewiki.core_spec
 
 local lua_core = require("davewiki.core")
+local test_util = require("davewiki.test_util")
 
 -- Get the absolute path to test_root directory relative to this script
 local test_root = vim.fn.fnamemodify(vim.fn.expand("<sfile>:h:h:h:h"), ":p") .. "test_root"
@@ -728,14 +729,22 @@ describe("davewiki.core markdown hyperlink support", function()
 
     describe("jump_to_link", function()
         local original_wiki_root
+        local mock_notify
+        local original_notify
 
         before_each(function()
             original_wiki_root = lua_core.wiki_root
             lua_core.setup({ wiki_root = test_root })
+            mock_notify = test_util.MockNotify()
+            original_notify = vim.notify
+            vim.notify = function(...)
+                return mock_notify:notify(...)
+            end
         end)
 
         after_each(function()
             lua_core.wiki_root = original_wiki_root
+            vim.notify = original_notify
         end)
 
         it("should open relative file link that exists", function()
@@ -833,6 +842,9 @@ describe("davewiki.core markdown hyperlink support", function()
 
             local result = lua_core.jump_to_link()
             assert.is_false(result)
+            assert.are.equal(1, #mock_notify.calls)
+            assert.are.equal("davewiki: file not found: " .. test_root .. "/nonexistent.md", mock_notify.calls[1].msg)
+            assert.are.equal(vim.log.levels.WARN, mock_notify.calls[1].level)
 
             vim.api.nvim_buf_delete(buf, { force = true })
         end)
@@ -903,7 +915,7 @@ describe("davewiki.core markdown hyperlink support", function()
         it("should return false for non-.md file extensions", function()
             local buf = vim.api.nvim_create_buf(false, true)
             vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "See [image](./image.png)" })
-            vim.api.nvim_buf_set_name(buf, test_root .. "/test-file.md")
+            vim.api.nvim_buf_set_name(buf, test_root .. "/test-file2.md")
             vim.api.nvim_set_current_buf(buf)
             vim.api.nvim_win_set_cursor(0, { 1, 8 })
 
@@ -911,6 +923,9 @@ describe("davewiki.core markdown hyperlink support", function()
             -- Non-.md files should still work if we're opening in browser
             -- But for this implementation, we only support .md files
             assert.is_false(result)
+            assert.are.equal(1, #mock_notify.calls)
+            assert.are.equal("davewiki: Only .md files are supported for internal links", mock_notify.calls[1].msg)
+            assert.are.equal(vim.log.levels.WARN, mock_notify.calls[1].level)
 
             vim.api.nvim_buf_delete(buf, { force = true })
         end)

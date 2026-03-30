@@ -56,13 +56,58 @@ nix run .#nvim-test -- -u scripts/minimal-init.lua --headless -c 'PlenaryBustedF
 - `tests/lua/davewiki/telescope_spec.lua` - Telescope module tests (telescope.nvim integration)
 - `tests/lua/davewiki/journal_spec.lua` - Journal module tests (daily journal management, telescope journal picker)
 - `tests/lua/davewiki/view_spec.lua` - View module tests (synthetic tag view generation)
-- Total: 226 tests covering all implemented features
+- Total: 264 tests covering all implemented features
 
 ### Testing Rules
 
 - **Never mock** vim internal functions or filesystem operations unless there is no alternative.
 - Tests run against **real files** in `test_root/` — no mocking the filesystem.
 - Tests must use `test_root` as the `wiki_root` and **never access files outside it**.
+- **Tests must run with zero warnings.** If a test triggers a warning because it exercises code that calls `vim.notify`, use `MockNotify` to capture and assert the notification message.
+
+### Testing Warning Notifications
+
+When testing code that produces user-facing warnings via `vim.notify`:
+
+1. **Use `MockNotify`** from `davewiki.test_util` to capture notifications
+2. **Set up in `before_each`** and restore in `after_each`
+3. **Assert the notification** message and level in the test
+
+Example:
+
+```lua
+local test_util = require("davewiki.test_util")
+
+describe("module with warnings", function()
+    local mock_notify
+    local original_notify
+
+    before_each(function()
+        -- Set up MockNotify before each test
+        mock_notify = test_util.MockNotify()
+        original_notify = vim.notify
+        vim.notify = function(...)
+            return mock_notify:notify(...)
+        end
+    end)
+
+    after_each(function()
+        -- Always restore original vim.notify
+        vim.notify = original_notify
+    end)
+
+    it("should notify on error condition", function()
+        local result = some_function_that_warns()
+
+        assert.is_false(result)
+        assert.are.equal(1, #mock_notify.calls)
+        assert.are.equal("davewiki: expected warning message", mock_notify.calls[1].msg)
+        assert.are.equal(vim.log.levels.ERROR, mock_notify.calls[1].level)  -- or vim.log.levels.WARN
+    end)
+end)
+```
+
+Note: Check the actual code to determine whether it uses `vim.log.levels.ERROR` (4) or `vim.log.levels.WARN` (3).
 
 ### Test File Management
 
