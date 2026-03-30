@@ -429,6 +429,9 @@ describe("davewiki.telescope jump_to_journal function", function()
             _G.require = original_require
 
             assert.is_false(result)
+            assert.are.equal(1, #mock_notify.calls)
+            assert.are.equal("davewiki: telescope.nvim not installed", mock_notify.calls[1].msg)
+            assert.are.equal(vim.log.levels.WARN, mock_notify.calls[1].level)
         end)
 
         it("should return false when wiki_root is not set", function()
