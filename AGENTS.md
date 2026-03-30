@@ -165,12 +165,27 @@ end)
   - `lua/davewiki/init.lua` → `tests/lua/davewiki/init_spec.lua`
   - `lua/davewiki/core.lua` → `tests/lua/davewiki/core_spec.lua`
 
+## Module Dependencies
+
+**No circular dependencies between modules.** The module hierarchy must remain acyclic.
+
+```
+Level 0 (leaf):    core.lua, test_util.lua (no dependencies)
+Level 1:           tags.lua, markdown.lua, journal.lua → core
+Level 2:           cmp.lua → tags; view.lua → core, markdown, tags
+Level 3:           telescope.lua → core, markdown, tags (lazy: view, journal)
+Level 4 (root):    init.lua → cmp, core, journal, markdown, tags, telescope, view
+```
+
+All dependency paths terminate at `core.lua`. When adding new modules, maintain this layered structure.
+
 ## Code Quality
 
 - All Lua code must include **type annotations**.
 - Type checking via lua-language-server must pass.
 - Follow lua-language-server (LuaLS) naming conventions.
 - Run `luacheck` (linter) and `stylua` (formatter) before committing.
+- **Avoid useless wrapper functions.** Do not create single-line functions that just call another function directly without adding any value. Use the underlying function instead.
 
 ### Keymaps and Autocommands
 
