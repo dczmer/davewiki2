@@ -10,15 +10,6 @@ A personal knowledge base system for neovim with journal-based note-taking, insp
 - Integrates with telescope.nvim for tag search and nvim-cmp for completion
 - Generates synthetic tag views that aggregate all references to a tag across the wiki
 
-## Key features
-
-- Journal-based daily note-taking
-- Tag-based organization with back-references
-- Tag views for consolidated research across the entire wiki
-- Markdown link navigation
-- Tag autocomplete
-- Telescope integration for tag search, heading search, and navigation
-
 ## How it works
 
 ### Wiki Root
@@ -163,6 +154,9 @@ vim.keymap.set('n', '<leader>wv', '<cmd>DavewikiGenerateViewFromCursor<CR>', { d
 
 -- Pick a tag and generate view
 vim.keymap.set('n', '<leader>wV', '<cmd>DavewikiGenerateView<CR>', { desc = "Pick tag and generate view" })
+
+-- Generate view from current tag file
+vim.keymap.set('n', '<leader>wvf', '<cmd>DavewikiGenerateViewFromTagFile<CR>', { desc = "Generate view from current tag file" })
 ```
 
 ### Attachments
@@ -197,9 +191,6 @@ require('lazy').setup({
 
 **Optional:**
 - `cmp-buffer` - buffer word completion
-- `cmp-path` - filesystem path completion
-- `cmp-nvim-lsp` - LSP completion source
-- `cmp-nvim-lsp-signature-help` - LSP signature help
 - `telescope-fzf-native` - FZF sorter for telescope
 - `vim-markdown` - Markdown syntax and ftplugin
 - `which-key.nvim` - keybinding help

@@ -149,4 +149,44 @@ M.is_tag_file = function(file_path)
     return resolved_path:sub(1, #resolved_sources) == resolved_sources
 end
 
+--- Generate an absolute path from wiki_root for a target file
+--- Returns path starting with "/" that is relative to wiki_root
+--- @param target_file string The absolute path to the target file
+--- @return string|nil The absolute path from wiki_root (e.g., "/notes/file.md"), or nil if outside wiki_root
+M.generate_absolute_path = function(target_file)
+    if not M.wiki_root or not target_file then
+        return nil
+    end
+
+    local resolved_wiki_root = vim.fn.resolve(M.wiki_root)
+    local resolved_target = vim.fn.resolve(target_file)
+
+    if not M.is_path_within_wiki_root(resolved_target) then
+        return nil
+    end
+
+    local relative_path = resolved_target:sub(#resolved_wiki_root + 1)
+
+    if relative_path:sub(1, 1) ~= "/" then
+        relative_path = "/" .. relative_path
+    end
+
+    return M.url_encode(relative_path)
+end
+
+--- Creates a markdown link from an absolute file path
+--- @param file_path string The absolute file path
+--- @param title string|nil Optional title for the link (defaults to filename without extension)
+--- @return string|nil Markdown link in format [title](/path), or nil if path is outside wiki_root
+M.make_markdown_link = function(file_path, title)
+    local encoded_path = M.generate_absolute_path(file_path)
+
+    if not encoded_path then
+        return nil
+    end
+
+    local link_title = title or vim.fn.fnamemodify(file_path, ":t:r")
+    return "[" .. link_title .. "](" .. encoded_path .. ")"
+end
+
 return M

@@ -99,22 +99,6 @@ function M.find_tag_mentions(tag_name)
     return mentions
 end
 
---- Creates a markdown link for a file path
---- @param file_path string The absolute file path
---- @param title string|nil Optional title for the link (defaults to filename)
---- @return string Markdown link
-local function make_markdown_link(file_path, title)
-    local relative_path = file_path:sub(#core.wiki_root + 1)
-    if relative_path:sub(1, 1) ~= "/" then
-        relative_path = "/" .. relative_path
-    end
-
-    local link_title = title or vim.fn.fnamemodify(file_path, ":t:r")
-    local encoded_path = core.url_encode(relative_path)
-
-    return "[" .. link_title .. "](" .. encoded_path .. ")"
-end
-
 --- Splits content into blocks separated by ---
 --- @param content string The file content
 --- @return table Array of blocks (strings)
@@ -187,7 +171,7 @@ function M.extract_journal_blocks_from_mention(tag_name, mention)
     for _, block_content in ipairs(file_blocks) do
         if block_content:find(tag_name, 1, true) then
             local filename = vim.fn.fnamemodify(mention.file, ":t:r")
-            local link = make_markdown_link(mention.file, filename)
+            local link = core.make_markdown_link(mention.file, filename)
             table.insert(blocks, {
                 link = link,
                 content = block_content,
@@ -211,7 +195,7 @@ function M.extract_wiki_paragraphs_from_mention(tag_name, mention)
 
     for _, para in ipairs(found_paras) do
         local filename = vim.fn.fnamemodify(mention.file, ":t:r")
-        local link = make_markdown_link(mention.file, filename)
+        local link = core.make_markdown_link(mention.file, filename)
         table.insert(paragraphs, {
             link = link,
             content = para,
@@ -246,7 +230,7 @@ function M.extract_journal_blocks(tag_name, mentions)
             for _, block_content in ipairs(file_blocks) do
                 if block_content:find(tag_name, 1, true) then
                     local filename = vim.fn.fnamemodify(mention.file, ":t:r")
-                    local link = make_markdown_link(mention.file, filename)
+                    local link = core.make_markdown_link(mention.file, filename)
                     table.insert(blocks, {
                         link = link,
                         content = block_content,
@@ -283,7 +267,7 @@ function M.extract_wiki_paragraphs(tag_name, mentions)
 
             for _, para in ipairs(found_paras) do
                 local filename = vim.fn.fnamemodify(mention.file, ":t:r")
-                local link = make_markdown_link(mention.file, filename)
+                local link = core.make_markdown_link(mention.file, filename)
                 table.insert(paragraphs, {
                     link = link,
                     content = para,

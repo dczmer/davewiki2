@@ -243,30 +243,4 @@ M.get_headings_list = function()
     return headings
 end
 
---- Generate an absolute path from wiki_root for a target file
---- Returns path starting with "/" that is relative to wiki_root
----
----@param target_file string The absolute path to the target file
----@return string|nil The absolute path from wiki_root (e.g., "/notes/file.md"), or nil if outside wiki_root
-M.generate_absolute_path = function(target_file)
-    if not core.wiki_root or not target_file then
-        return nil
-    end
-
-    local resolved_wiki_root = vim.fn.resolve(core.wiki_root)
-    local resolved_target = vim.fn.resolve(target_file)
-
-    if not core.is_path_within_wiki_root(resolved_target) then
-        return nil
-    end
-
-    local relative_path = resolved_target:sub(#resolved_wiki_root + 1)
-
-    if relative_path:sub(1, 1) ~= "/" then
-        relative_path = "/" .. relative_path
-    end
-
-    return core.url_encode(relative_path)
-end
-
 return M

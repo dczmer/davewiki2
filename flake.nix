@@ -42,9 +42,6 @@
               start = [
                 nvim-cmp
                 cmp-buffer
-                cmp-path
-                cmp-nvim-lsp
-                cmp-nvim-lsp-signature-help
                 telescope-nvim
                 telescope-fzf-native-nvim
                 vim-markdown

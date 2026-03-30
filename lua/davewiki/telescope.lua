@@ -289,14 +289,9 @@ function telescope.insert_link()
                     require("telescope.actions").close(bufnr)
 
                     if selection then
-                        -- Generate absolute path from wiki_root
-                        local absolute_path = markdown.generate_absolute_path(selection.filename)
+                        local link_text = core.make_markdown_link(selection.filename, selection.title)
 
-                        if absolute_path then
-                            -- Build the markdown link
-                            local link_text = "[" .. selection.title .. "](" .. absolute_path .. ")"
-
-                            -- Insert at cursor position
+                        if link_text then
                             vim.api.nvim_put({ link_text }, "c", true, true)
                         end
                     end

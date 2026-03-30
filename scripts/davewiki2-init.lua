@@ -116,6 +116,8 @@ vim.keymap.set("n", "<leader>wv", "<cmd>DavewikiGenerateViewFromCursor<CR>", { d
 
 vim.keymap.set("n", "<leader>wV", "<cmd>DavewikiGenerateView<CR>", { desc = "Pick tag and generate view" })
 
+vim.keymap.set("n", "<leader>wvf", "<cmd>DavewikiGenerateViewFromTagFile<CR>", { desc = "Generate view from current tag file" })
+
 -- davewiki telescope keymaps
 vim.keymap.set("n", "<leader>wt", function()
     require("davewiki").telescope.tags()

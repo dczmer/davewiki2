@@ -426,26 +426,3 @@ describe("davewiki.markdown get_headings_list", function()
         assert.are.equal(0, #headings)
     end)
 end)
-
-describe("davewiki.markdown generate_absolute_path", function()
-    before_each(function()
-        core.wiki_root = test_root
-    end)
-
-    it("should generate absolute path for file within wiki_root", function()
-        local result = markdown.generate_absolute_path(test_root .. "/notes/file.md")
-        assert.is_not_nil(result)
-        assert.are.equal("/notes/file.md", result)
-    end)
-
-    it("should return nil for file outside wiki_root", function()
-        local result = markdown.generate_absolute_path("/etc/passwd")
-        assert.is_nil(result)
-    end)
-
-    it("should return nil when wiki_root is nil", function()
-        core.wiki_root = nil
-        local result = markdown.generate_absolute_path("/any/path")
-        assert.is_nil(result)
-    end)
-end)

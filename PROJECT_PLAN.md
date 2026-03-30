@@ -62,9 +62,6 @@ Command-line neovim users who want a simple journal-based note-taking system.
 
 **Optional:**
 - cmp-buffer - buffer word completion source
-- cmp-path - filesystem path completion source
-- cmp-nvim-lsp - LSP completion source
-- cmp-nvim-lsp-signature-help - LSP signature help
 - telescope-fzf-native - FZF sorter for telescope
 - vim-markdown - Markdown syntax and ftplugin
 - which-key.nvim - keybinding help/discovery
