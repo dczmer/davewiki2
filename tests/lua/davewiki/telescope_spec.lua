@@ -4,6 +4,7 @@
 
 local telescope = require("davewiki.telescope")
 local core = require("davewiki.core")
+local test_util = require("davewiki.test_util")
 
 -- Get the absolute path to test_root directory relative to this script
 local test_root = vim.fn.fnamemodify(vim.fn.expand("<sfile>:h:h:h:h"), ":p") .. "test_root"
@@ -41,9 +42,21 @@ describe("davewiki.telescope setup", function()
 end)
 
 describe("davewiki.telescope tags function", function()
+    local mock_notify
+    local original_notify
+
     before_each(function()
         core.setup({ wiki_root = test_root })
         telescope.config.enabled = true
+        mock_notify = test_util.MockNotify()
+        original_notify = vim.notify
+        vim.notify = function(...)
+            return mock_notify:notify(...)
+        end
+    end)
+
+    after_each(function()
+        vim.notify = original_notify
     end)
 
     describe("tags", function()
@@ -67,15 +80,31 @@ describe("davewiki.telescope tags function", function()
         it("should return false when wiki_root is not set", function()
             core.wiki_root = nil
             local result = telescope.tags()
+
             assert.is_false(result)
+            assert.are.equal(1, #mock_notify.calls)
+            assert.are.equal("davewiki: wiki_root is not configured", mock_notify.calls[1].msg)
+            assert.are.equal(vim.log.levels.ERROR, mock_notify.calls[1].level)
         end)
     end)
 end)
 
 describe("davewiki.telescope tag_references function", function()
+    local mock_notify
+    local original_notify
+
     before_each(function()
         core.setup({ wiki_root = test_root })
         telescope.config.enabled = true
+        mock_notify = test_util.MockNotify()
+        original_notify = vim.notify
+        vim.notify = function(...)
+            return mock_notify:notify(...)
+        end
+    end)
+
+    after_each(function()
+        vim.notify = original_notify
     end)
 
     describe("tag_references", function()
@@ -99,7 +128,11 @@ describe("davewiki.telescope tag_references function", function()
         it("should return false when wiki_root is not set", function()
             core.wiki_root = nil
             local result = telescope.tag_references("#bengal")
+
             assert.is_false(result)
+            assert.are.equal(1, #mock_notify.calls)
+            assert.are.equal("davewiki: wiki_root is not configured", mock_notify.calls[1].msg)
+            assert.are.equal(vim.log.levels.ERROR, mock_notify.calls[1].level)
         end)
 
         it("should return false for invalid tag name", function()
@@ -110,9 +143,21 @@ describe("davewiki.telescope tag_references function", function()
 end)
 
 describe("davewiki.telescope insert_link function", function()
+    local mock_notify
+    local original_notify
+
     before_each(function()
         core.setup({ wiki_root = test_root })
         telescope.config.enabled = true
+        mock_notify = test_util.MockNotify()
+        original_notify = vim.notify
+        vim.notify = function(...)
+            return mock_notify:notify(...)
+        end
+    end)
+
+    after_each(function()
+        vim.notify = original_notify
     end)
 
     describe("insert_link", function()
@@ -136,7 +181,11 @@ describe("davewiki.telescope insert_link function", function()
         it("should return false when wiki_root is not set", function()
             core.wiki_root = nil
             local result = telescope.insert_link()
+
             assert.is_false(result)
+            assert.are.equal(1, #mock_notify.calls)
+            assert.are.equal("davewiki: wiki_root is not configured", mock_notify.calls[1].msg)
+            assert.are.equal(vim.log.levels.ERROR, mock_notify.calls[1].level)
         end)
 
         it("should return false when no file is open", function()
@@ -278,9 +327,21 @@ describe("davewiki.telescope helper functions", function()
 end)
 
 describe("davewiki.telescope headings function", function()
+    local mock_notify
+    local original_notify
+
     before_each(function()
         core.setup({ wiki_root = test_root })
         telescope.config.enabled = true
+        mock_notify = test_util.MockNotify()
+        original_notify = vim.notify
+        vim.notify = function(...)
+            return mock_notify:notify(...)
+        end
+    end)
+
+    after_each(function()
+        vim.notify = original_notify
     end)
 
     describe("headings", function()
@@ -304,7 +365,11 @@ describe("davewiki.telescope headings function", function()
         it("should return false when wiki_root is not set", function()
             core.wiki_root = nil
             local result = telescope.headings()
+
             assert.is_false(result)
+            assert.are.equal(1, #mock_notify.calls)
+            assert.are.equal("davewiki: wiki_root is not configured", mock_notify.calls[1].msg)
+            assert.are.equal(vim.log.levels.ERROR, mock_notify.calls[1].level)
         end)
     end)
 
