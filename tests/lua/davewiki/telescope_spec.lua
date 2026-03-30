@@ -144,6 +144,9 @@ describe("davewiki.telescope tag_references function", function()
         it("should return false for invalid tag name", function()
             local result = telescope.tag_references("#invalid@tag")
             assert.is_false(result)
+            assert.are.equal(1, #mock_notify.calls)
+            assert.are.equal("davewiki: Invalid tag name: #invalid@tag", mock_notify.calls[1].msg)
+            assert.are.equal(vim.log.levels.ERROR, mock_notify.calls[1].level)
         end)
     end)
 end)
@@ -209,6 +212,9 @@ describe("davewiki.telescope insert_link function", function()
             vim.api.nvim_buf_get_name = original_nvim_buf_get_name
 
             assert.is_false(result)
+            assert.are.equal(1, #mock_notify.calls)
+            assert.are.equal("davewiki: No file open in current buffer", mock_notify.calls[1].msg)
+            assert.are.equal(vim.log.levels.ERROR, mock_notify.calls[1].level)
         end)
 
         it("should return false when current file is outside wiki_root", function()
@@ -223,6 +229,9 @@ describe("davewiki.telescope insert_link function", function()
             vim.api.nvim_buf_get_name = original_nvim_buf_get_name
 
             assert.is_false(result)
+            assert.are.equal(1, #mock_notify.calls)
+            assert.are.equal("davewiki: Current file is not within wiki_root", mock_notify.calls[1].msg)
+            assert.are.equal(vim.log.levels.ERROR, mock_notify.calls[1].level)
         end)
 
         it("should return false when no markdown files exist", function()
