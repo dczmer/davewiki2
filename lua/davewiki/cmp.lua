@@ -36,7 +36,7 @@ end
 --- Gets the trigger characters for this source
 ---@return string[]
 function wiki_tags_source:get_trigger_characters()
-    return { "#" }
+    return { "#[A-Za-z0-9-_]" }
 end
 
 --- Checks if this source is available in the current context
