@@ -2,6 +2,22 @@
 
 This document provides a comprehensive manual testing plan for all user-facing functions in the Davewiki2 Neovim plugin.
 
+## 0. Test Environment Setup
+
+Before testing, launch Neovim with the test configuration:
+
+```sh
+nix run .#nvim-test -- -u scripts/davewiki2-init.lua
+```
+
+This starts Neovim with:
+- `./test_root` as the wiki_root directory
+- telescope.nvim configured
+- nvim-cmp configured for tag completion
+- All modules enabled (tags, journal, telescope, cmp, highlight)
+
+---
+
 ## Prerequisites
 
 Before testing, ensure:
@@ -44,54 +60,15 @@ Before testing, ensure:
 
 ---
 
-## 2. Keymaps (via scripts/davewiki2-init.lua)
-
-### 2.1 Navigation Keymaps
-
-| Keymap | Test Steps | Expected Result |
-|--------|------------|-----------------|
-| `<CR>` in markdown | Place cursor on `#tag`, press Enter | Jumps to tag file (creates if needed) |
-| `<CR>` on markdown link | Place cursor on `[text](path)`, press Enter | Jumps to linked file or opens URL in browser |
-| `<leader>wt` | Press keymap | Opens telescope tags picker |
-| `<leader>wT` | Press keymap | Opens telescope tag references picker |
-| `<leader>wh` | Press keymap | Opens telescope headings picker |
-
-### 2.2 Link Keymaps
-
-| Keymap | Test Steps | Expected Result |
-|--------|------------|-----------------|
-| `<leader>wl` | Press in insert/normal mode | Opens picker to insert markdown link |
-
-### 2.3 View Keymaps
-
-| Keymap | Test Steps | Expected Result |
-|--------|------------|-----------------|
-| `<leader>wv` | Place cursor on `#tag`, press | Generates view from cursor tag |
-| `<leader>wV` | Press keymap | Opens picker to select tag for view generation |
-
-### 2.4 Journal Keymaps
-
-| Keymap | Test Steps | Expected Result |
-|--------|------------|-----------------|
-| `<leader>wjt` | Press keymap | Opens today's journal |
-| `<leader>wjy` | Press keymap | Opens yesterday's journal |
-| `<leader>wjT` | Press keymap | Opens tomorrow's journal |
-| `<leader>wjo` | Press keymap | Prompts for date, opens that journal |
-| `<leader>wj` | Press keymap | Opens journal file picker |
-
----
-
-## 3. Cmp Module (Autocompletion)
+## 2. Cmp Module (Autocompletion)
 
 | Test Case | Steps | Expected Result |
 |-----------|-------|-----------------|
 | Tag completion | Type `#` in markdown file | Shows dropdown with existing tags |
-| Tag completion (no matches) | Type `#nonexistent` | Shows no suggestions or shows "No matches" |
-| Setup with config | Call `require('davewiki').cmp.setup({})` | Registers wiki_tags source |
 
 ---
 
-## 4. Autocommands (if enabled)
+## 3. Autocommands (if enabled)
 
 | Test Case | Steps | Expected Result |
 |-----------|-------|-----------------|
@@ -100,28 +77,28 @@ Before testing, ensure:
 
 ---
 
-## 5. Integration Scenarios
+## 4. Integration Scenarios
 
-### 5.1 Tag Workflow
+### 4.1 Tag Workflow
 
 1. Create new tag via `#new-idea` in a journal entry
 2. Press `<CR>` to jump to tag file
 3. Verify tag file created in `sources/new-idea.md`
 4. Add content to tag file
 5. Use `:DavewikiTagReferences #new-idea` to find all mentions
-6. Generate view with `<leader>wv`
+6. Use `:DavewikiGenerateViewFromCursor` to generate view
 
-### 5.2 Journal Workflow
+### 4.2 Journal Workflow
 
-1. Open today's journal with `<leader>wjt`
+1. Open today's journal with `:DavewikiJournalToday`
 2. Add content with `#project-notes` tag
-3. Tomorrow, use `<leader>wjy` to review yesterday's notes
-4. Use `<leader>wj` to browse all journals
+3. Tomorrow, use `:DavewikiJournalYesterday` to review yesterday's notes
+4. Use `:DavewikiJournals` to browse all journals
 
-### 5.3 Link Creation Workflow
+### 4.3 Link Creation Workflow
 
 1. In a note, type some text
-2. Press `<leader>wl` to insert a link
+2. Use `:DavewikiInsertLink` to insert a link
 3. Select target file from picker
 4. Verify `[]()` link inserted at cursor
 
@@ -132,7 +109,8 @@ Before testing, ensure:
 This plan covers:
 
 - **15 Vim Commands**: Journal (4), Telescope (7), View (2)
-- **12+ Keymaps**: Navigation (5), Link (1), View (2), Journal (5)
+- **1 Cmp Test**: Tag completion
+- **2 Autocommand Tests**: Backlinks, Tag highlighting
 - **3 Integration Scenarios** for end-to-end testing
 
 All commands follow the `:Davewiki*` naming convention and all functions include type annotations and docstrings.

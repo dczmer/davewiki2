@@ -133,7 +133,7 @@ vim.keymap.set("n", "<leader>wl", function()
     require("davewiki").telescope.insert_link()
 end, { desc = "Insert markdown link to wiki file" })
 
-vim.keymap.set("n", "<leader>wj", function()
+vim.keymap.set("n", "<leader>wjp", function()
     require("davewiki").telescope.jump_to_journal()
 end, { desc = "Browse journal files with telescope" })
 

@@ -378,6 +378,7 @@ M.find_backlinks = function(tag_name)
                     lnum = line_num,
                     col = col_num,
                     line = content,
+                    tag = tag_name,
                 })
             end
         end

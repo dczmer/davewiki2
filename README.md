@@ -179,7 +179,6 @@ require('lazy').setup({
   dependencies = {
     "nvim-telescope/telescope.nvim",
     "nvim-cmp",
-    "mattn/calendar-vim",
   },
   config = function()
     require('davewiki').setup({})
@@ -192,7 +191,6 @@ require('lazy').setup({
 **Required:**
 - `nvim-telescope/telescope.nvim` - search UI
 - `nvim-cmp` - tag completion
-- `mattn/calendar-vim` - calendar support for daily journals
 
 **Development:**
 - `nvim-lua/plenary.nvim` - testing framework
@@ -350,8 +348,8 @@ vim.keymap.set('n', '<leader>wl', function()
     require('davewiki').telescope.insert_link()
 end, { desc = 'Insert markdown link to wiki file' })
 
--- Browse journal files with <leader>wj
-vim.keymap.set('n', '<leader>wj', function()
+-- Browse journal files with <leader>wjp
+vim.keymap.set('n', '<leader>wjp', function()
     require('davewiki').telescope.jump_to_journal()
 end, { desc = 'Browse journal files with telescope' })
 ```

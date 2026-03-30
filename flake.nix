@@ -22,7 +22,6 @@
           set rtp+=${pkgs.vimPlugins.nvim-cmp}
           set rtp+=${pkgs.vimPlugins.telescope-nvim}
           set rtp+=${pkgs.vimPlugins.telescope-fzf-native-nvim}
-          set rtp+=${pkgs.vimPlugins.mattn-calendar-vim}
           set rtp+=${pkgs.vimPlugins.which-key-nvim}
         '';
         runtimeInputs = with pkgs; [
@@ -49,7 +48,6 @@
                 telescope-nvim
                 telescope-fzf-native-nvim
                 vim-markdown
-                mattn-calendar-vim
                 which-key-nvim
                 plenary-nvim
               ];
