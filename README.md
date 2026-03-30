@@ -179,7 +179,6 @@ require('lazy').setup({
   dependencies = {
     "nvim-telescope/telescope.nvim",
     "nvim-cmp",
-    "mattn/calendar-vim",
   },
   config = function()
     require('davewiki').setup({})
@@ -192,7 +191,6 @@ require('lazy').setup({
 **Required:**
 - `nvim-telescope/telescope.nvim` - search UI
 - `nvim-cmp` - tag completion
-- `mattn/calendar-vim` - calendar support for daily journals
 
 **Development:**
 - `nvim-lua/plenary.nvim` - testing framework

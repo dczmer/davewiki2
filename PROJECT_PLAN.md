@@ -59,7 +59,6 @@ Command-line neovim users who want a simple journal-based note-taking system.
 - nvim-cmp - tag auto-completion
 - telescope.nvim - search UI
 - plenary.nvim - testing utilities
-- mattn/calendar-vim - calendar support for daily journals
 
 **Optional:**
 - cmp-buffer - buffer word completion source
