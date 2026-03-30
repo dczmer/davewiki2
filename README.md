@@ -191,9 +191,6 @@ require('lazy').setup({
 
 **Optional:**
 - `cmp-buffer` - buffer word completion
-- `cmp-path` - filesystem path completion
-- `cmp-nvim-lsp` - LSP completion source
-- `cmp-nvim-lsp-signature-help` - LSP signature help
 - `telescope-fzf-native` - FZF sorter for telescope
 - `vim-markdown` - Markdown syntax and ftplugin
 - `which-key.nvim` - keybinding help
