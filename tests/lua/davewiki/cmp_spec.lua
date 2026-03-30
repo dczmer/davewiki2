@@ -100,22 +100,31 @@ describe("davewiki.cmp wiki_tags source", function()
         end)
 
         describe("is_available", function()
-            it("should return true for markdown buffers", function()
-                local buf = vim.api.nvim_create_buf(false, true)
+            before_each(function()
+                core.setup({ wiki_root = test_root })
+            end)
+
+            it("should return true for markdown buffers within wiki_root", function()
+                local test_file = test_root .. "/cmp-test-file.md"
+                vim.fn.writefile({ "# Test" }, test_file)
+                local buf = vim.fn.bufadd(test_file)
+                vim.fn.bufload(buf)
                 vim.api.nvim_set_current_buf(buf)
                 vim.bo[buf].filetype = "markdown"
 
                 assert.is_true(source.is_available())
 
                 vim.api.nvim_buf_delete(buf, { force = true })
+                vim.fn.delete(test_file)
             end)
 
-            it("should return true for markdown buffers with different names", function()
+            it("should return false for markdown buffers outside wiki_root", function()
                 local buf = vim.api.nvim_create_buf(false, true)
+                vim.api.nvim_buf_set_name(buf, "/tmp/outside-wiki.md")
                 vim.api.nvim_set_current_buf(buf)
                 vim.bo[buf].filetype = "markdown"
 
-                assert.is_true(source.is_available())
+                assert.is_false(source.is_available())
 
                 vim.api.nvim_buf_delete(buf, { force = true })
             end)
