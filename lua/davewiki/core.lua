@@ -174,19 +174,4 @@ M.generate_absolute_path = function(target_file)
     return M.url_encode(relative_path)
 end
 
---- Creates a markdown link from an absolute file path
---- @param file_path string The absolute file path
---- @param title string|nil Optional title for the link (defaults to filename without extension)
---- @return string|nil Markdown link in format [title](/path), or nil if path is outside wiki_root
-M.make_markdown_link = function(file_path, title)
-    local encoded_path = M.generate_absolute_path(file_path)
-
-    if not encoded_path then
-        return nil
-    end
-
-    local link_title = title or vim.fn.fnamemodify(file_path, ":t:r")
-    return "[" .. link_title .. "](" .. encoded_path .. ")"
-end
-
 return M

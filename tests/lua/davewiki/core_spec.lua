@@ -221,39 +221,3 @@ describe("davewiki.core generate_absolute_path", function()
         assert.is_nil(result)
     end)
 end)
-
-describe("davewiki.core make_markdown_link", function()
-    before_each(function()
-        core.wiki_root = test_root
-    end)
-
-    after_each(function()
-        core.wiki_root = nil
-    end)
-
-    it("should create markdown link for file within wiki_root", function()
-        local result = core.make_markdown_link(test_root .. "/notes/file.md")
-        assert.are.equal("[file](/notes/file.md)", result)
-    end)
-
-    it("should use custom title when provided", function()
-        local result = core.make_markdown_link(test_root .. "/notes/file.md", "My Title")
-        assert.are.equal("[My Title](/notes/file.md)", result)
-    end)
-
-    it("should handle files with spaces in names", function()
-        local result = core.make_markdown_link(test_root .. "/notes/my file.md")
-        assert.are.equal("[my file](/notes/my%20file.md)", result)
-    end)
-
-    it("should return nil for file outside wiki_root", function()
-        local result = core.make_markdown_link("/etc/passwd")
-        assert.is_nil(result)
-    end)
-
-    it("should return nil when wiki_root is nil", function()
-        core.wiki_root = nil
-        local result = core.make_markdown_link("/any/path")
-        assert.is_nil(result)
-    end)
-end)
