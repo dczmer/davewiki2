@@ -92,10 +92,11 @@ describe("davewiki.cmp wiki_tags source", function()
         end)
 
         describe("get_trigger_characters", function()
-            it("should return # as trigger character", function()
+            it("should return pattern requiring valid tag character after #", function()
                 local triggers = source.get_trigger_characters()
                 assert.is_table(triggers)
-                assert.is_true(vim.tbl_contains(triggers, "#"))
+                assert.are.equal(1, #triggers)
+                assert.are.equal("#[A-Za-z0-9-_]", triggers[1])
             end)
         end)
 

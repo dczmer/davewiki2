@@ -83,7 +83,7 @@ Command-line neovim users who want a simple journal-based note-taking system.
 - git - version control
 - ripgrep - search utility
 - fd - file finder
-- lz.n - lazy loading support (optional for users)
+- gh - GitHub CLI
 - plenary.nvim tests - testing framework
 
 **CI/CD:**
@@ -106,9 +106,10 @@ Command-line neovim users who want a simple journal-based note-taking system.
    - `davewiki/cmp.lua` - nvim-cmp integration
    - `davewiki/telescope.lua` - Telescope integration for tag and heading search
    - `davewiki/journal.lua` - Daily journal management and navigation
-   - `davewiki/view.lua` - Synthetic tag view generation
-
-2. **Tests:**
+    - `davewiki/view.lua` - Synthetic tag view generation
+    - `davewiki/test_util.lua` - Testing utilities (MockNotify)
+ 
+ 2. **Tests:**
    - `tests/` - plenary.nvim test suite
    - `test_root/` directory - sample notes and tags for testing
 
@@ -137,7 +138,6 @@ README.md
 PROJECT_PLAN.md
 AGENTS.md
 flake.nix                (nix build configuration)
-feature-plans/           (feature specification documents)
 ```
 
 **Wiki Directory Structure (managed by plugin for users):**
