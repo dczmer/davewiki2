@@ -10,6 +10,8 @@ local markdown = require("davewiki.markdown")
 local tags = require("davewiki.tags")
 
 ---@class DavewikiTelescopeConfig
+
+---@class DavewikiTelescopeConfig
 ---@field enabled boolean Enable telescope integration
 
 telescope.config = {
@@ -289,7 +291,8 @@ function telescope.insert_link()
                     require("telescope.actions").close(bufnr)
 
                     if selection then
-                        local link_text = core.make_markdown_link(selection.filename, selection.title)
+                        local link_text =
+                            markdown.make_markdown_link(selection.filename, selection.title)
 
                         if link_text then
                             vim.api.nvim_put({ link_text }, "c", true, true)

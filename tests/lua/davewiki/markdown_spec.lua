@@ -133,7 +133,8 @@ describe("davewiki.markdown get_link_under_cursor", function()
     it("should handle multiple links on same line", function()
         local buf = vim.api.nvim_create_buf(false, true)
         vim.api.nvim_buf_set_lines(
-            buf,0,
+            buf,
+            0,
             -1,
             false,
             { "Text [first](a.md) and [second](b.md) here" }
@@ -312,7 +313,10 @@ describe("davewiki.markdown jump_to_link", function()
         local result = markdown.jump_to_link()
         assert.is_false(result)
         assert.are.equal(1, #mock_notify.calls)
-        assert.are.equal("davewiki: file not found: " .. test_root .. "/nonexistent.md", mock_notify.calls[1].msg)
+        assert.are.equal(
+            "davewiki: file not found: " .. test_root .. "/nonexistent.md",
+            mock_notify.calls[1].msg
+        )
         assert.are.equal(vim.log.levels.WARN, mock_notify.calls[1].level)
 
         vim.api.nvim_buf_delete(buf, { force = true })
@@ -389,7 +393,10 @@ describe("davewiki.markdown jump_to_link", function()
         local result = markdown.jump_to_link()
         assert.is_false(result)
         assert.are.equal(1, #mock_notify.calls)
-        assert.are.equal("davewiki: Only .md files are supported for internal links", mock_notify.calls[1].msg)
+        assert.are.equal(
+            "davewiki: Only .md files are supported for internal links",
+            mock_notify.calls[1].msg
+        )
         assert.are.equal(vim.log.levels.WARN, mock_notify.calls[1].level)
 
         vim.api.nvim_buf_delete(buf, { force = true })
@@ -415,7 +422,7 @@ describe("davewiki.markdown get_headings_list", function()
     it("should sort headings alphabetically", function()
         local headings = markdown.get_headings_list()
         for i = 2, #headings do
-            assert.is_true(headings[i -1].text <= headings[i].text)
+            assert.is_true(headings[i - 1].text <= headings[i].text)
         end
     end)
 
@@ -424,5 +431,41 @@ describe("davewiki.markdown get_headings_list", function()
         local headings = markdown.get_headings_list()
         assert.is_table(headings)
         assert.are.equal(0, #headings)
+    end)
+end)
+
+describe("davewiki.markdown make_markdown_link", function()
+    before_each(function()
+        core.wiki_root = test_root
+    end)
+
+    after_each(function()
+        core.wiki_root = nil
+    end)
+
+    it("should create markdown link for file within wiki_root", function()
+        local result = markdown.make_markdown_link(test_root .. "/notes/file.md")
+        assert.are.equal("[file](/notes/file.md)", result)
+    end)
+
+    it("should use custom title when provided", function()
+        local result = markdown.make_markdown_link(test_root .. "/notes/file.md", "My Title")
+        assert.are.equal("[My Title](/notes/file.md)", result)
+    end)
+
+    it("should handle files with spaces in names", function()
+        local result = markdown.make_markdown_link(test_root .. "/notes/my file.md")
+        assert.are.equal("[my file](/notes/my%20file.md)", result)
+    end)
+
+    it("should return nil for file outside wiki_root", function()
+        local result = markdown.make_markdown_link("/etc/passwd")
+        assert.is_nil(result)
+    end)
+
+    it("should return nil when wiki_root is nil", function()
+        core.wiki_root = nil
+        local result = markdown.make_markdown_link("/any/path")
+        assert.is_nil(result)
     end)
 end)

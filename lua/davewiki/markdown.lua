@@ -204,6 +204,21 @@ M.extract_h1_or_filename = function(file_path)
     return filename
 end
 
+--- Creates a markdown link from an absolute file path
+--- @param file_path string The absolute file path
+--- @param title string|nil Optional title for the link (defaults to filename without extension)
+--- @return string|nil Markdown link in format [title](/path), or nil if path is outside wiki_root
+M.make_markdown_link = function(file_path, title)
+    local encoded_path = core.generate_absolute_path(file_path)
+
+    if not encoded_path then
+        return nil
+    end
+
+    local link_title = title or vim.fn.fnamemodify(file_path, ":t:r")
+    return "[" .. link_title .. "](" .. encoded_path .. ")"
+end
+
 --- Get a sorted list of all level-1 headings from the wiki
 --- Uses ripgrep to find lines starting with "# " (but not "##")
 ---@return table Array of heading objects with text, file, and lnum fields
