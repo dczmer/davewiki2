@@ -4,6 +4,8 @@
 
 local telescope = require("davewiki.telescope")
 local core = require("davewiki.core")
+local markdown = require("davewiki.markdown")
+local tags = require("davewiki.tags")
 local test_util = require("davewiki.test_util")
 
 -- Get the absolute path to test_root directory relative to this script
@@ -256,7 +258,7 @@ describe("davewiki.telescope insert_link function", function()
         end)
     end)
 
-    describe("davewiki.core generate_absolute_path", function()
+    describe("davewiki.markdown generate_absolute_path", function()
         before_each(function()
             core.setup({ wiki_root = test_root })
         end)
@@ -265,7 +267,7 @@ describe("davewiki.telescope insert_link function", function()
             local current_file = test_root .. "/notes/baked-fish.md"
             local target_file = test_root .. "/notes/grilled-fish.md"
 
-            local absolute_path = core.generate_absolute_path(target_file)
+            local absolute_path = markdown.generate_absolute_path(target_file)
 
             assert.are.equal("/notes/grilled-fish.md", absolute_path)
         end)
@@ -274,7 +276,7 @@ describe("davewiki.telescope insert_link function", function()
             local current_file = test_root .. "/notes/recipes/summer.md"
             local target_file = test_root .. "/notes/grilled-fish.md"
 
-            local absolute_path = core.generate_absolute_path(target_file)
+            local absolute_path = markdown.generate_absolute_path(target_file)
 
             assert.are.equal("/notes/grilled-fish.md", absolute_path)
         end)
@@ -282,7 +284,7 @@ describe("davewiki.telescope insert_link function", function()
         it("should generate absolute path for file at root", function()
             local target_file = test_root .. "/README.md"
 
-            local absolute_path = core.generate_absolute_path(target_file)
+            local absolute_path = markdown.generate_absolute_path(target_file)
 
             assert.are.equal("/README.md", absolute_path)
         end)
@@ -290,7 +292,7 @@ describe("davewiki.telescope insert_link function", function()
         it("should generate absolute path for nested directory", function()
             local target_file = test_root .. "/notes/deep/nested/file.md"
 
-            local absolute_path = core.generate_absolute_path(target_file)
+            local absolute_path = markdown.generate_absolute_path(target_file)
 
             assert.are.equal("/notes/deep/nested/file.md", absolute_path)
         end)
@@ -298,7 +300,7 @@ describe("davewiki.telescope insert_link function", function()
         it("should handle files with spaces in names", function()
             local target_file = test_root .. "/notes/my file.md"
 
-            local absolute_path = core.generate_absolute_path(target_file)
+            local absolute_path = markdown.generate_absolute_path(target_file)
 
             assert.are.equal("/notes/my%20file.md", absolute_path)
         end)
@@ -306,7 +308,7 @@ describe("davewiki.telescope insert_link function", function()
         it("should return nil when target is outside wiki_root", function()
             local target_file = "/etc/passwd"
 
-            local absolute_path = core.generate_absolute_path(target_file)
+            local absolute_path = markdown.generate_absolute_path(target_file)
 
             assert.is_nil(absolute_path)
         end)
@@ -318,28 +320,28 @@ describe("davewiki.telescope helper functions", function()
         core.setup({ wiki_root = test_root })
     end)
 
-    describe("davewiki.core get_tags_list", function()
+    describe("davewiki.tags get_tags_list", function()
         it("should return list of unique tags from wiki", function()
-            local tags = core.get_tags_list()
+            local tag_list = tags.get_tags_list()
 
-            assert.is_table(tags)
-            assert.is_true(#tags > 0)
+            assert.is_table(tag_list)
+            assert.is_true(#tag_list > 0)
 
-            for _, tag in ipairs(tags) do
+            for _, tag in ipairs(tag_list) do
                 assert.is_string(tag)
                 assert.is_true(tag:match("^#") ~= nil)
             end
 
-            for i = 2, #tags do
-                assert.is_true(tags[i - 1] <= tags[i])
+            for i = 2, #tag_list do
+                assert.is_true(tag_list[i - 1] <= tag_list[i])
             end
         end)
 
         it("should return empty table when wiki_root is nil", function()
             core.wiki_root = nil
-            local tags = core.get_tags_list()
-            assert.is_table(tags)
-            assert.are.equal(0, #tags)
+            local tag_list = tags.get_tags_list()
+            assert.is_table(tag_list)
+            assert.are.equal(0, #tag_list)
         end)
     end)
 end)
@@ -394,9 +396,9 @@ describe("davewiki.telescope headings function", function()
         end)
     end)
 
-    describe("davewiki.core get_headings_list", function()
+    describe("davewiki.markdown get_headings_list", function()
         it("should return list of all level-1 headings from wiki", function()
-            local headings = core.get_headings_list()
+            local headings = markdown.get_headings_list()
 
             assert.is_table(headings)
             assert.is_true(#headings > 0)
@@ -410,19 +412,19 @@ describe("davewiki.telescope headings function", function()
             end
 
             for i = 2, #headings do
-                assert.is_true(headings[i - 1].text <= headings[i].text)
+                assert.is_true(headings[i -1].text <= headings[i].text)
             end
         end)
 
         it("should return empty table when wiki_root is nil", function()
             core.wiki_root = nil
-            local headings = core.get_headings_list()
+            local headings = markdown.get_headings_list()
             assert.is_table(headings)
             assert.are.equal(0, #headings)
         end)
 
         it("should only include level-1 headings", function()
-            local headings = core.get_headings_list()
+            local headings = markdown.get_headings_list()
 
             for _, heading in ipairs(headings) do
                 local heading_content = heading.text:sub(3)
@@ -434,7 +436,7 @@ describe("davewiki.telescope headings function", function()
         end)
 
         it("should include filename in each heading entry", function()
-            local headings = core.get_headings_list()
+            local headings = markdown.get_headings_list()
             assert.is_true(#headings > 0)
 
             for _, heading in ipairs(headings) do

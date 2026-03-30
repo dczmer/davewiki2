@@ -8,6 +8,8 @@ local M = {}
 local cmp = require("davewiki.cmp")
 local core = require("davewiki.core")
 local journal = require("davewiki.journal")
+local markdown = require("davewiki.markdown")
+local tags = require("davewiki.tags")
 local telescope = require("davewiki.telescope")
 local view = require("davewiki.view")
 
@@ -56,7 +58,7 @@ function M.setup(user_config)
     core.setup({ wiki_root = config.wiki_root })
     config.wiki_root = core.wiki_root
 
-    core.setup_commands(config)
+    tags.setup_commands(config)
 
     if config.highlight_tags then
         vim.api.nvim_set_hl(0, "DavewikiTag", {
@@ -71,7 +73,7 @@ function M.setup(user_config)
             pattern = config.wiki_root .. "/*.md," .. config.wiki_root .. "/**/*.md",
             desc = "Apply tag highlighting to markdown files in wiki",
             callback = function()
-                vim.fn.matchadd("DavewikiTag", core.TAG_PATTERN:gsub("+", "\\+") .. "\\>")
+                vim.fn.matchadd("DavewikiTag", tags.TAG_PATTERN:gsub("+", "\\+") .. "\\>")
             end,
         })
     end
@@ -96,6 +98,8 @@ function M.setup(user_config)
     end
 
     M.core = core
+    M.tags = tags
+    M.markdown = markdown
 
     return M
 end

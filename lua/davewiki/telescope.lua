@@ -6,6 +6,8 @@
 local telescope = {}
 
 local core = require("davewiki.core")
+local markdown = require("davewiki.markdown")
+local tags = require("davewiki.tags")
 
 ---@class DavewikiTelescopeConfig
 ---@field enabled boolean Enable telescope integration
@@ -39,7 +41,7 @@ function telescope.tags()
         return false
     end
 
-    local tag_files = core.find_tag_files()
+    local tag_files = tags.find_tag_files()
 
     if #tag_files == 0 then
         vim.notify("davewiki: No tags found in wiki_root", vim.log.levels.INFO)
@@ -56,7 +58,7 @@ function telescope.tags()
             finder = finders.new_table({
                 results = tag_files,
                 entry_maker = function(entry)
-                    local tag_name = core.extract_tag_from_filename(entry)
+                    local tag_name = tags.extract_tag_from_filename(entry)
                     return {
                         value = entry,
                         display = tag_name or entry,
@@ -106,7 +108,7 @@ function telescope.tag_references(tag_name)
     end
 
     -- Get references (either for specific tag or all tags)
-    local references = core.get_tag_references(tag_name)
+    local references = tags.get_tag_references(tag_name)
 
     if #references == 0 then
         if tag_name then
@@ -173,7 +175,7 @@ function telescope.headings()
         return false
     end
 
-    local headings_list = core.get_headings_list()
+    local headings_list = markdown.get_headings_list()
 
     if #headings_list == 0 then
         -- Silent behavior when no headings found (per spec)
@@ -249,7 +251,7 @@ function telescope.insert_link()
     end
 
     -- Get all markdown files
-    local markdown_files = core.get_markdown_files()
+    local markdown_files = markdown.get_markdown_files()
 
     if #markdown_files == 0 then
         vim.notify("davewiki: No markdown files found in wiki_root", vim.log.levels.INFO)
@@ -267,7 +269,7 @@ function telescope.insert_link()
                 results = markdown_files,
                 entry_maker = function(entry)
                     -- Extract title from file
-                    local title = core.extract_h1_or_filename(entry)
+                    local title = markdown.extract_h1_or_filename(entry)
                     local filename = vim.fn.fnamemodify(entry, ":t")
                     local display = title .. " (" .. filename .. ")"
                     return {
@@ -288,7 +290,7 @@ function telescope.insert_link()
 
                     if selection then
                         -- Generate absolute path from wiki_root
-                        local absolute_path = core.generate_absolute_path(selection.filename)
+                        local absolute_path = markdown.generate_absolute_path(selection.filename)
 
                         if absolute_path then
                             -- Build the markdown link
@@ -320,7 +322,7 @@ function telescope.tag_view()
         return false
     end
 
-    local tag_files = core.find_tag_files()
+    local tag_files = tags.find_tag_files()
 
     if #tag_files == 0 then
         vim.notify("davewiki: No tags found in wiki_root", vim.log.levels.INFO)
@@ -338,7 +340,7 @@ function telescope.tag_view()
             finder = finders.new_table({
                 results = tag_files,
                 entry_maker = function(entry)
-                    local tag_name = core.extract_tag_from_filename(entry)
+                    local tag_name = tags.extract_tag_from_filename(entry)
                     return {
                         value = entry,
                         display = tag_name or entry,
@@ -387,10 +389,10 @@ function telescope.setup_commands()
         desc = "Open davewiki tag references picker",
         complete = function(_, cmdline, _)
             -- Provide basic tag completion if possible
-            local tags = core.scan_for_tags()
+            local tag_list = tags.scan_for_tags()
             local results = {}
-            for _, tag_data in ipairs(tags) do
-                table.insert(results, tag_data.tag)
+            for _, data in ipairs(tag_list) do
+                table.insert(results, data.tag)
             end
             return results
         end,

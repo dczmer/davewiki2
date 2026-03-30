@@ -104,8 +104,8 @@ vim.api.nvim_create_autocmd("FileType", {
     callback = function()
         vim.keymap.set("n", "<CR>", function()
             -- Try tag first, then link
-            if not davewiki.jump_to_tag() then
-                davewiki.jump_to_link()
+            if not davewiki.tags.jump_to_tag() then
+                davewiki.markdown.jump_to_link()
             end
         end, { buffer = true, desc = "Jump to tag or link under cursor" })
     end,

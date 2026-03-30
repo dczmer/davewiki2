@@ -104,7 +104,9 @@ Command-line neovim users who want a simple journal-based note-taking system.
 
 1. **Lua Modules (in `lua/` directory):**
    - `davewiki/init.lua` - Public interface, provides `setup()` function
-   - `davewiki/core.lua` - Core utilities including wiki_root resolution
+   - `davewiki/core.lua` - Core utilities (wiki_root, ripgrep wrapper, validation functions)
+   - `davewiki/tags.lua` - Tag file management and tag operations
+   - `davewiki/markdown.lua` - Markdown link and file operations
    - `davewiki/cmp.lua` - nvim-cmp integration
    - `davewiki/telescope.lua` - Telescope integration for tag and heading search
    - `davewiki/journal.lua` - Daily journal management and navigation
@@ -124,7 +126,9 @@ Command-line neovim users who want a simple journal-based note-taking system.
 lua/                     (lua modules)
 └── davewiki/
     ├── init.lua         (public interface)
-    ├── core.lua
+    ├── core.lua         (utility functions)
+    ├── tags.lua         (tag operations)
+    ├── markdown.lua     (markdown operations)
     ├── cmp.lua
     ├── telescope.lua
     ├── journal.lua
