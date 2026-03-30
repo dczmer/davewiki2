@@ -258,7 +258,7 @@ describe("davewiki.telescope insert_link function", function()
         end)
     end)
 
-    describe("davewiki.markdown generate_absolute_path", function()
+    describe("davewiki.core generate_absolute_path", function()
         before_each(function()
             core.setup({ wiki_root = test_root })
         end)
@@ -267,7 +267,7 @@ describe("davewiki.telescope insert_link function", function()
             local current_file = test_root .. "/notes/baked-fish.md"
             local target_file = test_root .. "/notes/grilled-fish.md"
 
-            local absolute_path = markdown.generate_absolute_path(target_file)
+            local absolute_path = core.generate_absolute_path(target_file)
 
             assert.are.equal("/notes/grilled-fish.md", absolute_path)
         end)
@@ -276,7 +276,7 @@ describe("davewiki.telescope insert_link function", function()
             local current_file = test_root .. "/notes/recipes/summer.md"
             local target_file = test_root .. "/notes/grilled-fish.md"
 
-            local absolute_path = markdown.generate_absolute_path(target_file)
+            local absolute_path = core.generate_absolute_path(target_file)
 
             assert.are.equal("/notes/grilled-fish.md", absolute_path)
         end)
@@ -284,7 +284,7 @@ describe("davewiki.telescope insert_link function", function()
         it("should generate absolute path for file at root", function()
             local target_file = test_root .. "/README.md"
 
-            local absolute_path = markdown.generate_absolute_path(target_file)
+            local absolute_path = core.generate_absolute_path(target_file)
 
             assert.are.equal("/README.md", absolute_path)
         end)
@@ -292,7 +292,7 @@ describe("davewiki.telescope insert_link function", function()
         it("should generate absolute path for nested directory", function()
             local target_file = test_root .. "/notes/deep/nested/file.md"
 
-            local absolute_path = markdown.generate_absolute_path(target_file)
+            local absolute_path = core.generate_absolute_path(target_file)
 
             assert.are.equal("/notes/deep/nested/file.md", absolute_path)
         end)
@@ -300,7 +300,7 @@ describe("davewiki.telescope insert_link function", function()
         it("should handle files with spaces in names", function()
             local target_file = test_root .. "/notes/my file.md"
 
-            local absolute_path = markdown.generate_absolute_path(target_file)
+            local absolute_path = core.generate_absolute_path(target_file)
 
             assert.are.equal("/notes/my%20file.md", absolute_path)
         end)
@@ -308,7 +308,7 @@ describe("davewiki.telescope insert_link function", function()
         it("should return nil when target is outside wiki_root", function()
             local target_file = "/etc/passwd"
 
-            local absolute_path = markdown.generate_absolute_path(target_file)
+            local absolute_path = core.generate_absolute_path(target_file)
 
             assert.is_nil(absolute_path)
         end)

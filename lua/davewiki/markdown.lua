@@ -243,13 +243,4 @@ M.get_headings_list = function()
     return headings
 end
 
---- Generate an absolute path from wiki_root for a target file
---- Returns path starting with "/" that is relative to wiki_root
----
----@param target_file string The absolute path to the target file
----@return string|nil The absolute path from wiki_root (e.g., "/notes/file.md"), or nil if outside wiki_root
-M.generate_absolute_path = function(target_file)
-    return core.generate_absolute_path(target_file)
-end
-
 return M
