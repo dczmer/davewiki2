@@ -1,0 +1,33 @@
+# markdownlint (mdl) configuration for davewiki2 project
+# Place this file at .mdlrc in the project root
+
+# Rule configuration
+# See: https://github.com/markdownlint/markdownlint/blob/main/docs/RULES.md
+
+# MD013 - Line length
+# Exclude - many lines are intentionally long (commands, code, URLs)
+exclude_rule 'MD013'
+
+# MD029 - Ordered list item prefix
+# Allow using '1.' for all items (this is valid markdown and makes reordering easier)
+rule 'MD029', :style => :ordered
+
+# MD007 - Unordered list indentation
+# Use 2-space indentation for lists to match common style
+rule 'MD007', :indent => 2
+
+# MD033 - Inline HTML
+# Allow inline HTML (sometimes needed for special formatting)
+exclude_rule 'MD033'
+
+# MD041 - First line in file should be a top level header
+# Not applicable for AGENTS.md which starts with instructions
+exclude_rule 'MD041'
+
+# MD024 - Multiple headers with the same content
+# Allow duplicate headers (common in long documents)
+exclude_rule 'MD024'
+
+# MD034 - Bare URL used
+# Allow bare URLs (they render fine in most markdown parsers)
+exclude_rule 'MD034'

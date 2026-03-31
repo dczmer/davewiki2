@@ -4,6 +4,7 @@
 -- @version 1.0
 
 local cmp = {}
+local core = require("davewiki.core")
 local tags = require("davewiki.tags")
 
 ---@class DavewikiCmpConfig
@@ -28,7 +29,6 @@ local wiki_tags_source = {}
 ---@return table
 function wiki_tags_source.new()
     local self = setmetatable({}, { __index = wiki_tags_source })
-    local core = require("davewiki.core")
     self.wiki_root = core.wiki_root
     return self
 end
@@ -36,7 +36,7 @@ end
 --- Gets the trigger characters for this source
 ---@return string[]
 function wiki_tags_source:get_trigger_characters()
-    return { "#" }
+    return { "#[A-Za-z0-9-_]" }
 end
 
 --- Checks if this source is available in the current context
@@ -44,7 +44,14 @@ end
 function wiki_tags_source:is_available()
     local buf = vim.api.nvim_get_current_buf()
     local filetype = vim.bo[buf].filetype
-    return filetype == "markdown"
+    if filetype ~= "markdown" then
+        return false
+    end
+    local filepath = vim.api.nvim_buf_get_name(buf)
+    if filepath == "" then
+        return false
+    end
+    return core.is_path_within_wiki_root(filepath)
 end
 
 --- Performs completion for tag names

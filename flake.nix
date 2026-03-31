@@ -34,6 +34,7 @@
           lua-language-server
           stylua
           gh
+          mdl
         ];
         neovimWrapped = pkgs.wrapNeovim pkgs.neovim-unwrapped {
           configure = {
