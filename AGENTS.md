@@ -205,7 +205,7 @@ layered structure.
 - All Lua code must include **type annotations**.
 - Type checking via lua-language-server must pass.
 - Follow lua-language-server (LuaLS) naming conventions.
-- Run `luacheck` (linter) and `stylua` (formatter) before committing.
+- Run `luacheck` (Lua linter), `stylua` (Lua formatter), and `mdl -s mdl_style.rb` (markdown linter) before committing.
 - **Avoid useless wrapper functions.** Do not create single-line functions that just call
   another function directly without adding any value. Use the underlying function instead.
 

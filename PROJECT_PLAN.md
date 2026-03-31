@@ -99,6 +99,7 @@ Command-line neovim users who want a simple journal-based note-taking system.
 
 - luacheck - linting
 - stylua - Lua formatter
+- mdl - markdown linting
 - lua-language-server - type checking
 - git - version control
 - ripgrep - search utility
@@ -281,6 +282,7 @@ wiki_root/               (configurable, e.g., ~/.davewiki)
 
 - luacheck - Lua linter
 - stylua - Lua formatter
+- mdl - Markdown linter
 - lua-language-server - Type checking (all code requires type annotations)
 
 **Code Quality Requirements:**
