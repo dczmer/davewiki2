@@ -1,0 +1,444 @@
+*davewiki.txt*	A personal knowledge base system for neovim
+
+				DAVEWIKI			       *davewiki*
+
+A personal knowledge base system for neovim with journal-based note-taking,
+inspired by Logseq.
+
+==============================================================================
+CONTENTS						*davewiki-contents*
+
+1. Introduction ........................... |davewiki-introduction|
+2. Features .............................. |davewiki-features|
+3. Configuration ......................... |davewiki-configuration|
+4. Commands ............................... |davewiki-commands|
+5. Mappings .............................. |davewiki-mappings|
+6. Lua API ................................ |davewiki-lua-api|
+7. Structure ............................. |davewiki-structure|
+8. Tag Views .............................. |davewiki-tag-views|
+9. Highlights ............................ |davewiki-highlights|
+
+==============================================================================
+1. INTRODUCTION					*davewiki-introduction*
+
+Davewiki is a personal knowledge base system for neovim that provides:
+- Journal-based note-taking
+- Tag-based organization with back-references
+- Markdown link navigation
+- Integration with telescope.nvim and nvim-cmp
+
+All notes are stored in a configurable `wiki_root` directory (e.g.,
+`~/davewiki`). The wiki organizes notes using flat tags (`#tag-name`) with
+back-reference tracking.
+
+==============================================================================
+2. FEATURES						*davewiki-features*
+
+Journals ~
+- Daily notes stored in `journals/YYYY-MM-DD.md`
+- Automatic template with date, TASKS, AGENDA, and NOTES sections
+- Context-aware navigation (relative to current journal or today)
+
+Tags ~
+- Flat tag syntax: `#tag-name` (no hierarchy)
+- Tag files stored in `sources/` directory
+- Back-reference tracking across all wiki files
+- Quick navigation between tags
+
+Tag Views ~
+- Synthetic views that aggregate all references to a tag
+- Tag file content, journal blocks, and wiki references
+- Each section includes markdown links to source documents
+- View content is generated on-demand
+
+Markdown Links ~
+- Internal links: `[text](path.md)` with absolute or relative paths
+- External URLs: `[text](https://example.com)` opens in browser
+- Security: All paths validated to stay within `wiki_root`
+
+Tag Backlinks ~
+- Automatic display when opening tag files
+- Quickfix window shows all references to that tag
+- Smart summary with 80-character preview
+- Configure with `show_tag_backlinks` option
+
+Tag Highlighting ~
+- Tags (`#tag-name`) highlighted with custom highlight group
+- Default: orange foreground on dark background with underline
+- Customize via `DavewikiTag` highlight group
+
+==============================================================================
+3. CONFIGURATION				*davewiki-configuration*
+
+BASIC SETUP ~
+
+>
+  require('davewiki').setup({
+    wiki_root = "~/.davewiki",
+    telescope = { enabled = true },
+    cmp = { enabled = true },
+    journal = { enabled = true },
+    show_tag_backlinks = true,
+    highlight_tags = true,
+  })
+<
+
+OPTIONS ~
+
+`wiki_root`		(string)	Root directory for all notes
+				Default: `~/davewiki`
+
+`telescope.enabled`	(boolean)	Enable telescope integration
+				Default: `true`
+
+`cmp.enabled`		(boolean)	Enable nvim-cmp integration
+				Default: `true`
+
+`journal.enabled`	(boolean)	Enable journal module
+				Default: `true`
+
+`show_tag_backlinks`	(boolean)	Enable automatic backlink display
+				Default: `true`
+
+`highlight_tags`	(boolean)	Enable tag highlighting
+				Default: `true`
+
+ALTERNATIVE CONFIGURATION ~
+
+You can also set `wiki_root` via a vim global variable:
+>
+  let g:davewiki_wiki_root = '~/my-wiki'
+<
+
+Priority: setup option > `g:davewiki_wiki_root` > default `~/davewiki`
+
+NVIM-CMP CONFIGURATION ~
+
+Add the `wiki_tags` source to your cmp setup:
+>
+  require('cmp').setup({
+    sources = {
+      { name = 'wiki_tags' },
+      -- other sources...
+    },
+  })
+<
+
+==============================================================================
+4. COMMANDS						*davewiki-commands*
+
+TELESCOPE COMMANDS ~
+
+*:DavewikiTags*
+	Open a telescope picker to search and navigate to tag files.
+
+*:DavewikiTagReferences* `[tag]`
+	Search for tag references. If no tag is provided, shows all tag
+	references across the wiki.
+
+*:DavewikiHeadings*
+	Search for level-1 headings across all markdown files.
+
+*:DavewikiInsertLink*
+	Insert a markdown link using telescope. Automatically generates an
+	absolute path.
+
+*:DavewikiJournals*
+	Browse journal files with telescope. Requires journal module.
+
+*:DavewikiGenerateView*
+	Pick a tag and generate its synthetic view.
+
+JOURNAL COMMANDS ~
+
+*:DavewikiJournalToday*
+	Open today's journal file.
+
+*:DavewikiJournalYesterday*
+	Open yesterday's journal file. Context-aware: if current buffer is a
+	journal file, navigates relative to that journal's date.
+
+*:DavewikiJournalTomorrow*
+	Open tomorrow's journal file. Context-aware: if current buffer is a
+	journal file, navigates relative to that journal's date.
+
+*:DavewikiJournalOpen*
+	Prompt for a date and open that journal.
+
+TAG VIEW COMMANDS ~
+
+*:DavewikiGenerateView*
+	Pick a tag and generate its synthetic view.
+
+*:DavewikiGenerateViewFromCursor*
+	Generate view for the tag under cursor.
+
+*:DavewikiGenerateViewFromTagFile*
+	Generate view for the current tag file.
+
+==============================================================================
+5. MAPPINGS						*davewiki-mappings*
+
+No default keymaps are provided. Here are recommended mappings:
+
+TELESCOPE ~
+
+>
+  -- Open tags picker
+  vim.keymap.set('n', '<leader>wt', function()
+      require('davewiki').telescope.tags()
+  end, { desc = 'Open davewiki tags picker' })
+
+  -- Search for tag references
+  vim.keymap.set('n', '<leader>wT', function()
+      require('davewiki').telescope.tag_references()
+  end, { desc = 'Search davewiki tag references' })
+
+  -- Search for headings
+  vim.keymap.set('n', '<leader>wh', function()
+      require('davewiki').telescope.headings()
+  end, { desc = 'Search davewiki headings' })
+
+  -- Insert markdown link
+  vim.keymap.set('n', '<leader>wl', function()
+      require('davewiki').telescope.insert_link()
+  end, { desc = 'Insert markdown link to wiki file' })
+
+  -- Browse journal files
+  vim.keymap.set('n', '<leader>wjp', function()
+      require('davewiki').telescope.jump_to_journal()
+  end, { desc = 'Browse journal files with telescope' })
+<
+
+JOURNALS ~
+
+>
+  -- Open today's journal
+  vim.keymap.set('n', '<leader>wjt', '<cmd>DavewikiJournalToday<CR>',
+    { desc = "Open today's journal" })
+
+  -- Open yesterday's journal
+  vim.keymap.set('n', '<leader>wjy', '<cmd>DavewikiJournalYesterday<CR>',
+    { desc = "Open yesterday's journal" })
+
+  -- Open tomorrow's journal
+  vim.keymap.set('n', '<leader>wjT', '<cmd>DavewikiJournalTomorrow<CR>',
+    { desc = "Open tomorrow's journal" })
+
+  -- Open journal for specific date
+  vim.keymap.set('n', '<leader>wjo', '<cmd>DavewikiJournalOpen<CR>',
+    { desc = "Open journal for specific date" })
+<
+
+TAG VIEWS ~
+
+>
+  -- Generate view for tag under cursor
+  vim.keymap.set('n', '<leader>wv',
+    '<cmd>DavewikiGenerateViewFromCursor<CR>',
+    { desc = "Generate tag view from cursor" })
+
+  -- Pick a tag and generate view
+  vim.keymap.set('n', '<leader>wV', '<cmd>DavewikiGenerateView<CR>',
+    { desc = "Pick tag and generate view" })
+
+  -- Generate view from current tag file
+  vim.keymap.set('n', '<leader>wvf',
+    '<cmd>DavewikiGenerateViewFromTagFile<CR>',
+    { desc = "Generate view from current tag file" })
+<
+
+LINK NAVIGATION ~
+
+>
+  -- Navigate markdown links with Enter
+  vim.keymap.set('n', '<CR>', function()
+    require('davewiki').markdown.open_link_under_cursor()
+  end, { desc = 'Open markdown link under cursor' })
+<
+
+==============================================================================
+6. LUA API						*davewiki-lua-api*
+
+The plugin exposes its modules through `require('davewiki')`.
+
+SETUP ~
+
+`require('davewiki').setup({config})`
+	Initialize davewiki with configuration options.
+
+TELESCOPE MODULE ~
+
+`require('davewiki').telescope.tags()`
+	Open telescope picker for tag files.
+
+`require('davewiki').telescope.tag_references([tag])`
+	Search for tag references.
+
+`require('davewiki').telescope.headings()`
+	Search for headings in wiki files.
+
+`require('davewiki').telescope.insert_link()`
+	Insert a markdown link using telescope picker.
+
+`require('davewiki').telescope.jump_to_journal()`
+	Browse journal files with telescope.
+
+MARKDOWN MODULE ~
+
+`require('davewiki').markdown.open_link_under_cursor()`
+	Open the markdown link under the cursor. Works for both internal
+	links and external URLs.
+
+JOURNAL MODULE ~
+
+`require('davewiki').journal.today()`
+	Open today's journal.
+
+`require('davewiki').journal.yesterday()`
+	Open yesterday's journal (context-aware).
+
+`require('davewiki').journal.tomorrow()`
+	Open tomorrow's journal (context-aware).
+
+`require('davewiki').journal.open(date_string)`
+	Open journal for a specific date.
+
+VIEW MODULE ~
+
+`require('davewiki').view.generate_from_cursor()`
+	Generate tag view for tag under cursor.
+
+`require('davewiki').view.generate_from_tag_file()`
+	Generate tag view for current tag file.
+
+`require('davewiki').view.generate(tag_name)`
+	Generate tag view for a specific tag.
+
+==============================================================================
+7. STRUCTURE						*davewiki-structure*
+
+The wiki is organized under `wiki_root` (default: `~/davewiki`):
+
+`journals/`		Daily journal files (`YYYY-MM-DD.md`)
+
+`sources/`		Tag anchor files (`tag-name.md`)
+
+`notes/`		Other notes (can mention tags but not auto-indexed)
+
+`attachments/`	Optional attachments (images, files)
+
+JOURNAL FORMAT ~
+
+Journals are organized into blocks separated by `---`. Each block can contain
+multiple tags:
+>
+  ---
+  Today I learned about #vim scripting.
+  
+  Some notes on #markdown formatting.
+  ---
+
+  Another block with #vim tips.
+  ---
+<
+
+JOURNAL TEMPLATE ~
+
+New journals include YAML frontmatter and standard sections:
+>
+  ---
+  date: 2026-03-26
+  ---
+  
+  ## 2026-03-26 - Wednesday
+  
+  ## TASKS
+  
+  ## AGENDA
+  
+  ## NOTES
+<
+
+MARKDOWN LINKS ~
+
+Internal links (paths starting with `/` are resolved relative to wiki_root):
+>
+  [notes](/notes/recipes.md)
+<
+
+Relative paths:
+>
+  [notes](./notes.md)
+  [notes](notes.md)
+<
+
+External URLs (open in system browser):
+>
+  [website](https://example.com)
+<
+
+==============================================================================
+8. TAG VIEWS						*davewiki-tag-views*
+
+Tag views aggregate all references to a specific tag into a single buffer.
+
+FEATURES ~
+- Generates synthetic view file containing tag file content, journal blocks,
+  and wiki references
+- Each section includes markdown links to source documents
+- View is created as an unsaved buffer - you can save it manually if desired
+- Automatically regenerates content when invoked for an existing view
+
+VIEW CONTENT ~
+
+When generating a tag view for `#cooking`, the buffer contains:
+
+1. Tag File Content: Full content of `sources/cooking.md` (or "NO TAG FILE"
+   placeholder)
+2. Journal Blocks: Complete `---` separated blocks from journal files that
+   mention `#cooking`
+3. Wiki References: Paragraphs from non-journal wiki files that mention
+   `#cooking`
+
+USAGE ~
+
+Pick a tag: >
+  :DavewikiGenerateView
+<
+
+From cursor: >
+  :DavewikiGenerateViewFromCursor
+<
+
+From current tag file: >
+  :DavewikiGenerateViewFromTagFile
+<
+
+==============================================================================
+9. HIGHLIGHTS					*davewiki-highlights*
+
+DAVEWIKI TAG HIGHLIGHT GROUP ~
+
+`DavewikiTag`
+	Default: orange foreground (`#FF8C00`) on dark charcoal background
+	(`#2A2A2A`) with underline
+
+Customize by overriding the highlight group:
+>
+  vim.api.nvim_set_hl(0, "DavewikiTag", {
+    fg = "#00FF00",
+    bg = "#000000",
+    underline = true,
+  })
+<
+
+Or with vim highlight command:
+>
+  highlight DavewikiTag guifg=blue guibg=yellow gui=underline
+<
+
+Disable by setting `highlight_tags = false` in configuration.
+
+==============================================================================
+vim:tw=78:ts=8:ft=help:norl:
