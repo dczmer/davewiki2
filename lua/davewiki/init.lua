@@ -73,7 +73,7 @@ function M.setup(user_config)
             pattern = config.wiki_root .. "/*.md," .. config.wiki_root .. "/**/*.md",
             desc = "Apply tag highlighting to markdown files in wiki",
             callback = function()
-                vim.fn.matchadd("DavewikiTag", tags.TAG_PATTERN:gsub("+", "\\+") .. "\\>")
+                vim.fn.matchadd("DavewikiTag", core.TAG_PATTERN:gsub("+", "\\+") .. "\\>")
             end,
         })
     end

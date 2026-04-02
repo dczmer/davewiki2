@@ -7,10 +7,6 @@ local M = {}
 
 local core = require("davewiki.core")
 
---- Pattern for matching valid tags (e.g., #tag-name)
---- @type string
-M.TAG_PATTERN = "#[A-Za-z0-9-_]+"
-
 --- Frontmatter template structure for tag files
 --- @class TagFrontmatter
 --- @field name string The tag name without the # prefix
@@ -43,7 +39,7 @@ M.scan_for_tags = function()
     local args = {
         "--only-matching",
         "--with-filename",
-        M.TAG_PATTERN,
+        core.TAG_PATTERN,
         core.wiki_root,
     }
 
@@ -214,7 +210,7 @@ M.get_tag_under_cursor = function()
 
     local start_pos = 1
     while true do
-        local tag_start, tag_end = line:find(M.TAG_PATTERN, start_pos)
+        local tag_start, tag_end = line:find(core.TAG_PATTERN, start_pos)
         if not tag_start then
             break
         end
@@ -428,7 +424,7 @@ M.get_tag_references = function(tag_name)
         "--line-number",
         "--column",
         "--only-matching",
-        M.TAG_PATTERN,
+        core.TAG_PATTERN,
         core.wiki_root,
     }
 

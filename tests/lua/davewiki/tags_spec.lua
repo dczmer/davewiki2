@@ -8,9 +8,9 @@ local core = require("davewiki.core")
 local test_root = vim.fn.fnamemodify(vim.fn.expand("<sfile>:h:h:h:h"), ":p") .. "test_root"
 
 describe("davewiki.tags constants", function()
-    it("should have TAG_PATTERN defined", function()
-        assert.is_not_nil(tags.TAG_PATTERN)
-        assert.are.equal("#[A-Za-z0-9-_]+", tags.TAG_PATTERN)
+    it("should have TAG_PATTERN defined in core module", function()
+        assert.is_not_nil(core.TAG_PATTERN)
+        assert.are.equal("#[A-Za-z0-9-_]+", core.TAG_PATTERN)
     end)
 end)
 
