@@ -4,13 +4,14 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     flake-utils.url = "github:numtide/flake-utils";
+    dave-shield.url = "github:dczmer/dave-shield";
   };
 
   outputs =
     {
-      self,
       nixpkgs,
       flake-utils,
+      dave-shield,
       ...
     }:
     flake-utils.lib.eachDefaultSystem (
@@ -30,6 +31,7 @@
           fzf
         ];
         devPackages = with pkgs; [
+          git
           lua54Packages.luacheck
           lua-language-server
           stylua
@@ -59,6 +61,12 @@
           '';
           inherit runtimeInputs;
         };
+        jailedOpenCode = dave-shield.lib.${system}.makeJailedOpenCode {
+          extraPkgs = runtimeInputs ++ devPackages;
+        };
+        jailedShell = dave-shield.lib.${system}.makeJailedShell {
+          extraPkgs = runtimeInputs ++ devPackages;
+        };
       in
       {
         packages = {
@@ -81,7 +89,8 @@
           buildInputs =
             with pkgs;
             [
-              git
+              jailedOpenCode
+              jailedShell
             ]
             ++ runtimeInputs
             ++ devPackages;
