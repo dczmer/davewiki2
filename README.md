@@ -441,7 +441,7 @@ For manual acceptance testing, you can run an interactive neovim instance
 pre-configured with davewiki:
 
 ```sh
-nix run .#nvim-test -- -u scripts/minimal-init.lua
+nvim-test -u scripts/minimal-init.lua
 ```
 
 This opens neovim with the `scripts/minimal-init.lua` configuration, which:
@@ -459,12 +459,12 @@ You can test hyperlink navigation by pressing `<CR>` on a markdown link like
 For a fuller configuration with all features enabled and keymaps configured:
 
 ```sh
-nix run .#nvim-test -- -u scripts/davewiki2-init.lua
+nvim-test -u scripts/davewiki2-init.lua
 ```
 
 ### Running Tests
 
 ```sh
-nix run .#nvim-test -- -u scripts/minimal-init.lua --headless -c \
+nvim-test -u scripts/minimal-init.lua --headless -c \
   'PlenaryBustedDirectory tests' -c 'qa!'
 ```
