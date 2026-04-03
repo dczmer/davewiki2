@@ -7,7 +7,7 @@ This document provides a comprehensive manual testing plan for all user-facing f
 Before testing, launch Neovim with the test configuration:
 
 ```sh
-nix run .#nvim-test -- -u scripts/davewiki2-init.lua
+nvim-test -u scripts/davewiki2-init.lua
 ```
 
 This starts Neovim with:

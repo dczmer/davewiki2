@@ -61,11 +61,14 @@
           '';
           inherit runtimeInputs;
         };
+        extraPkgs = [
+          nvim-test-app
+        ] ++ runtimeInputs ++ devPackages;
         jailedOpenCode = dave-shield.lib.${system}.makeJailedOpenCode {
-          extraPkgs = runtimeInputs ++ devPackages;
+          inherit extraPkgs;
         };
         jailedShell = dave-shield.lib.${system}.makeJailedShell {
-          extraPkgs = runtimeInputs ++ devPackages;
+          inherit extraPkgs;
         };
       in
       {

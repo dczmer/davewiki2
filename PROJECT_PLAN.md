@@ -232,7 +232,7 @@ wiki_root/               (configurable, e.g., ~/.davewiki)
 
 **Running Locally:**
 
-- `nix run .#nvim-test` - Run test neovim instance
+- `nvim-test` - Run test neovim instance
 - `nix run .#davewiki` - Run davewiki application
 - Or enter dev shell: `nix develop` then use `nvim-test` and `davewiki`
   commands
@@ -240,9 +240,9 @@ wiki_root/               (configurable, e.g., ~/.davewiki)
 **Testing:**
 
 - **Unit tests:**
-  `nix run .#nvim-test -- -u scripts/minimal-init.lua --headless -c ...`
+  `nvim-test -u scripts/minimal-init.lua --headless -c ...`
 - **Integration tests:** Combined module/functionality testing
-- **Manual testing:** `nix run .#nvim-test` to open an interactive neovim
+- **Manual testing:** `nvim-test` to open an interactive neovim
   instance with davewiki pre-configured using `scripts/minimal-init.lua`. The
   minimal init includes a working example of jump-to-tag functionality bound
   to `<CR>` in markdown files.
@@ -254,7 +254,7 @@ wiki_root/               (configurable, e.g., ~/.davewiki)
 - Use `PlenaryBustedDirectory` to run all tests in a directory
 - Always end with `-c 'qa!'` to exit after tests complete
 - Example:
-  `nix run .#nvim-test -- -u scripts/minimal-init.lua --headless -c
+  `nvim-test -u scripts/minimal-init.lua --headless -c
   'PlenaryBustedFile tests/file_spec.lua' -c 'qa!'`
 
 **Test Environment:**
@@ -275,7 +275,7 @@ wiki_root/               (configurable, e.g., ~/.davewiki)
 
 1. Run linters and type checker
 2. Run test code:
-   `nix run .#nvim-test -- -u scripts/minimal-init.lua --headless -c
+`nvim-test -u scripts/minimal-init.lua --headless -c
    "lua ..."`
 
 **Linting/Formatting/Type Checking:**

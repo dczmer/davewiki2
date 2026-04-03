@@ -25,7 +25,7 @@ Follow test-driven development:
 To run the complete test suite:
 
 ```sh
-nix run .#nvim-test -- -u scripts/minimal-init.lua --headless -c \
+nvim-test -u scripts/minimal-init.lua --headless -c \
   'PlenaryBustedDirectory tests' -c 'qa!'
 ```
 
@@ -33,23 +33,23 @@ Or run individual test files:
 
 ```sh
 # Run core module tests
-nix run .#nvim-test -- -u scripts/minimal-init.lua --headless -c \
+nvim-test -u scripts/minimal-init.lua --headless -c \
   'PlenaryBustedFile tests/lua/davewiki/core_spec.lua' -c 'qa!'
 
 # Run tags module tests
-nix run .#nvim-test -- -u scripts/minimal-init.lua --headless -c \
+nvim-test -u scripts/minimal-init.lua --headless -c \
   'PlenaryBustedFile tests/lua/davewiki/tags_spec.lua' -c 'qa!'
 
 # Run markdown module tests
-nix run .#nvim-test -- -u scripts/minimal-init.lua --headless -c \
+nvim-test -u scripts/minimal-init.lua --headless -c \
   'PlenaryBustedFile tests/lua/davewiki/markdown_spec.lua' -c 'qa!'
 
 # Run init module tests
-nix run .#nvim-test -- -u scripts/minimal-init.lua --headless -c \
+nvim-test -u scripts/minimal-init.lua --headless -c \
   'PlenaryBustedFile tests/lua/davewiki/init_spec.lua' -c 'qa!'
 
 # Run cmp module tests
-nix run .#nvim-test -- -u scripts/minimal-init.lua --headless -c \
+nvim-test -u scripts/minimal-init.lua --headless -c \
   'PlenaryBustedFile tests/lua/davewiki/cmp_spec.lua' -c 'qa!'
 ```
 
