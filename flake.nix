@@ -1,23 +1,27 @@
 {
-  description = "A personal knowledge base system for neovim with journal-based note-taking";
 
+  description = "A personal knowledge base system for neovim with journal-based note-taking";
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     flake-utils.url = "github:numtide/flake-utils";
     dave-shield.url = "github:dczmer/dave-shield";
+    llm-agents.url = "github:numtide/llm-agents.nix";
   };
-
   outputs =
     {
       nixpkgs,
       flake-utils,
       dave-shield,
+      llm-agents,
       ...
     }:
     flake-utils.lib.eachDefaultSystem (
       system:
       let
-        pkgs = nixpkgs.legacyPackages.${system};
+        pkgs = import nixpkgs {
+          inherit system;
+          config.allowUnfree = true;
+        };
         customRC = ''
           " manually add each plugin dependency to rtp so we can load them from plenary tests.
           set rtp+=${pkgs.vimPlugins.nvim-cmp}
@@ -37,6 +41,7 @@
           stylua
           gh
           mdl
+          tree
         ];
         neovimWrapped = pkgs.wrapNeovim pkgs.neovim-unwrapped {
           configure = {
@@ -63,22 +68,29 @@
         };
         extraPkgs = [
           nvim-test-app
-        ] ++ runtimeInputs ++ devPackages;
-        jailedOpenCode = dave-shield.lib.${system}.makeJailedOpenCode {
-          inherit extraPkgs;
-        };
-        jailedShell = dave-shield.lib.${system}.makeJailedShell {
-          inherit extraPkgs;
-        };
+        ]
+        ++ runtimeInputs
+        ++ devPackages;
+        daveShield = dave-shield.lib.${system}.daveShield;
+        agents = llm-agents.packages.${system};
+        extraCombinators = with dave-shield.lib.${system}.jailCombinators; [
+          # share the opencode config from my home dir.
+          # otherwise, you have to configure and auth in each new sandbox environment.
+          (readwrite (noescape "~/.config/opencode"))
+          (readwrite (noescape "~/.local/share/opencode"))
+          (readwrite (noescape "~/.local/state/opencode"))
+        ];
       in
-      {
+      rec {
         packages = {
-          ripgrep = pkgs.ripgrep;
-          luacheck = pkgs.lua54Packages.luacheck;
-          stylua = pkgs.stylua;
-          lua-language-server = pkgs.lua-language-server;
-          lua = pkgs.lua54Packages.lua;
-          gh = pkgs.gh;
+          jailedOpenCode = daveShield {
+            exec = agents.opencode;
+            inherit extraPkgs extraCombinators;
+          };
+          jailedShell = daveShield {
+            exec = pkgs.bash;
+            inherit extraPkgs extraCombinators;
+          };
         };
         apps = rec {
           default = nvim-test;
@@ -87,17 +99,13 @@
             program = "${nvim-test-app}/bin/nvim-test";
           };
         };
-
         devShells.default = pkgs.mkShell {
-          buildInputs =
-            with pkgs;
-            [
-              jailedOpenCode
-              jailedShell
-            ]
-            ++ runtimeInputs
-            ++ devPackages;
-
+          buildInputs = [
+            packages.jailedOpenCode
+            packages.jailedShell
+          ]
+          ++ runtimeInputs
+          ++ devPackages;
           shellHook = ''
             echo "Development environment for davewiki loaded"
             echo "Run 'nix develop' to enter the dev shell"
