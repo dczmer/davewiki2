@@ -5,14 +5,12 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     flake-utils.url = "github:numtide/flake-utils";
     dave-shield.url = "github:dczmer/dave-shield";
-    llm-agents.url = "github:numtide/llm-agents.nix";
   };
   outputs =
     {
       nixpkgs,
       flake-utils,
       dave-shield,
-      llm-agents,
       ...
     }:
     flake-utils.lib.eachDefaultSystem (
@@ -71,20 +69,14 @@
         ]
         ++ runtimeInputs
         ++ devPackages;
-        daveShield = dave-shield.lib.${system}.daveShield;
-        agents = llm-agents.packages.${system};
-        extraCombinators = with dave-shield.lib.${system}.jailCombinators; [
-          # share the opencode config from my home dir.
-          # otherwise, you have to configure and auth in each new sandbox environment.
-          (readwrite (noescape "~/.config/opencode"))
-          (readwrite (noescape "~/.local/share/opencode"))
-          (readwrite (noescape "~/.local/state/opencode"))
+        extraCombinators = [
         ];
+        daveShield = dave-shield.lib.${system}.daveShield;
+        makeJailedOpenCode = dave-shield.lib.${system}.makeJailedOpenCode;
       in
       rec {
         packages = {
-          jailedOpenCode = daveShield {
-            exec = agents.opencode;
+          jailedOpenCode = makeJailedOpenCode {
             inherit extraPkgs extraCombinators;
           };
           jailedShell = daveShield {
