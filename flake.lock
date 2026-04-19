@@ -74,11 +74,11 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1776627316,
-        "narHash": "sha256-hcJCbXf34jKAIQ+3r9+BN2RnNdZkL4r78RWKe0slDZE=",
+        "lastModified": 1776627540,
+        "narHash": "sha256-U++mSKR8YqRFpV/hLarBnN537cjX9hwZaMx7hOK1Xw8=",
         "owner": "dczmer",
         "repo": "dave-shield",
-        "rev": "534bc51504710c820ab672ded236befab1895119",
+        "rev": "46d4cba23449729cf0e0622dbfccb7eb9093ac52",
         "type": "github"
       },
       "original": {
