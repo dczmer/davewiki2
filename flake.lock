@@ -71,14 +71,15 @@
         "flake-utils": "flake-utils",
         "jail-nix": "jail-nix",
         "llm-agents": "llm-agents",
-        "nixpkgs": "nixpkgs_2"
+        "nixpkgs": "nixpkgs_2",
+        "skill-issues-src": "skill-issues-src"
       },
       "locked": {
-        "lastModified": 1776627540,
-        "narHash": "sha256-U++mSKR8YqRFpV/hLarBnN537cjX9hwZaMx7hOK1Xw8=",
+        "lastModified": 1776640455,
+        "narHash": "sha256-C989C+GnRt6JVHKdzaBFzfUhvaN0HS5d/FWYCwCigFk=",
         "owner": "dczmer",
         "repo": "dave-shield",
-        "rev": "46d4cba23449729cf0e0622dbfccb7eb9093ac52",
+        "rev": "264c59c327881cb5efa0692b2702b1eb13c90d7f",
         "type": "github"
       },
       "original": {
@@ -249,6 +250,22 @@
         "dave-shield": "dave-shield",
         "flake-utils": "flake-utils_2",
         "nixpkgs": "nixpkgs_3"
+      }
+    },
+    "skill-issues-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1776562922,
+        "narHash": "sha256-Wc1Bop6Huf2CZXnMiOsWcasJ2r6dlhHaxa238JwnbBk=",
+        "owner": "dczmer",
+        "repo": "skill-issues",
+        "rev": "7bcfa646dda2bcb54cad08a335e0e657a1d63fb8",
+        "type": "github"
+      },
+      "original": {
+        "owner": "dczmer",
+        "repo": "skill-issues",
+        "type": "github"
       }
     },
     "systems": {
