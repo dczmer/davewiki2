@@ -146,9 +146,6 @@ TELESCOPE COMMANDS ~
 *:DavewikiJournals*
 	Browse journal files with telescope. Requires journal module.
 
-*:DavewikiGenerateView*
-	Pick a tag and generate its synthetic view.
-
 JOURNAL COMMANDS ~
 
 *:DavewikiJournalToday*

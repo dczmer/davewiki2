@@ -14,10 +14,8 @@ davewiki	davewiki.txt	/*davewiki*
 davewiki-commands	davewiki.txt	/*davewiki-commands*
 davewiki-configuration	davewiki.txt	/*davewiki-configuration*
 davewiki-contents	davewiki.txt	/*davewiki-contents*
-davewiki-development	davewiki.txt	/*davewiki-development*
 davewiki-features	davewiki.txt	/*davewiki-features*
 davewiki-highlights	davewiki.txt	/*davewiki-highlights*
-davewiki-installation	davewiki.txt	/*davewiki-installation*
 davewiki-introduction	davewiki.txt	/*davewiki-introduction*
 davewiki-lua-api	davewiki.txt	/*davewiki-lua-api*
 davewiki-mappings	davewiki.txt	/*davewiki-mappings*
