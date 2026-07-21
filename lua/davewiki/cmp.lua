@@ -54,10 +54,23 @@ function wiki_tags_source:is_available()
     return core.is_path_within_wiki_root(filepath)
 end
 
+---@class DavewikiCmpCompletionItem
+---@field label string
+---@field kind integer
+---@field documentation string
+---@field insertText string
+
+---@class DavewikiCmpCompletionResponse
+---@field items DavewikiCmpCompletionItem[]
+---@field isIncomplete boolean
+
 --- Performs completion for tag names
+---@param params table
+---@param callback fun(response: DavewikiCmpCompletionResponse)
 function wiki_tags_source:complete(params, callback)
     local tag_data = tags.scan_for_tags()
 
+    ---@type DavewikiCmpCompletionItem[]
     local items = {}
     for _, data in ipairs(tag_data) do
         table.insert(items, {

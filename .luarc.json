@@ -10,7 +10,8 @@
   "workspace": {
     "library": [
       "${env:VIMRUNTIME}/lua",
-      "${env:PLENARY_NVIM}"
+      "${env:PLENARY_NVIM}",
+      "types"
     ],
     "checkThirdParty": false
   },

@@ -161,6 +161,7 @@ describe("davewiki.cmp wiki_tags source", function()
                     offset = 1,
                 }
 
+                ---@type DavewikiCmpCompletionResponse
                 local result = nil
                 local callback = function(response)
                     result = response
@@ -187,6 +188,7 @@ describe("davewiki.cmp wiki_tags source", function()
                     offset = 1,
                 }
 
+                ---@type DavewikiCmpCompletionResponse
                 local result = nil
                 local callback = function(response)
                     result = response
@@ -220,6 +222,7 @@ describe("davewiki.cmp wiki_tags source", function()
                     offset = 1,
                 }
 
+                ---@type DavewikiCmpCompletionResponse
                 local result = nil
                 local callback = function(response)
                     result = response

@@ -8,6 +8,8 @@ local M = {}
 --- Each instance maintains its own isolated call history.
 --- @class MockNotify
 --- @field calls table[] List of recorded calls: {msg, level, opts}
+--- @field notify fun(self: MockNotify, msg: string, level: integer|nil, opts: table|nil)
+--- @field clear fun(self: MockNotify)
 
 local MockNotify = {}
 MockNotify.__index = MockNotify
