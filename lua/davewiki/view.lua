@@ -384,7 +384,7 @@ function M.generate_view(tag_name)
     end
 
     -- Find mentions once and extract content in a single loop
-    local mentions = M.find_tag_mentions(tag_name)
+    local mentions = M.find_tag_mentions(tag_name) or {}
     local journal_blocks = {}
     local wiki_paragraphs = {}
 
@@ -416,8 +416,8 @@ function M.generate_view(tag_name)
         bufnr = vim.api.nvim_create_buf(false, true)
         vim.api.nvim_buf_set_name(bufnr, view_name)
         vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
-        vim.api.nvim_buf_set_option(bufnr, "filetype", "markdown")
-        vim.api.nvim_buf_set_option(bufnr, "buftype", "acwrite")
+        vim.api.nvim_set_option_value("filetype", "markdown", { buf = bufnr })
+        vim.api.nvim_set_option_value("buftype", "acwrite", { buf = bufnr })
     end
 
     -- Open the buffer

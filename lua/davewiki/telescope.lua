@@ -10,8 +10,6 @@ local markdown = require("davewiki.markdown")
 local tags = require("davewiki.tags")
 
 ---@class DavewikiTelescopeConfig
-
----@class DavewikiTelescopeConfig
 ---@field enabled boolean Enable telescope integration
 
 telescope.config = {
@@ -377,10 +375,7 @@ function telescope.setup_commands()
 
     -- Command to open tag references picker
     vim.api.nvim_create_user_command("DavewikiTagReferences", function(opts)
-        local tag_name = opts.args
-        if tag_name == "" then
-            tag_name = nil
-        end
+        local tag_name = opts.args == "" and nil or opts.args
         telescope.tag_references(tag_name)
     end, {
         nargs = "?",

@@ -119,6 +119,9 @@ M.create_tag_file = function(tag_name)
     end
 
     local tag_file_path = M.get_tag_file_path(tag_name)
+    if not tag_file_path then
+        return false
+    end
 
     local sources_dir = core.wiki_root .. "/sources"
     if vim.fn.isdirectory(sources_dir) ~= 1 then

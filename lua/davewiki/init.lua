@@ -21,15 +21,6 @@ local view = require("davewiki.view")
 ---@field show_tag_backlinks boolean Enable automatic backlink display in quickfix (default: true)
 ---@field highlight_tags boolean Enable tag syntax highlighting (default: true)
 
----@class DavewikiTelescopeConfig
----@field enabled boolean Enable telescope integration (default: true)
-
----@class DavewikiCmpConfig
----@field enabled boolean Enable nvim-cmp integration (default: true)
-
----@class DavewikiJournalConfig
----@field enabled boolean Enable journal module (default: true)
-
 local default_config = {
     telescope = {
         enabled = true,

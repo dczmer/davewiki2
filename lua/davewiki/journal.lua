@@ -91,9 +91,9 @@ local function parse_date_to_time(date_string)
     end
 
     return os.time({
-        year = tonumber(year),
-        month = tonumber(month),
-        day = tonumber(day),
+        year = tonumber(year) --[[@as integer]],
+        month = tonumber(month) --[[@as integer]],
+        day = tonumber(day) --[[@as integer]],
         hour = 12,
     })
 end
@@ -106,7 +106,7 @@ function M.get_day_name(date_string)
     if not time then
         return ""
     end
-    return os.date("%A", time)
+    return os.date("%A", time) --[[@as string]]
 end
 
 --- Parse the date from the current buffer's filename
@@ -221,7 +221,7 @@ end
 --- Open today's journal
 ---@return boolean True if successful, false otherwise
 function M.open_today()
-    local today = os.date("*t")
+    local today = os.date("*t") --[[@as table]]
     local date_string = M.format_date(today)
     return M.open_journal(date_string)
 end
@@ -238,7 +238,7 @@ function M.open_yesterday()
         current_time = os.time()
     end
     local yesterday_time = current_time - 86400
-    local yesterday = os.date("*t", yesterday_time)
+    local yesterday = os.date("*t", yesterday_time) --[[@as table]]
     local date_string = M.format_date(yesterday)
     return M.open_journal(date_string)
 end
@@ -255,7 +255,7 @@ function M.open_tomorrow()
         current_time = os.time()
     end
     local tomorrow_time = current_time + 86400
-    local tomorrow = os.date("*t", tomorrow_time)
+    local tomorrow = os.date("*t", tomorrow_time) --[[@as table]]
     local date_string = M.format_date(tomorrow)
     return M.open_journal(date_string)
 end
@@ -265,7 +265,7 @@ end
 function M.open_date()
     vim.ui.input({
         prompt = "Enter date (YYYY-MM-DD): ",
-        default = os.date("%Y-%m-%d"),
+        default = os.date("%Y-%m-%d") --[[@as string]],
     }, function(input)
         if not input then
             return
@@ -299,15 +299,6 @@ function M.setup_commands()
     vim.api.nvim_create_user_command("DavewikiJournalOpen", function()
         M.open_date()
     end, { desc = "Open journal for a specific date" })
-end
-
---- Get the journals directory path
----@return string|nil The journals directory path, or nil if wiki_root not set
-function M.get_journal_dir()
-    if not core.wiki_root then
-        return nil
-    end
-    return core.wiki_root .. "/journals"
 end
 
 return M
