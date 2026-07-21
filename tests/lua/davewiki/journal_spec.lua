@@ -176,6 +176,9 @@ describe("davewiki.journal template creation", function()
             assert.are.equal("# AGENDA", content[9])
             assert.are.equal("", content[10])
             assert.are.equal("# NOTES", content[11])
+            assert.are.equal("", content[12])
+            assert.are.equal("---", content[13])
+            assert.are.equal("", content[14])
         end)
 
         it("should handle different date values", function()
@@ -246,7 +249,10 @@ describe("davewiki.journal open operations", function()
             local result = lua_journal.open_journal("invalid-date")
             assert.is_false(result)
             assert.are.equal(1, #mock_notify.calls)
-            assert.are.equal("davewiki: invalid date format: invalid-date", mock_notify.calls[1].msg)
+            assert.are.equal(
+                "davewiki: invalid date format: invalid-date",
+                mock_notify.calls[1].msg
+            )
             assert.are.equal(vim.log.levels.ERROR, mock_notify.calls[1].level)
         end)
 

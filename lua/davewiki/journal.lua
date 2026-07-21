@@ -166,6 +166,9 @@ function M.create_template(date_string)
         "# AGENDA",
         "",
         "# NOTES",
+        "",
+        "---",
+        "",
     }
 end
 

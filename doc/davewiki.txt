@@ -355,6 +355,8 @@ New journals include YAML frontmatter and standard sections:
   ## AGENDA
   
   ## NOTES
+  
+  ---
 <
 
 MARKDOWN LINKS ~
