@@ -265,7 +265,7 @@ end
 
 --- Extracts the tag name from a tag file path
 --- Returns the tag name (without # prefix) if path is a valid tag file, nil otherwise
---- @param file_path string The file path
+--- @param file_path string? The file path
 --- @return string|nil The tag name or nil
 M.extract_tag_from_filename = function(file_path)
     if not file_path then

@@ -349,11 +349,15 @@ local function format_view_content(tag_name, tag_file_content, journal_blocks, w
 end
 
 --- Generates a synthetic view buffer for a tag
---- @param tag_name string The tag name (with # prefix)
+--- @param tag_name string? The tag name (with # prefix)
 --- @return integer|nil The buffer number of the view buffer, or nil on failure
 function M.generate_view(tag_name)
     -- Validate tag
-    if not tag_name or not core.is_valid_tag(tag_name) then
+    if not tag_name then
+        return nil
+    end
+
+    if not core.is_valid_tag(tag_name) then
         return nil
     end
 

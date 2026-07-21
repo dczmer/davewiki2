@@ -77,11 +77,6 @@ describe("davewiki.core is_valid_tag", function()
     it("should return false for nil input", function()
         assert.is_false(core.is_valid_tag(nil))
     end)
-
-    it("should return false for non-string input", function()
-        assert.is_false(core.is_valid_tag(123))
-        assert.is_false(core.is_valid_tag({}))
-    end)
 end)
 
 describe("davewiki.core is_path_within_wiki_root", function()

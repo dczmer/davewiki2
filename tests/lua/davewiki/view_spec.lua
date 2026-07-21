@@ -83,9 +83,18 @@ describe("davewiki.view generate_view", function()
         end
     end)
 
+    --- Helper to generate a view and assert it returned a valid buffer handle.
+    ---@param tag_name string
+    ---@return integer
+    local function generate_view_assert(tag_name)
+        local bufnr = view.generate_view(tag_name)
+        assert(bufnr ~= nil, "generate_view returned nil for " .. tag_name)
+        return bufnr
+    end
+
     describe("generate_view with valid tag", function()
         it("should create a view buffer", function()
-            local bufnr = view.generate_view("#cooking")
+            local bufnr = generate_view_assert("#cooking")
             assert.is_number(bufnr)
             assert.is_true(vim.api.nvim_buf_is_valid(bufnr))
 
@@ -104,7 +113,7 @@ describe("davewiki.view generate_view", function()
         end)
 
         it("should create buffer with correct name", function()
-            local bufnr = view.generate_view("#cooking")
+            local bufnr = generate_view_assert("#cooking")
             local name = vim.api.nvim_buf_get_name(bufnr)
             assert.is_true(name:match("cooking%-view%.md$") ~= nil)
 
@@ -113,8 +122,8 @@ describe("davewiki.view generate_view", function()
         end)
 
         it("should regenerate buffer if it already exists", function()
-            local bufnr1 = view.generate_view("#cooking")
-            local bufnr2 = view.generate_view("#cooking")
+            local bufnr1 = generate_view_assert("#cooking")
+            local bufnr2 = generate_view_assert("#cooking")
 
             -- Should return same buffer number (regenerated)
             assert.are.equal(bufnr1, bufnr2)
@@ -126,7 +135,7 @@ describe("davewiki.view generate_view", function()
 
     describe("generate_view content", function()
         it("should include tag file content section", function()
-            local bufnr = view.generate_view("#cooking")
+            local bufnr = generate_view_assert("#cooking")
             local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
             local content = table.concat(lines, "\n")
 
@@ -138,7 +147,7 @@ describe("davewiki.view generate_view", function()
         end)
 
         it("should show NO TAG FILE when tag file does not exist", function()
-            local bufnr = view.generate_view("#nonexistent-tag-view-test")
+            local bufnr = generate_view_assert("#nonexistent-tag-view-test")
             local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
             local content = table.concat(lines, "\n")
 
@@ -149,7 +158,7 @@ describe("davewiki.view generate_view", function()
         end)
 
         it("should include source links with markdown format", function()
-            local bufnr = view.generate_view("#cooking")
+            local bufnr = generate_view_assert("#cooking")
             local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
             local content = table.concat(lines, "\n")
 
@@ -161,7 +170,7 @@ describe("davewiki.view generate_view", function()
         end)
 
         it("should separate sections with ---", function()
-            local bufnr = view.generate_view("#cooking")
+            local bufnr = generate_view_assert("#cooking")
             local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
             local content = table.concat(lines, "\n")
 
@@ -176,7 +185,7 @@ describe("davewiki.view generate_view", function()
     describe("generate_view edge cases", function()
         it("should handle tag with no mentions", function()
             -- Create a unique tag that won't exist anywhere
-            local bufnr = view.generate_view("#unique-tag-no-mentions-xyz123")
+            local bufnr = generate_view_assert("#unique-tag-no-mentions-xyz123")
             assert.is_number(bufnr)
 
             local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
@@ -190,24 +199,24 @@ describe("davewiki.view generate_view", function()
         end)
 
         it("should validate tag name format", function()
-            local bufnr = view.generate_view("#cooking")
+            local bufnr = generate_view_assert("#cooking")
             assert.is_number(bufnr)
             vim.api.nvim_buf_delete(bufnr, { force = true })
 
             -- Invalid tags should return nil
-            bufnr = view.generate_view("cooking") -- missing #
-            assert.is_nil(bufnr)
+            local result = view.generate_view("cooking") -- missing #
+            assert.is_nil(result)
 
-            bufnr = view.generate_view("#cooking!") -- invalid character
-            assert.is_nil(bufnr)
+            result = view.generate_view("#cooking!") -- invalid character
+            assert.is_nil(result)
 
-            bufnr = view.generate_view("") -- empty
-            assert.is_nil(bufnr)
+            result = view.generate_view("") -- empty
+            assert.is_nil(result)
         end)
 
         it("should create views directory if it does not exist", function()
             -- This tests that the view buffer path uses views/ subdirectory naming
-            local bufnr = view.generate_view("#cooking")
+            local bufnr = generate_view_assert("#cooking")
             local name = vim.api.nvim_buf_get_name(bufnr)
 
             -- The buffer name should contain the tag name with -view suffix
@@ -302,6 +311,7 @@ describe("davewiki.view handler functions", function()
         it("should distinguish between journals and wiki files", function()
             local mentions = view.find_tag_mentions("#testviewfindunique")
             assert.is_table(mentions)
+            assert(mentions ~= nil, "find_tag_mentions returned nil")
 
             local has_journal = false
             local has_note = false
