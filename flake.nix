@@ -99,6 +99,9 @@
           ++ runtimeInputs
           ++ devPackages;
           shellHook = ''
+            export VIMRUNTIME="${pkgs.neovim-unwrapped}/share/nvim/runtime"
+            export PLENARY_NVIM="${pkgs.vimPlugins.plenary-nvim}"
+
             echo "Development environment for davewiki loaded"
             echo "Run 'nix develop' to enter the dev shell"
             echo "Use 'nix run .#nvim-test -- -u scripts/minimal-init.lua --headless -c \"lua ...\"' to run tests"

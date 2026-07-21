@@ -1,0 +1,20 @@
+{
+  "$schema": "https://raw.githubusercontent.com/sumneko/lua-language-server/master/meta/schema/luarc.schema.json",
+  "runtime": {
+    "version": "LuaJIT",
+    "path": [
+      "lua/?.lua",
+      "lua/?/init.lua"
+    ]
+  },
+  "workspace": {
+    "library": [
+      "${env:VIMRUNTIME}/lua",
+      "${env:PLENARY_NVIM}"
+    ],
+    "checkThirdParty": false
+  },
+  "diagnostics": {
+    "globals": ["vim"]
+  }
+}
