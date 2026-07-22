@@ -4,6 +4,7 @@
 
 local view = require("davewiki.view")
 local core = require("davewiki.core")
+local test_util = require("davewiki.test_util")
 
 -- Get the absolute path to test_root directory relative to this script
 local test_root = vim.fn.fnamemodify(vim.fn.expand("<sfile>:h:h:h:h"), ":p") .. "test_root"
@@ -193,20 +194,41 @@ describe("davewiki.view generate_view", function()
             vim.api.nvim_buf_delete(bufnr, { force = true })
         end)
 
-        it("should validate tag name format", function()
-            local bufnr = generate_view_assert("#cooking")
-            assert.is_number(bufnr)
-            vim.api.nvim_buf_delete(bufnr, { force = true })
+        describe("generate_view error notifications", function()
+            local mock_notify
+            local restore_notify
 
-            -- Invalid tags should return nil
-            local result = view.generate_view("cooking") -- missing #
-            assert.is_nil(result)
+            before_each(function()
+                mock_notify, restore_notify = test_util.mock_notify()
+            end)
 
-            result = view.generate_view("#cooking!") -- invalid character
-            assert.is_nil(result)
+            after_each(function()
+                restore_notify()
+            end)
 
-            result = view.generate_view("") -- empty
-            assert.is_nil(result)
+            it("should notify and return nil for invalid tag names", function()
+                local invalid_tags = { "cooking", "#cooking!", "" }
+                for _, tag in ipairs(invalid_tags) do
+                    mock_notify:clear()
+                    local result = view.generate_view(tag)
+                    assert.is_nil(result)
+                    assert.are.equal(1, #mock_notify.calls)
+                    assert.are.equal(
+                        "davewiki: Invalid tag name: " .. tag,
+                        mock_notify.calls[1].msg
+                    )
+                    assert.are.equal(vim.log.levels.ERROR, mock_notify.calls[1].level)
+                end
+            end)
+
+            it("should notify and return nil when wiki_root is not configured", function()
+                core.wiki_root = nil
+                local result = view.generate_view("#cooking")
+                assert.is_nil(result)
+                assert.are.equal(1, #mock_notify.calls)
+                assert.are.equal("davewiki: wiki_root is not configured", mock_notify.calls[1].msg)
+                assert.are.equal(vim.log.levels.ERROR, mock_notify.calls[1].level)
+            end)
         end)
 
         it("should create views directory if it does not exist", function()

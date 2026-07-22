@@ -352,17 +352,15 @@ end
 --- @param tag_name string The tag name (with # prefix)
 --- @return integer|nil The buffer number of the view buffer, or nil on failure
 function M.generate_view(tag_name)
-    -- Validate tag
-    if not tag_name then
-        return nil
-    end
-
+    -- Validate tag (is_valid_tag is nil-safe; invalid input is a user error, so notify)
     if not core.is_valid_tag(tag_name) then
+        vim.notify("davewiki: Invalid tag name: " .. tostring(tag_name), vim.log.levels.ERROR)
         return nil
     end
 
     -- Validate wiki_root
     if not core.wiki_root then
+        vim.notify("davewiki: wiki_root is not configured", vim.log.levels.ERROR)
         return nil
     end
 
@@ -384,6 +382,9 @@ function M.generate_view(tag_name)
     -- Gather content
     local tag_file_content = M.get_tag_file_content(tag_name)
     if not tag_file_content then
+        -- Unreachable given the checks above (nil implies invalid tag or missing
+        -- wiki_root); kept defensively in case get_tag_file_content changes
+        vim.notify("davewiki: could not generate view for " .. tag_name, vim.log.levels.ERROR)
         return nil
     end
 
