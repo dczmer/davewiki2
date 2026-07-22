@@ -268,8 +268,11 @@ function telescope.insert_link()
             finder = finders.new_table({
                 results = markdown_files,
                 entry_maker = function(entry)
-                    -- Extract title from file
+                    -- Extract title from file, falling back to filename if unavailable
                     local title = markdown.extract_h1_or_filename(entry)
+                    if not title then
+                        title = vim.fn.fnamemodify(entry, ":t:r")
+                    end
                     local filename = vim.fn.fnamemodify(entry, ":t")
                     local display = title .. " (" .. filename .. ")"
                     return {

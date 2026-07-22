@@ -95,6 +95,7 @@
           buildInputs = [
             packages.jailedOpenCode
             packages.jailedShell
+            nvim-test-app
           ]
           ++ runtimeInputs
           ++ devPackages;

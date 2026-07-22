@@ -14,7 +14,7 @@ local telescope = require("davewiki.telescope")
 local view = require("davewiki.view")
 
 ---@class DavewikiConfig
----@field wiki_root string Root directory for all notes (required)
+---@field wiki_root string? Root directory for all notes (defaults to ~/davewiki or g:davewiki_wiki_root)
 ---@field telescope DavewikiTelescopeConfig? Telescope integration config
 ---@field cmp DavewikiCmpConfig? nvim-cmp integration config
 ---@field journal DavewikiJournalConfig? Journal module config

@@ -5,18 +5,7 @@ project context.
 
 ## Git Commits
 
-**NEVER** make a git commit without prompting the user first.
-
-## Development Workflow
-
-Follow test-driven development:
-
-1. Write unit tests first. Stub them out so there are no errors, but tests fail.
-2. Iterate on the implementation until tests pass.
-3. Verify all tests pass.
-4. Run the linter and type checker after every edit.
-5. Test manually with `nix run`.
-6. Run tests, linter, formatter, and type checker before committing.
+**NEVER** make a git commit without explicit consent from the user first.
 
 ## Testing
 
@@ -35,22 +24,6 @@ Or run individual test files:
 # Run core module tests
 nvim-test -u scripts/minimal-init.lua --headless -c \
   'PlenaryBustedFile tests/lua/davewiki/core_spec.lua' -c 'qa!'
-
-# Run tags module tests
-nvim-test -u scripts/minimal-init.lua --headless -c \
-  'PlenaryBustedFile tests/lua/davewiki/tags_spec.lua' -c 'qa!'
-
-# Run markdown module tests
-nvim-test -u scripts/minimal-init.lua --headless -c \
-  'PlenaryBustedFile tests/lua/davewiki/markdown_spec.lua' -c 'qa!'
-
-# Run init module tests
-nvim-test -u scripts/minimal-init.lua --headless -c \
-  'PlenaryBustedFile tests/lua/davewiki/init_spec.lua' -c 'qa!'
-
-# Run cmp module tests
-nvim-test -u scripts/minimal-init.lua --headless -c \
-  'PlenaryBustedFile tests/lua/davewiki/cmp_spec.lua' -c 'qa!'
 ```
 
 ### Test Commands Reference
