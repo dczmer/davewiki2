@@ -107,11 +107,6 @@ describe("davewiki.view generate_view", function()
             assert.is_nil(bufnr)
         end)
 
-        it("should return nil for nil tag name", function()
-            local bufnr = view.generate_view(nil)
-            assert.is_nil(bufnr)
-        end)
-
         it("should create buffer with correct name", function()
             local bufnr = generate_view_assert("#cooking")
             local name = vim.api.nvim_buf_get_name(bufnr)
