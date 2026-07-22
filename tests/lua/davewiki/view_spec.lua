@@ -263,9 +263,15 @@ describe("davewiki.view handler functions", function()
             assert.are.equal("NO TAG FILE", content)
         end)
 
-        it("should return nil for invalid tag", function()
+        it("should notify and return nil for invalid tag", function()
+            local mock_notify, restore_notify = test_util.mock_notify()
             local content = view.get_tag_file_content("invalid")
+            restore_notify()
+
             assert.is_nil(content)
+            assert.are.equal(1, #mock_notify.calls)
+            assert.are.equal("davewiki: Invalid tag name: invalid", mock_notify.calls[1].msg)
+            assert.are.equal(vim.log.levels.ERROR, mock_notify.calls[1].level)
         end)
     end)
 
@@ -320,9 +326,15 @@ describe("davewiki.view handler functions", function()
             assert.are.equal(0, #mentions)
         end)
 
-        it("should return nil for invalid tag", function()
+        it("should notify and return nil for invalid tag", function()
+            local mock_notify, restore_notify = test_util.mock_notify()
             local mentions = view.find_tag_mentions("invalid")
+            restore_notify()
+
             assert.is_nil(mentions)
+            assert.are.equal(1, #mock_notify.calls)
+            assert.are.equal("davewiki: Invalid tag name: invalid", mock_notify.calls[1].msg)
+            assert.are.equal(vim.log.levels.ERROR, mock_notify.calls[1].level)
         end)
 
         it("should distinguish between journals and wiki files", function()

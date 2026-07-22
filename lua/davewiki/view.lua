@@ -29,7 +29,9 @@ local tags = require("davewiki.tags")
 --- @param tag_name string The tag name (with # prefix)
 --- @return string|nil The content of the tag file, or "NO TAG FILE" placeholder, or nil for invalid tag
 function M.get_tag_file_content(tag_name)
+    -- is_valid_tag is nil-safe; invalid input is a user error, so notify
     if not core.is_valid_tag(tag_name) then
+        vim.notify("davewiki: Invalid tag name: " .. tostring(tag_name), vim.log.levels.ERROR)
         return nil
     end
 
@@ -50,7 +52,9 @@ end
 --- @param tag_name string The tag name (with # prefix)
 --- @return table|nil Array of TagMention objects (deduplicated by file path), or nil for invalid tag
 function M.find_tag_mentions(tag_name)
+    -- is_valid_tag is nil-safe; invalid input is a user error, so notify
     if not core.is_valid_tag(tag_name) then
+        vim.notify("davewiki: Invalid tag name: " .. tostring(tag_name), vim.log.levels.ERROR)
         return nil
     end
 
