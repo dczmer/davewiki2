@@ -86,14 +86,14 @@ end
 ---@return number|nil The time value, or nil if invalid
 local function parse_date_to_time(date_string)
     local year, month, day = date_string:match("^(%d%d%d%d)-(%d%d)-(%d%d)$")
-    if not year then
+    if not year or not month or not day then
         return nil
     end
 
     return os.time({
-        year = tonumber(year) --[[@as integer]],
-        month = tonumber(month) --[[@as integer]],
-        day = tonumber(day) --[[@as integer]],
+        year = year,
+        month = month,
+        day = day,
         hour = 12,
     })
 end
