@@ -18,8 +18,6 @@ read_globals = {
 
 -- Files and directories to exclude
 exclude_files = {
-    "test_root/",
-    "tests/",
     ".direnv/",
 }
 
