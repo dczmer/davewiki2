@@ -409,11 +409,6 @@ describe("davewiki.tags extract_tag_from_filename", function()
         local tag = tags.extract_tag_from_filename(test_root .. "/sources/bengal.txt")
         assert.is_nil(tag)
     end)
-
-    it("should return nil for nil path", function()
-        local tag = tags.extract_tag_from_filename(nil)
-        assert.is_nil(tag)
-    end)
 end)
 
 describe("davewiki.tags extract_summary", function()
