@@ -179,6 +179,9 @@ layered structure.
 - Type checking via lua-language-server must pass.
 - Follow lua-language-server (LuaLS) naming conventions.
 - Run `luacheck` (Lua linter), `stylua` (Lua formatter), and `mdl -s mdl_style.rb` (markdown linter) before committing.
+- **Lua version:** Neovim embeds LuaJIT (Lua 5.1 API), so `.luarc.json` must keep
+  `runtime.version: LuaJIT` — even though the standalone `lua` in the dev environment is
+  5.4. Do not use 5.2+ APIs (e.g., `math.tointeger`) in plugin code.
 - **Avoid useless wrapper functions.** Do not create single-line functions that just call
   another function directly without adding any value. Use the underlying function instead.
 
