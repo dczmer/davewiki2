@@ -27,7 +27,7 @@ local tags = require("davewiki.tags")
 
 --- Gets the content of a tag file
 --- @param tag_name string The tag name (with # prefix)
---- @return string|nil The content of the tag file, or "NO TAG FILE" placeholder, or nil for invalid tag
+--- @return string|nil The tag file content, "NO TAG FILE" placeholder, or nil for invalid tag or missing wiki_root
 function M.get_tag_file_content(tag_name)
     -- is_valid_tag is nil-safe; invalid input is a user error, so notify
     if not core.is_valid_tag(tag_name) then
@@ -37,6 +37,8 @@ function M.get_tag_file_content(tag_name)
 
     local tag_file_path = tags.get_tag_file_path(tag_name)
     if not tag_file_path then
+        -- nil path implies wiki_root is not configured (tag_name was validated above)
+        vim.notify("davewiki: wiki_root is not configured", vim.log.levels.ERROR)
         return nil
     end
 
@@ -50,7 +52,7 @@ end
 
 --- Finds all unique files mentioning a tag
 --- @param tag_name string The tag name (with # prefix)
---- @return table|nil Array of TagMention objects (deduplicated by file path), or nil for invalid tag
+--- @return table|nil Array of TagMention objects (deduplicated by file path), or nil for invalid tag or unset wiki_root
 function M.find_tag_mentions(tag_name)
     -- is_valid_tag is nil-safe; invalid input is a user error, so notify
     if not core.is_valid_tag(tag_name) then
@@ -59,7 +61,8 @@ function M.find_tag_mentions(tag_name)
     end
 
     if not core.wiki_root then
-        return {}
+        vim.notify("davewiki: wiki_root is not configured", vim.log.levels.ERROR)
+        return nil
     end
 
     -- Use ripgrep to find all occurrences
