@@ -106,9 +106,7 @@ function M.get_day_name(date_string)
     if not time then
         return ""
     end
-    local day_name = os.date("%A", time)
-    -- os.date returns string|table depending on the format string; assert to narrow
-    assert(type(day_name) == "string", "os.date: expected string result")
+    local day_name = core.date_string("%A", time)
     return day_name
 end
 
@@ -224,9 +222,7 @@ end
 --- Open today's journal
 ---@return boolean True if successful, false otherwise
 function M.open_today()
-    local today = os.date("*t")
-    -- os.date returns string|table depending on the format string; assert to narrow
-    assert(type(today) == "table", "os.date: expected table result")
+    local today = core.date_table()
     local date_string = M.format_date(today)
     return M.open_journal(date_string)
 end
@@ -243,9 +239,7 @@ function M.open_yesterday()
         current_time = os.time()
     end
     local yesterday_time = current_time - 86400
-    local yesterday = os.date("*t", yesterday_time)
-    -- os.date returns string|table depending on the format string; assert to narrow
-    assert(type(yesterday) == "table", "os.date: expected table result")
+    local yesterday = core.date_table(yesterday_time)
     local date_string = M.format_date(yesterday)
     return M.open_journal(date_string)
 end
@@ -262,9 +256,7 @@ function M.open_tomorrow()
         current_time = os.time()
     end
     local tomorrow_time = current_time + 86400
-    local tomorrow = os.date("*t", tomorrow_time)
-    -- os.date returns string|table depending on the format string; assert to narrow
-    assert(type(tomorrow) == "table", "os.date: expected table result")
+    local tomorrow = core.date_table(tomorrow_time)
     local date_string = M.format_date(tomorrow)
     return M.open_journal(date_string)
 end
@@ -272,9 +264,7 @@ end
 --- Prompt user for a date and open the corresponding journal
 ---@return boolean True if successful, false otherwise
 function M.open_date()
-    local today = os.date("%Y-%m-%d")
-    -- os.date returns string|table depending on the format string; assert to narrow
-    assert(type(today) == "string", "os.date: expected string result")
+    local today = core.date_string("%Y-%m-%d")
     vim.ui.input({
         prompt = "Enter date (YYYY-MM-DD): ",
         default = today,

@@ -17,9 +17,7 @@ local core = require("davewiki.core")
 --- @return TagFrontmatter
 M.create_frontmatter = function(tag_name)
     local name = tag_name:gsub("^#", "")
-    local created = os.date("%Y-%m-%d")
-    -- os.date returns string|table depending on the format string; assert to narrow
-    assert(type(created) == "string", "os.date: expected string result")
+    local created = core.date_string("%Y-%m-%d")
     return {
         name = name,
         created = created,
