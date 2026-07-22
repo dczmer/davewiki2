@@ -54,9 +54,8 @@ describe("davewiki.markdown extract_h1_or_filename", function()
         local file_path = test_root .. "/notes/baked-fish.md"
         local result = markdown.extract_h1_or_filename(file_path)
         assert.is_string(result)
-        if not result then
-            return
-        end
+        -- redundant with the assertion above, but plain assert narrows the type for lua-language-server
+        assert(result, "expected non-nil result")
         assert.is_true(#result > 0)
         assert.is_false(result:match("^#") ~= nil)
     end)
@@ -103,9 +102,8 @@ describe("davewiki.markdown get_link_under_cursor", function()
 
         local link = markdown.get_link_under_cursor()
         assert.is_not_nil(link)
-        if not link then
-            return
-        end
+        -- redundant with the assertion above, but plain assert narrows the type for lua-language-server
+        assert(link, "expected non-nil link")
         assert.are.equal("./file.md", link.path)
 
         vim.api.nvim_buf_delete(buf, { force = true })
@@ -131,9 +129,8 @@ describe("davewiki.markdown get_link_under_cursor", function()
 
         local link = markdown.get_link_under_cursor()
         assert.is_not_nil(link)
-        if not link then
-            return
-        end
+        -- redundant with the assertion above, but plain assert narrows the type for lua-language-server
+        assert(link, "expected non-nil link")
         assert.are.equal("./file.md", link.path)
 
         vim.api.nvim_buf_delete(buf, { force = true })
@@ -153,17 +150,15 @@ describe("davewiki.markdown get_link_under_cursor", function()
         vim.api.nvim_win_set_cursor(0, { 1, 8 })
         local link = markdown.get_link_under_cursor()
         assert.is_not_nil(link)
-        if not link then
-            return
-        end
+        -- redundant with the assertion above, but plain assert narrows the type for lua-language-server
+        assert(link, "expected non-nil link")
         assert.are.equal("a.md", link.path)
 
         vim.api.nvim_win_set_cursor(0, { 1, 25 })
         link = markdown.get_link_under_cursor()
         assert.is_not_nil(link)
-        if not link then
-            return
-        end
+        -- redundant with the assertion above, but plain assert narrows the type for lua-language-server
+        assert(link, "expected non-nil link")
         assert.are.equal("b.md", link.path)
 
         vim.api.nvim_buf_delete(buf, { force = true })
@@ -177,9 +172,8 @@ describe("davewiki.markdown get_link_under_cursor", function()
 
         local link = markdown.get_link_under_cursor()
         assert.is_not_nil(link)
-        if not link then
-            return
-        end
+        -- redundant with the assertion above, but plain assert narrows the type for lua-language-server
+        assert(link, "expected non-nil link")
         assert.are.equal("https://example.com", link.path)
         assert.is_true(link.is_url)
 
@@ -194,9 +188,8 @@ describe("davewiki.markdown get_link_under_cursor", function()
 
         local link = markdown.get_link_under_cursor()
         assert.is_not_nil(link)
-        if not link then
-            return
-        end
+        -- redundant with the assertion above, but plain assert narrows the type for lua-language-server
+        assert(link, "expected non-nil link")
         assert.are.equal("./file.md", link.path)
         assert.are.equal("My Link", link.text)
 
@@ -223,9 +216,8 @@ describe("davewiki.markdown get_link_under_cursor", function()
 
         local link = markdown.get_link_under_cursor()
         assert.is_not_nil(link)
-        if not link then
-            return
-        end
+        -- redundant with the assertion above, but plain assert narrows the type for lua-language-server
+        assert(link, "expected non-nil link")
         assert.are.equal("/sources/note.md", link.path)
 
         vim.api.nvim_buf_delete(buf, { force = true })
