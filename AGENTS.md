@@ -253,7 +253,7 @@ Run this skill when making changes that affect project structure, conventions, o
 Use `gh` for all GitHub CLI operations (issues, PRs, releases):
 
 ```sh
-nix run .#gh -- pr create --title "feat: add new feature" --body "$(cat <<'EOF'
+gh -- pr create --title "feat: add new feature" --body "$(cat <<'EOF'
 ## Summary
 - New feature description
 EOF
