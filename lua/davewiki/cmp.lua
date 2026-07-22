@@ -8,7 +8,7 @@ local core = require("davewiki.core")
 local tags = require("davewiki.tags")
 
 ---@class DavewikiCmpConfig
----@field enabled boolean Enable cmp integration
+---@field enabled boolean? Enable cmp integration
 
 cmp.config = {
     enabled = true,

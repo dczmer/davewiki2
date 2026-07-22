@@ -10,7 +10,7 @@ local markdown = require("davewiki.markdown")
 local tags = require("davewiki.tags")
 
 ---@class DavewikiTelescopeConfig
----@field enabled boolean Enable telescope integration
+---@field enabled boolean? Enable telescope integration
 
 telescope.config = {
     enabled = true,

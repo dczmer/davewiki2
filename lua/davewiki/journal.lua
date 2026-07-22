@@ -8,7 +8,7 @@ local M = {}
 local core = require("davewiki.core")
 
 ---@class DavewikiJournalConfig
----@field enabled boolean Enable journal module
+---@field enabled boolean? Enable journal module
 
 M.config = {
     enabled = true,

@@ -15,12 +15,13 @@ local view = require("davewiki.view")
 
 ---@class DavewikiConfig
 ---@field wiki_root string Root directory for all notes (required)
----@field telescope DavewikiTelescopeConfig Telescope integration config
----@field cmp DavewikiCmpConfig nvim-cmp integration config
----@field journal DavewikiJournalConfig Journal module config
----@field show_tag_backlinks boolean Enable automatic backlink display in quickfix (default: true)
----@field highlight_tags boolean Enable tag syntax highlighting (default: true)
+---@field telescope DavewikiTelescopeConfig? Telescope integration config
+---@field cmp DavewikiCmpConfig? nvim-cmp integration config
+---@field journal DavewikiJournalConfig? Journal module config
+---@field show_tag_backlinks boolean? Enable automatic backlink display in quickfix (default: true)
+---@field highlight_tags boolean? Enable tag syntax highlighting (default: true)
 
+---@type DavewikiConfig
 local default_config = {
     telescope = {
         enabled = true,
