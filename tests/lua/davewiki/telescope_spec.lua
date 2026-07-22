@@ -45,36 +45,25 @@ end)
 
 describe("davewiki.telescope tags function", function()
     local mock_notify
-    local original_notify
+    local restore_notify
 
     before_each(function()
         core.setup({ wiki_root = test_root })
         telescope.config.enabled = true
-        mock_notify = test_util.MockNotify()
-        original_notify = vim.notify
-        vim.notify = function(...)
-            return mock_notify:notify(...)
-        end
+        mock_notify, restore_notify = test_util.mock_notify()
     end)
 
     after_each(function()
-        vim.notify = original_notify
+        restore_notify()
     end)
 
     describe("tags", function()
         it("should return false when telescope is not installed", function()
-            -- Mock telescope module as not installed
-            local original_require = _G.require
-            _G.require = function(mod)
-                if mod == "telescope" then
-                    error("module 'telescope' not found")
-                end
-                return original_require(mod)
-            end
+            local restore = test_util.with_telescope_uninstalled(core)
 
             local result = telescope.tags()
 
-            _G.require = original_require
+            restore()
 
             assert.is_false(result)
             assert.are.equal(1, #mock_notify.calls)
@@ -96,36 +85,25 @@ end)
 
 describe("davewiki.telescope tag_references function", function()
     local mock_notify
-    local original_notify
+    local restore_notify
 
     before_each(function()
         core.setup({ wiki_root = test_root })
         telescope.config.enabled = true
-        mock_notify = test_util.MockNotify()
-        original_notify = vim.notify
-        vim.notify = function(...)
-            return mock_notify:notify(...)
-        end
+        mock_notify, restore_notify = test_util.mock_notify()
     end)
 
     after_each(function()
-        vim.notify = original_notify
+        restore_notify()
     end)
 
     describe("tag_references", function()
         it("should return false when telescope is not installed", function()
-            -- Mock telescope module as not installed
-            local original_require = _G.require
-            _G.require = function(mod)
-                if mod == "telescope" then
-                    error("module 'telescope' not found")
-                end
-                return original_require(mod)
-            end
+            local restore = test_util.with_telescope_uninstalled(core)
 
             local result = telescope.tag_references("#bengal")
 
-            _G.require = original_require
+            restore()
 
             assert.is_false(result)
             assert.are.equal(1, #mock_notify.calls)
@@ -155,36 +133,25 @@ end)
 
 describe("davewiki.telescope insert_link function", function()
     local mock_notify
-    local original_notify
+    local restore_notify
 
     before_each(function()
         core.setup({ wiki_root = test_root })
         telescope.config.enabled = true
-        mock_notify = test_util.MockNotify()
-        original_notify = vim.notify
-        vim.notify = function(...)
-            return mock_notify:notify(...)
-        end
+        mock_notify, restore_notify = test_util.mock_notify()
     end)
 
     after_each(function()
-        vim.notify = original_notify
+        restore_notify()
     end)
 
     describe("insert_link", function()
         it("should return false when telescope is not installed", function()
-            -- Mock telescope module as not installed
-            local original_require = _G.require
-            _G.require = function(mod)
-                if mod == "telescope" then
-                    error("module 'telescope' not found")
-                end
-                return original_require(mod)
-            end
+            local restore = test_util.with_telescope_uninstalled(core)
 
             local result = telescope.insert_link()
 
-            _G.require = original_require
+            restore()
 
             assert.is_false(result)
             assert.are.equal(1, #mock_notify.calls)
@@ -203,15 +170,9 @@ describe("davewiki.telescope insert_link function", function()
         end)
 
         it("should return false when no file is open", function()
-            -- Mock nvim_buf_get_name to return empty string
-            local original_nvim_buf_get_name = vim.api.nvim_buf_get_name
-            vim.api.nvim_buf_get_name = function()
-                return ""
-            end
+            vim.cmd("enew!")
 
             local result = telescope.insert_link()
-
-            vim.api.nvim_buf_get_name = original_nvim_buf_get_name
 
             assert.is_false(result)
             assert.are.equal(1, #mock_notify.calls)
@@ -220,39 +181,33 @@ describe("davewiki.telescope insert_link function", function()
         end)
 
         it("should return false when current file is outside wiki_root", function()
-            -- Mock nvim_buf_get_name to return a file outside wiki_root
-            local original_nvim_buf_get_name = vim.api.nvim_buf_get_name
-            vim.api.nvim_buf_get_name = function()
-                return "/outside/wiki/file.md"
-            end
+            vim.cmd("enew!")
+            vim.api.nvim_buf_set_name(0, "/outside/wiki/file.md")
 
             local result = telescope.insert_link()
 
-            vim.api.nvim_buf_get_name = original_nvim_buf_get_name
-
             assert.is_false(result)
             assert.are.equal(1, #mock_notify.calls)
-            assert.are.equal("davewiki: Current file is not within wiki_root", mock_notify.calls[1].msg)
+            assert.are.equal(
+                "davewiki: Current file is not within wiki_root",
+                mock_notify.calls[1].msg
+            )
             assert.are.equal(vim.log.levels.ERROR, mock_notify.calls[1].level)
         end)
 
         it("should return false when no markdown files exist", function()
-            -- Mock nvim_buf_get_name
-            local original_nvim_buf_get_name = vim.api.nvim_buf_get_name
-            vim.api.nvim_buf_get_name = function()
-                return test_root .. "/notes/baked-fish.md"
-            end
-
             -- Temporarily set wiki_root to empty directory
             local original_root = core.wiki_root
             core.wiki_root = "/tmp/empty-davewiki-test"
             vim.fn.mkdir(core.wiki_root, "p")
 
+            vim.cmd("enew!")
+            vim.api.nvim_buf_set_name(0, core.wiki_root .. "/file.md")
+
             local result = telescope.insert_link()
 
             core.wiki_root = original_root
             vim.fn.delete("/tmp/empty-davewiki-test", "rf")
-            vim.api.nvim_buf_get_name = original_nvim_buf_get_name
 
             assert.is_false(result)
         end)
@@ -292,36 +247,25 @@ end)
 
 describe("davewiki.telescope headings function", function()
     local mock_notify
-    local original_notify
+    local restore_notify
 
     before_each(function()
         core.setup({ wiki_root = test_root })
         telescope.config.enabled = true
-        mock_notify = test_util.MockNotify()
-        original_notify = vim.notify
-        vim.notify = function(...)
-            return mock_notify:notify(...)
-        end
+        mock_notify, restore_notify = test_util.mock_notify()
     end)
 
     after_each(function()
-        vim.notify = original_notify
+        restore_notify()
     end)
 
     describe("headings", function()
         it("should return false when telescope is not installed", function()
-            -- Mock telescope module as not installed
-            local original_require = _G.require
-            _G.require = function(mod)
-                if mod == "telescope" then
-                    error("module 'telescope' not found")
-                end
-                return original_require(mod)
-            end
+            local restore = test_util.with_telescope_uninstalled(core)
 
             local result = telescope.headings()
 
-            _G.require = original_require
+            restore()
 
             assert.is_false(result)
             assert.are.equal(1, #mock_notify.calls)
@@ -356,7 +300,7 @@ describe("davewiki.telescope headings function", function()
             end
 
             for i = 2, #headings do
-                assert.is_true(headings[i -1].text <= headings[i].text)
+                assert.is_true(headings[i - 1].text <= headings[i].text)
             end
         end)
 

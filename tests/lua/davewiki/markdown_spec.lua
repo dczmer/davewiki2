@@ -211,21 +211,17 @@ end)
 describe("davewiki.markdown jump_to_link", function()
     local original_wiki_root
     local mock_notify
-    local original_notify
+    local restore_notify
 
     before_each(function()
         original_wiki_root = core.wiki_root
         core.setup({ wiki_root = test_root })
-        mock_notify = test_util.MockNotify()
-        original_notify = vim.notify
-        vim.notify = function(...)
-            return mock_notify:notify(...)
-        end
+        mock_notify, restore_notify = test_util.mock_notify()
     end)
 
     after_each(function()
         core.wiki_root = original_wiki_root
-        vim.notify = original_notify
+        restore_notify()
     end)
 
     it("should open relative file link that exists", function()
@@ -367,18 +363,14 @@ describe("davewiki.markdown jump_to_link", function()
         vim.api.nvim_set_current_buf(buf)
         vim.api.nvim_win_set_cursor(0, { 1, 8 })
 
-        local original_ui_open = vim.ui.open
-        local opened_url = nil
-        vim.ui.open = function(url)
-            opened_url = url
-        end
+        local mock_open, restore_ui_open = test_util.mock_ui_open()
 
         local result = markdown.jump_to_link()
 
-        vim.ui.open = original_ui_open
+        restore_ui_open()
 
         assert.is_true(result)
-        assert.are.equal("https://example.com", opened_url)
+        assert.are.equal("https://example.com", mock_open.opened_url)
 
         vim.api.nvim_buf_delete(buf, { force = true })
     end)
