@@ -4,7 +4,8 @@
     "version": "LuaJIT",
     "path": [
       "lua/?.lua",
-      "lua/?/init.lua"
+      "lua/?/init.lua",
+      "tests/lua/?.lua"
     ]
   },
   "workspace": {

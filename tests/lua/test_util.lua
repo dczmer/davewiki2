@@ -1,6 +1,6 @@
 ---
 -- Test utilities for davewiki tests.
--- @module davewiki.test_util
+-- @module test_util
 
 local M = {}
 

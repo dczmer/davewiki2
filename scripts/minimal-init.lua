@@ -1,5 +1,11 @@
 vim.opt.runtimepath:append(".")
 
+-- make test helpers in tests/lua requirable: plenary runs each spec file in a
+-- child nvim process that never sources this init file, but children inherit
+-- the environment and LuaJIT picks up LUA_PATH at startup
+vim.env.LUA_PATH = "./tests/lua/?.lua;" .. (vim.env.LUA_PATH or ";")
+package.path = package.path .. ";./tests/lua/?.lua"
+
 -- some minimal config
 vim.g.mapleader = ","
 vim.g.maplocalleader = "\\"

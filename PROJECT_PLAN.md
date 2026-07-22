@@ -132,10 +132,10 @@ Command-line neovim users who want a simple journal-based note-taking system.
     search
   - `davewiki/journal.lua` - Daily journal management and navigation
   - `davewiki/view.lua` - Synthetic tag view generation
-  - `davewiki/test_util.lua` - Testing utilities (MockNotify)
 
 2. **Tests:**
   - `tests/` - plenary.nvim test suite
+  - `tests/lua/test_util.lua` - Testing utilities (MockNotify)
   - `test_root/` directory - sample notes and tags for testing
 
 3. **Scripts:**

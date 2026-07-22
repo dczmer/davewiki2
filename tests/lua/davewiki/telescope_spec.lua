@@ -6,7 +6,7 @@ local telescope = require("davewiki.telescope")
 local core = require("davewiki.core")
 local markdown = require("davewiki.markdown")
 local tags = require("davewiki.tags")
-local test_util = require("davewiki.test_util")
+local test_util = require("test_util")
 
 -- Get the absolute path to test_root directory relative to this script
 local test_root = vim.fn.fnamemodify(vim.fn.expand("<sfile>:h:h:h:h"), ":p") .. "test_root"

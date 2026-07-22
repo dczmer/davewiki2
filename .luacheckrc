@@ -27,8 +27,8 @@ allow_defined_top = true
 
 -- Per-file overrides
 -- test_util.lua intentionally replaces vim.notify and vim.ui.open with test
--- mocks; this is the only place the plugin does so.
-files["lua/davewiki/test_util.lua"] = {
+-- mocks; this is the only place that does so.
+files["tests/lua/test_util.lua"] = {
     ignore = { "122" },
 }
 

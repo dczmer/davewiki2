@@ -4,7 +4,7 @@
 
 local markdown = require("davewiki.markdown")
 local core = require("davewiki.core")
-local test_util = require("davewiki.test_util")
+local test_util = require("test_util")
 
 local test_root = vim.fn.fnamemodify(vim.fn.expand("<sfile>:h:h:h:h"), ":p") .. "test_root"
 

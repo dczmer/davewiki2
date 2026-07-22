@@ -63,14 +63,14 @@ nvim-test -u scripts/minimal-init.lua --headless -c \
 
 When testing code that produces user-facing warnings via `vim.notify`:
 
-1. **Use `MockNotify`** from `davewiki.test_util` to capture notifications
+1. **Use `MockNotify`** from `test_util` (`tests/lua/test_util.lua`) to capture notifications
 2. **Set up in `before_each`** and restore in `after_each`
 3. **Assert the notification** message and level in the test
 
 Example:
 
 ```lua
-local test_util = require("davewiki.test_util")
+local test_util = require("test_util")
 
 describe("module with warnings", function()
     local mock_notify
@@ -163,7 +163,7 @@ end)
 **No circular dependencies between modules.** The module hierarchy must remain acyclic.
 
 ```
-Level 0 (leaf):    core.lua, test_util.lua (no dependencies)
+Level 0 (leaf):    core.lua (no dependencies)
 Level 1:           tags.lua, markdown.lua, journal.lua → core
 Level 2:           cmp.lua → tags; view.lua → core, markdown, tags
 Level 3:           telescope.lua → core, markdown, tags (lazy: view, journal)
