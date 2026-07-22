@@ -106,8 +106,7 @@ function M.get_day_name(date_string)
     if not time then
         return ""
     end
-    local day_name = core.date_string("%A", time)
-    return day_name
+    return core.date_string("%A", time)
 end
 
 --- Parse the date from the current buffer's filename
