@@ -62,7 +62,7 @@ describe("davewiki.tags scan_for_tags", function()
     it("should sort results by count descending", function()
         local tag_list = tags.scan_for_tags()
         for i = 2, #tag_list do
-            assert.is_true(tag_list[i -1].count >= tag_list[i].count)
+            assert.is_true(tag_list[i - 1].count >= tag_list[i].count)
         end
     end)
 
