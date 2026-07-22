@@ -27,14 +27,18 @@ local tags = require("davewiki.tags")
 
 --- Gets the content of a tag file
 --- @param tag_name string The tag name (with # prefix)
---- @return string|nil The content of the tag file, or "NO TAG FILE" placeholder, or nil for invalid tag
+--- @return string|nil The tag file content, "NO TAG FILE" placeholder, or nil for invalid tag or missing wiki_root
 function M.get_tag_file_content(tag_name)
+    -- is_valid_tag is nil-safe; invalid input is a user error, so notify
     if not core.is_valid_tag(tag_name) then
+        vim.notify("davewiki: Invalid tag name: " .. tostring(tag_name), vim.log.levels.ERROR)
         return nil
     end
 
     local tag_file_path = tags.get_tag_file_path(tag_name)
     if not tag_file_path then
+        -- nil path implies wiki_root is not configured (tag_name was validated above)
+        vim.notify("davewiki: wiki_root is not configured", vim.log.levels.ERROR)
         return nil
     end
 
@@ -48,14 +52,17 @@ end
 
 --- Finds all unique files mentioning a tag
 --- @param tag_name string The tag name (with # prefix)
---- @return table|nil Array of TagMention objects (deduplicated by file path), or nil for invalid tag
+--- @return table|nil Array of TagMention objects (deduplicated by file path), or nil for invalid tag or unset wiki_root
 function M.find_tag_mentions(tag_name)
+    -- is_valid_tag is nil-safe; invalid input is a user error, so notify
     if not core.is_valid_tag(tag_name) then
+        vim.notify("davewiki: Invalid tag name: " .. tostring(tag_name), vim.log.levels.ERROR)
         return nil
     end
 
     if not core.wiki_root then
-        return {}
+        vim.notify("davewiki: wiki_root is not configured", vim.log.levels.ERROR)
+        return nil
     end
 
     -- Use ripgrep to find all occurrences
@@ -352,13 +359,15 @@ end
 --- @param tag_name string The tag name (with # prefix)
 --- @return integer|nil The buffer number of the view buffer, or nil on failure
 function M.generate_view(tag_name)
-    -- Validate tag
-    if not tag_name or not core.is_valid_tag(tag_name) then
+    -- Validate tag (is_valid_tag is nil-safe; invalid input is a user error, so notify)
+    if not core.is_valid_tag(tag_name) then
+        vim.notify("davewiki: Invalid tag name: " .. tostring(tag_name), vim.log.levels.ERROR)
         return nil
     end
 
     -- Validate wiki_root
     if not core.wiki_root then
+        vim.notify("davewiki: wiki_root is not configured", vim.log.levels.ERROR)
         return nil
     end
 
@@ -380,11 +389,14 @@ function M.generate_view(tag_name)
     -- Gather content
     local tag_file_content = M.get_tag_file_content(tag_name)
     if not tag_file_content then
+        -- Unreachable given the checks above (nil implies invalid tag or missing
+        -- wiki_root); kept defensively in case get_tag_file_content changes
+        vim.notify("davewiki: could not generate view for " .. tag_name, vim.log.levels.ERROR)
         return nil
     end
 
     -- Find mentions once and extract content in a single loop
-    local mentions = M.find_tag_mentions(tag_name)
+    local mentions = M.find_tag_mentions(tag_name) or {}
     local journal_blocks = {}
     local wiki_paragraphs = {}
 
@@ -416,8 +428,8 @@ function M.generate_view(tag_name)
         bufnr = vim.api.nvim_create_buf(false, true)
         vim.api.nvim_buf_set_name(bufnr, view_name)
         vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, lines)
-        vim.api.nvim_buf_set_option(bufnr, "filetype", "markdown")
-        vim.api.nvim_buf_set_option(bufnr, "buftype", "acwrite")
+        vim.api.nvim_set_option_value("filetype", "markdown", { buf = bufnr })
+        vim.api.nvim_set_option_value("buftype", "acwrite", { buf = bufnr })
     end
 
     -- Open the buffer

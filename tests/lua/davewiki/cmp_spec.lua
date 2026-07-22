@@ -111,7 +111,7 @@ describe("davewiki.cmp wiki_tags source", function()
                 local buf = vim.fn.bufadd(test_file)
                 vim.fn.bufload(buf)
                 vim.api.nvim_set_current_buf(buf)
-                vim.bo[buf].filetype = "markdown"
+                vim.api.nvim_set_option_value("filetype", "markdown", { buf = buf })
 
                 assert.is_true(source.is_available())
 
@@ -123,7 +123,7 @@ describe("davewiki.cmp wiki_tags source", function()
                 local buf = vim.api.nvim_create_buf(false, true)
                 vim.api.nvim_buf_set_name(buf, "/tmp/outside-wiki.md")
                 vim.api.nvim_set_current_buf(buf)
-                vim.bo[buf].filetype = "markdown"
+                vim.api.nvim_set_option_value("filetype", "markdown", { buf = buf })
 
                 assert.is_false(source.is_available())
 
@@ -133,7 +133,7 @@ describe("davewiki.cmp wiki_tags source", function()
             it("should return false for non-markdown buffers", function()
                 local buf = vim.api.nvim_create_buf(false, true)
                 vim.api.nvim_set_current_buf(buf)
-                vim.bo[buf].filetype = "lua"
+                vim.api.nvim_set_option_value("filetype", "lua", { buf = buf })
 
                 assert.is_false(source.is_available())
 
@@ -152,7 +152,7 @@ describe("davewiki.cmp wiki_tags source", function()
                 local buf = vim.api.nvim_create_buf(false, true)
                 vim.api.nvim_set_current_buf(buf)
                 vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "#bengal" })
-                vim.bo[buf].filetype = "markdown"
+                vim.api.nvim_set_option_value("filetype", "markdown", { buf = buf })
 
                 local params = {
                     context = {
@@ -161,6 +161,7 @@ describe("davewiki.cmp wiki_tags source", function()
                     offset = 1,
                 }
 
+                ---@type DavewikiCmpCompletionResponse
                 local result = nil
                 local callback = function(response)
                     result = response
@@ -178,7 +179,7 @@ describe("davewiki.cmp wiki_tags source", function()
             it("should include tag with documentation showing usage count", function()
                 local buf = vim.api.nvim_create_buf(false, true)
                 vim.api.nvim_set_current_buf(buf)
-                vim.bo[buf].filetype = "markdown"
+                vim.api.nvim_set_option_value("filetype", "markdown", { buf = buf })
 
                 local params = {
                     context = {
@@ -187,6 +188,7 @@ describe("davewiki.cmp wiki_tags source", function()
                     offset = 1,
                 }
 
+                ---@type DavewikiCmpCompletionResponse
                 local result = nil
                 local callback = function(response)
                     result = response
@@ -211,7 +213,7 @@ describe("davewiki.cmp wiki_tags source", function()
             it("should return all tags regardless of prefix", function()
                 local buf = vim.api.nvim_create_buf(false, true)
                 vim.api.nvim_set_current_buf(buf)
-                vim.bo[buf].filetype = "markdown"
+                vim.api.nvim_set_option_value("filetype", "markdown", { buf = buf })
 
                 local params = {
                     context = {
@@ -220,6 +222,7 @@ describe("davewiki.cmp wiki_tags source", function()
                     offset = 1,
                 }
 
+                ---@type DavewikiCmpCompletionResponse
                 local result = nil
                 local callback = function(response)
                     result = response

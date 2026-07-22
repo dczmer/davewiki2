@@ -149,6 +149,27 @@ M.is_tag_file = function(file_path)
     return resolved_path:sub(1, #resolved_sources) == resolved_sources
 end
 
+--- Format a date/time as a string. Do not use table formats ("*t", "!*t").
+--- @param format string The strftime-style format string
+--- @param time number? The time value (default: current time)
+--- @return string The formatted date string
+M.date_string = function(format, time)
+    local result = os.date(format, time)
+    -- os.date returns string|table depending on the format string; assert to narrow
+    assert(type(result) == "string", "os.date: expected string result")
+    return result
+end
+
+--- Get a date/time as a table (equivalent to os.date("*t", time)).
+--- @param time number? The time value (default: current time)
+--- @return osdate The date table
+M.date_table = function(time)
+    local result = os.date("*t", time)
+    -- os.date returns string|table depending on the format string; assert to narrow
+    assert(type(result) == "table", "os.date: expected table result")
+    return result
+end
+
 --- Generate an absolute path from wiki_root for a target file
 --- Returns path starting with "/" that is relative to wiki_root
 --- @param target_file string The absolute path to the target file

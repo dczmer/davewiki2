@@ -1,16 +1,13 @@
 {
-
   description = "A personal knowledge base system for neovim with journal-based note-taking";
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
     flake-utils.url = "github:numtide/flake-utils";
-    dave-shield.url = "github:dczmer/dave-shield";
   };
   outputs =
     {
       nixpkgs,
       flake-utils,
-      dave-shield,
       ...
     }:
     flake-utils.lib.eachDefaultSystem (
@@ -64,26 +61,8 @@
           '';
           inherit runtimeInputs;
         };
-        extraPkgs = [
-          nvim-test-app
-        ]
-        ++ runtimeInputs
-        ++ devPackages;
-        extraCombinators = [
-        ];
-        daveShield = dave-shield.lib.${system}.daveShield;
-        makeJailedOpenCode = dave-shield.lib.${system}.makeJailedOpenCode;
       in
-      rec {
-        packages = {
-          jailedOpenCode = makeJailedOpenCode {
-            inherit extraPkgs extraCombinators;
-          };
-          jailedShell = daveShield {
-            exec = pkgs.bash;
-            inherit extraPkgs extraCombinators;
-          };
-        };
+      {
         apps = rec {
           default = nvim-test;
           nvim-test = {
@@ -93,15 +72,14 @@
         };
         devShells.default = pkgs.mkShell {
           buildInputs = [
-            packages.jailedOpenCode
-            packages.jailedShell
+            nvim-test-app
           ]
           ++ runtimeInputs
           ++ devPackages;
           shellHook = ''
-            echo "Development environment for davewiki loaded"
-            echo "Run 'nix develop' to enter the dev shell"
-            echo "Use 'nix run .#nvim-test -- -u scripts/minimal-init.lua --headless -c \"lua ...\"' to run tests"
+            # export lua package loactions so we can find them in the store
+            export VIMRUNTIME="${pkgs.neovim-unwrapped}/share/nvim/runtime"
+            export PLENARY_NVIM="${pkgs.vimPlugins.plenary-nvim}"
           '';
         };
       }

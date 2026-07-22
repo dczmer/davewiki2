@@ -17,7 +17,7 @@ local core = require("davewiki.core")
 --- @return TagFrontmatter
 M.create_frontmatter = function(tag_name)
     local name = tag_name:gsub("^#", "")
-    local created = os.date("%Y-%m-%d")
+    local created = core.date_string("%Y-%m-%d")
     return {
         name = name,
         created = created,
@@ -80,7 +80,7 @@ M.scan_for_tags = function()
 end
 
 --- Finds all tag files in the sources/ directory
---- @return table Array of file paths to tag files, sorted alphabetically
+--- @return string[] Array of file paths to tag files, sorted alphabetically
 M.find_tag_files = function()
     if not core.wiki_root then
         return {}
@@ -119,6 +119,9 @@ M.create_tag_file = function(tag_name)
     end
 
     local tag_file_path = M.get_tag_file_path(tag_name)
+    if not tag_file_path then
+        return false
+    end
 
     local sources_dir = core.wiki_root .. "/sources"
     if vim.fn.isdirectory(sources_dir) ~= 1 then

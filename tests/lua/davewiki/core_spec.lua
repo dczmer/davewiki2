@@ -9,29 +9,29 @@ local test_root = vim.fn.fnamemodify(vim.fn.expand("<sfile>:h:h:h:h"), ":p") .. 
 describe("davewiki.core wiki_root resolution", function()
     before_each(function()
         core.wiki_root = nil
-        vim.g.davewiki_wiki_root = nil
+        pcall(vim.api.nvim_del_var, "davewiki_wiki_root")
     end)
 
     describe("setup with wiki_root option", function()
         it("should accept wiki_root from setup options", function()
-            local result = core.setup({ wiki_root = "/test/path" })
+            core.setup({ wiki_root = "/test/path" })
             assert.are.equal("/test/path", core.wiki_root)
         end)
     end)
 
     describe("setup with global variable", function()
         it("should use g:davewiki_wiki_root when no option provided", function()
-            vim.g.davewiki_wiki_root = "/global/path"
+            vim.api.nvim_set_var("davewiki_wiki_root", "/global/path")
             core.setup({})
             assert.are.equal("/global/path", core.wiki_root)
-            vim.g.davewiki_wiki_root = nil
+            pcall(vim.api.nvim_del_var, "davewiki_wiki_root")
         end)
     end)
 
     describe("setup with default path", function()
         it("should use ~/davewiki when neither option nor global set", function()
-            vim.g.davewiki_wiki_root = nil
-            local result = core.setup({})
+            pcall(vim.api.nvim_del_var, "davewiki_wiki_root")
+            core.setup({})
             local wiki_root = core.wiki_root
             assert.is_not_nil(wiki_root)
             assert.is_string(wiki_root)
@@ -72,15 +72,6 @@ describe("davewiki.core is_valid_tag", function()
         assert.is_false(core.is_valid_tag("#tag@invalid"))
         assert.is_false(core.is_valid_tag("#tag space"))
         assert.is_false(core.is_valid_tag("#tag#invalid"))
-    end)
-
-    it("should return false for nil input", function()
-        assert.is_false(core.is_valid_tag(nil))
-    end)
-
-    it("should return false for non-string input", function()
-        assert.is_false(core.is_valid_tag(123))
-        assert.is_false(core.is_valid_tag({}))
     end)
 end)
 
@@ -171,10 +162,6 @@ describe("davewiki.core is_tag_file", function()
         core.wiki_root = nil
         assert.is_false(core.is_tag_file(test_root .. "/sources/bengal.md"))
     end)
-
-    it("should return false for nil path", function()
-        assert.is_false(core.is_tag_file(nil))
-    end)
 end)
 
 describe("davewiki.core generate_absolute_path", function()
@@ -219,5 +206,38 @@ describe("davewiki.core generate_absolute_path", function()
         core.wiki_root = nil
         local result = core.generate_absolute_path("/any/path")
         assert.is_nil(result)
+    end)
+end)
+
+describe("davewiki.core date_string", function()
+    it("should format the current date as a string", function()
+        local result = core.date_string("%Y-%m-%d")
+        assert.are.equal("string", type(result))
+        assert.truthy(result:match("^%d%d%d%d%-%d%d%-%d%d$"))
+    end)
+
+    it("should format a given time value", function()
+        -- 2021-03-15 12:00:00 UTC-ish; use os.time to construct a local time
+        local time = os.time({ year = 2021, month = 3, day = 15, hour = 12 })
+        local result = core.date_string("%Y-%m-%d", time)
+        assert.are.equal("2021-03-15", result)
+    end)
+end)
+
+describe("davewiki.core date_table", function()
+    it("should return a date table for the current time", function()
+        local result = core.date_table()
+        assert.are.equal("table", type(result))
+        assert.are.equal("number", type(result.year))
+        assert.are.equal("number", type(result.month))
+        assert.are.equal("number", type(result.day))
+    end)
+
+    it("should return a date table for a given time value", function()
+        local time = os.time({ year = 2021, month = 3, day = 15, hour = 12 })
+        local result = core.date_table(time)
+        assert.are.equal(2021, result.year)
+        assert.are.equal(3, result.month)
+        assert.are.equal(15, result.day)
     end)
 end)

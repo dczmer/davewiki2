@@ -4,7 +4,7 @@
 
 local lua_journal = require("davewiki.journal")
 local lua_core = require("davewiki.core")
-local test_util = require("davewiki.test_util")
+local test_util = require("test_util")
 
 -- Get the absolute path to test_root directory relative to this script
 local test_root = vim.fn.fnamemodify(vim.fn.expand("<sfile>:h:h:h:h"), ":p") .. "test_root"
@@ -176,6 +176,9 @@ describe("davewiki.journal template creation", function()
             assert.are.equal("# AGENDA", content[9])
             assert.are.equal("", content[10])
             assert.are.equal("# NOTES", content[11])
+            assert.are.equal("", content[12])
+            assert.are.equal("---", content[13])
+            assert.are.equal("", content[14])
         end)
 
         it("should handle different date values", function()
@@ -205,24 +208,20 @@ end)
 
 describe("davewiki.journal open operations", function()
     local mock_notify
-    local original_notify
+    local restore_notify
 
     before_each(function()
         lua_core.wiki_root = test_root
         lua_journal.setup({ enabled = true })
         ensure_journals_dir()
         vim.cmd("enew")
-        mock_notify = test_util.MockNotify()
-        original_notify = vim.notify
-        vim.notify = function(...)
-            return mock_notify:notify(...)
-        end
+        mock_notify, restore_notify = test_util.mock_notify()
     end)
 
     after_each(function()
         cleanup_created_files()
         vim.cmd("enew!")
-        vim.notify = original_notify
+        restore_notify()
     end)
 
     describe("open_journal", function()
@@ -246,7 +245,10 @@ describe("davewiki.journal open operations", function()
             local result = lua_journal.open_journal("invalid-date")
             assert.is_false(result)
             assert.are.equal(1, #mock_notify.calls)
-            assert.are.equal("davewiki: invalid date format: invalid-date", mock_notify.calls[1].msg)
+            assert.are.equal(
+                "davewiki: invalid date format: invalid-date",
+                mock_notify.calls[1].msg
+            )
             assert.are.equal(vim.log.levels.ERROR, mock_notify.calls[1].level)
         end)
 
@@ -395,41 +397,27 @@ local telescope = require("davewiki.telescope")
 local core = require("davewiki.core")
 local journal = require("davewiki.journal")
 
--- Get the absolute path to test_root directory relative to this script
-local test_root = vim.fn.fnamemodify(vim.fn.expand("<sfile>:h:h:h:h"), ":p") .. "test_root"
-
 describe("davewiki.telescope jump_to_journal function", function()
     local mock_notify
-    local original_notify
+    local restore_notify
 
     before_each(function()
         core.setup({ wiki_root = test_root })
         journal.config.enabled = true
-        mock_notify = test_util.MockNotify()
-        original_notify = vim.notify
-        vim.notify = function(...)
-            return mock_notify:notify(...)
-        end
+        mock_notify, restore_notify = test_util.mock_notify()
     end)
 
     after_each(function()
-        vim.notify = original_notify
+        restore_notify()
     end)
 
     describe("jump_to_journal", function()
         it("should return false when telescope is not installed", function()
-            -- Mock telescope module as not installed
-            local original_require = _G.require
-            _G.require = function(mod)
-                if mod == "telescope" or mod:match("^telescope%.") then
-                    error("module '" .. mod .. "' not found")
-                end
-                return original_require(mod)
-            end
+            local restore = test_util.with_telescope_uninstalled(core)
 
             local result = telescope.jump_to_journal()
 
-            _G.require = original_require
+            restore()
 
             assert.is_false(result)
             assert.are.equal(1, #mock_notify.calls)

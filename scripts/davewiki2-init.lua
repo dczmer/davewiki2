@@ -112,11 +112,26 @@ vim.api.nvim_create_autocmd("FileType", {
 })
 
 -- davewiki view keymaps
-vim.keymap.set("n", "<leader>wv", "<cmd>DavewikiGenerateViewFromCursor<CR>", { desc = "Generate tag view from cursor" })
+vim.keymap.set(
+    "n",
+    "<leader>wv",
+    "<cmd>DavewikiGenerateViewFromCursor<CR>",
+    { desc = "Generate tag view from cursor" }
+)
 
-vim.keymap.set("n", "<leader>wV", "<cmd>DavewikiGenerateView<CR>", { desc = "Pick tag and generate view" })
+vim.keymap.set(
+    "n",
+    "<leader>wV",
+    "<cmd>DavewikiGenerateView<CR>",
+    { desc = "Pick tag and generate view" }
+)
 
-vim.keymap.set("n", "<leader>wvf", "<cmd>DavewikiGenerateViewFromTagFile<CR>", { desc = "Generate view from current tag file" })
+vim.keymap.set(
+    "n",
+    "<leader>wvf",
+    "<cmd>DavewikiGenerateViewFromTagFile<CR>",
+    { desc = "Generate view from current tag file" }
+)
 
 -- davewiki telescope keymaps
 vim.keymap.set("n", "<leader>wt", function()
@@ -140,10 +155,30 @@ vim.keymap.set("n", "<leader>wjp", function()
 end, { desc = "Browse journal files with telescope" })
 
 -- davewiki journal keymaps
-vim.keymap.set("n", "<leader>wjt", "<cmd>DavewikiJournalToday<CR>", { desc = "Open today's journal" })
+vim.keymap.set(
+    "n",
+    "<leader>wjt",
+    "<cmd>DavewikiJournalToday<CR>",
+    { desc = "Open today's journal" }
+)
 
-vim.keymap.set("n", "<leader>wjy", "<cmd>DavewikiJournalYesterday<CR>", { desc = "Open yesterday's journal" })
+vim.keymap.set(
+    "n",
+    "<leader>wjy",
+    "<cmd>DavewikiJournalYesterday<CR>",
+    { desc = "Open yesterday's journal" }
+)
 
-vim.keymap.set("n", "<leader>wjT", "<cmd>DavewikiJournalTomorrow<CR>", { desc = "Open tomorrow's journal" })
+vim.keymap.set(
+    "n",
+    "<leader>wjT",
+    "<cmd>DavewikiJournalTomorrow<CR>",
+    { desc = "Open tomorrow's journal" }
+)
 
-vim.keymap.set("n", "<leader>wjo", "<cmd>DavewikiJournalOpen<CR>", { desc = "Open journal for specific date" })
+vim.keymap.set(
+    "n",
+    "<leader>wjo",
+    "<cmd>DavewikiJournalOpen<CR>",
+    { desc = "Open journal for specific date" }
+)

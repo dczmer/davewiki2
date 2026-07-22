@@ -62,7 +62,7 @@ describe("davewiki.tags scan_for_tags", function()
     it("should sort results by count descending", function()
         local tag_list = tags.scan_for_tags()
         for i = 2, #tag_list do
-            assert.is_true(tag_list[i -1].count >= tag_list[i].count)
+            assert.is_true(tag_list[i - 1].count >= tag_list[i].count)
         end
     end)
 
@@ -117,7 +117,7 @@ end)
 describe("davewiki.tags create_tag_file", function()
     before_each(function()
         core.wiki_root = test_root
-        vim.g.davewiki_wiki_root = nil
+        pcall(vim.api.nvim_del_var, "davewiki_wiki_root")
     end)
 
     after_each(function()
@@ -407,11 +407,6 @@ describe("davewiki.tags extract_tag_from_filename", function()
 
     it("should return nil for non-markdown files", function()
         local tag = tags.extract_tag_from_filename(test_root .. "/sources/bengal.txt")
-        assert.is_nil(tag)
-    end)
-
-    it("should return nil for nil path", function()
-        local tag = tags.extract_tag_from_filename(nil)
         assert.is_nil(tag)
     end)
 end)

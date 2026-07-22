@@ -126,6 +126,10 @@ M.jump_to_link = function()
         return false
     end
 
+    if not target_path then
+        return false
+    end
+
     if not core.is_path_within_wiki_root(target_path) then
         vim.notify("davewiki: path escapes wiki_root", vim.log.levels.ERROR)
         return false
