@@ -84,4 +84,21 @@ function M.mock_ui_open()
         end
 end
 
+--- Temporarily replace a field on a module table (e.g. to stub a function in
+--- tests) and return a function that restores the original value. Dynamic
+--- indexing keeps the type checker from associating the assignment with the
+--- module's declared field, so no diagnostic exemptions are needed here or at
+--- call sites.
+--- @param module table The module table to modify
+--- @param field string The field name to replace
+--- @param value any The replacement value
+--- @return fun(): nil restore Restores the original field value
+function M.stub_field(module, field, value)
+    local original = module[field]
+    module[field] = value
+    return function()
+        module[field] = original
+    end
+end
+
 return M

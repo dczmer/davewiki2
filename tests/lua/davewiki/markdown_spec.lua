@@ -298,8 +298,6 @@ describe("davewiki.markdown jump_to_link", function()
     end)
 
     it("should open absolute file link within wiki_root", function()
-        local test_file = test_root .. "/sources/bengal.md"
-
         local buf = vim.api.nvim_create_buf(false, true)
         vim.api.nvim_buf_set_lines(buf, 0, -1, false, { "See [bengal](/sources/bengal.md)" })
         vim.api.nvim_buf_set_name(buf, test_root .. "/some-file.md")

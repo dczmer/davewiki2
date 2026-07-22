@@ -136,7 +136,7 @@ end)
 -- instead of failing tag validation. Regression test for the broken
 -- `opts.args == "" and nil or opts.args` idiom (always evaluated to opts.args).
 describe("davewiki.telescope DavewikiTagReferences command", function()
-    local original_tag_references
+    local restore_tag_references
     local captured_args
 
     before_each(function()
@@ -146,15 +146,14 @@ describe("davewiki.telescope DavewikiTagReferences command", function()
 
         -- Stub tag_references to capture the argument without opening a picker
         captured_args = {}
-        original_tag_references = telescope.tag_references
-        telescope.tag_references = function(...)
+        restore_tag_references = test_util.stub_field(telescope, "tag_references", function(...)
             table.insert(captured_args, { n = select("#", ...), value = (...) })
             return true
-        end
+        end)
     end)
 
     after_each(function()
-        telescope.tag_references = original_tag_references
+        restore_tag_references()
     end)
 
     it("should pass nil to tag_references when no argument is given", function()

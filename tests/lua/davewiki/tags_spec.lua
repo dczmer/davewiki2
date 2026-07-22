@@ -117,7 +117,7 @@ end)
 describe("davewiki.tags create_tag_file", function()
     before_each(function()
         core.wiki_root = test_root
-        vim.g.davewiki_wiki_root = nil
+        pcall(vim.api.nvim_del_var, "davewiki_wiki_root")
     end)
 
     after_each(function()

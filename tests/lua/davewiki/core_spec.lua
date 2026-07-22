@@ -9,29 +9,29 @@ local test_root = vim.fn.fnamemodify(vim.fn.expand("<sfile>:h:h:h:h"), ":p") .. 
 describe("davewiki.core wiki_root resolution", function()
     before_each(function()
         core.wiki_root = nil
-        vim.g.davewiki_wiki_root = nil
+        pcall(vim.api.nvim_del_var, "davewiki_wiki_root")
     end)
 
     describe("setup with wiki_root option", function()
         it("should accept wiki_root from setup options", function()
-            local result = core.setup({ wiki_root = "/test/path" })
+            core.setup({ wiki_root = "/test/path" })
             assert.are.equal("/test/path", core.wiki_root)
         end)
     end)
 
     describe("setup with global variable", function()
         it("should use g:davewiki_wiki_root when no option provided", function()
-            vim.g.davewiki_wiki_root = "/global/path"
+            vim.api.nvim_set_var("davewiki_wiki_root", "/global/path")
             core.setup({})
             assert.are.equal("/global/path", core.wiki_root)
-            vim.g.davewiki_wiki_root = nil
+            pcall(vim.api.nvim_del_var, "davewiki_wiki_root")
         end)
     end)
 
     describe("setup with default path", function()
         it("should use ~/davewiki when neither option nor global set", function()
-            vim.g.davewiki_wiki_root = nil
-            local result = core.setup({})
+            pcall(vim.api.nvim_del_var, "davewiki_wiki_root")
+            core.setup({})
             local wiki_root = core.wiki_root
             assert.is_not_nil(wiki_root)
             assert.is_string(wiki_root)

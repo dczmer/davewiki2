@@ -397,9 +397,6 @@ local telescope = require("davewiki.telescope")
 local core = require("davewiki.core")
 local journal = require("davewiki.journal")
 
--- Get the absolute path to test_root directory relative to this script
-local test_root = vim.fn.fnamemodify(vim.fn.expand("<sfile>:h:h:h:h"), ":p") .. "test_root"
-
 describe("davewiki.telescope jump_to_journal function", function()
     local mock_notify
     local restore_notify
