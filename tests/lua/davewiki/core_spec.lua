@@ -73,10 +73,6 @@ describe("davewiki.core is_valid_tag", function()
         assert.is_false(core.is_valid_tag("#tag space"))
         assert.is_false(core.is_valid_tag("#tag#invalid"))
     end)
-
-    it("should return false for nil input", function()
-        assert.is_false(core.is_valid_tag(nil))
-    end)
 end)
 
 describe("davewiki.core is_path_within_wiki_root", function()
@@ -165,10 +161,6 @@ describe("davewiki.core is_tag_file", function()
     it("should return false when wiki_root is nil", function()
         core.wiki_root = nil
         assert.is_false(core.is_tag_file(test_root .. "/sources/bengal.md"))
-    end)
-
-    it("should return false for nil path", function()
-        assert.is_false(core.is_tag_file(nil))
     end)
 end)
 

@@ -83,7 +83,7 @@ end
 M.TAG_PATTERN = "#[A-Za-z0-9-_]+"
 
 --- Validates a tag name against the TAG_PATTERN
---- @param tag_name string? The tag name to validate (with # prefix)
+--- @param tag_name string The tag name to validate (with # prefix)
 --- @return boolean
 M.is_valid_tag = function(tag_name)
     if not tag_name or type(tag_name) ~= "string" then
@@ -131,7 +131,7 @@ M.url_encode = function(str)
 end
 
 --- Checks if a file path is a tag file in the sources/ directory
---- @param file_path string? The file path to check
+--- @param file_path string The file path to check
 --- @return boolean True if the file is a tag file
 M.is_tag_file = function(file_path)
     if not file_path or not M.wiki_root then
