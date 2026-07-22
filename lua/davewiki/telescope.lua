@@ -378,7 +378,7 @@ function telescope.setup_commands()
 
     -- Command to open tag references picker
     vim.api.nvim_create_user_command("DavewikiTagReferences", function(opts)
-        local tag_name = opts.args == "" and nil or opts.args
+        local tag_name = opts.args ~= "" and opts.args or nil
         telescope.tag_references(tag_name)
     end, {
         nargs = "?",

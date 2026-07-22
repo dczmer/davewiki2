@@ -131,6 +131,48 @@ describe("davewiki.telescope tag_references function", function()
     end)
 end)
 
+-- The :DavewikiTagReferences user command must normalize an empty <args>
+-- string to nil so that a no-argument invocation lists all tag references
+-- instead of failing tag validation. Regression test for the broken
+-- `opts.args == "" and nil or opts.args` idiom (always evaluated to opts.args).
+describe("davewiki.telescope DavewikiTagReferences command", function()
+    local original_tag_references
+    local captured_args
+
+    before_each(function()
+        core.setup({ wiki_root = test_root })
+        telescope.config.enabled = true
+        telescope.setup_commands()
+
+        -- Stub tag_references to capture the argument without opening a picker
+        captured_args = {}
+        original_tag_references = telescope.tag_references
+        telescope.tag_references = function(...)
+            table.insert(captured_args, { n = select("#", ...), value = (...) })
+            return true
+        end
+    end)
+
+    after_each(function()
+        telescope.tag_references = original_tag_references
+    end)
+
+    it("should pass nil to tag_references when no argument is given", function()
+        vim.cmd("DavewikiTagReferences")
+
+        assert.are.equal(1, #captured_args)
+        assert.are.equal(1, captured_args[1].n)
+        assert.is_nil(captured_args[1].value)
+    end)
+
+    it("should pass the tag name to tag_references when an argument is given", function()
+        vim.cmd("DavewikiTagReferences #bengal")
+
+        assert.are.equal(1, #captured_args)
+        assert.are.equal("#bengal", captured_args[1].value)
+    end)
+end)
+
 describe("davewiki.telescope insert_link function", function()
     local mock_notify
     local restore_notify
